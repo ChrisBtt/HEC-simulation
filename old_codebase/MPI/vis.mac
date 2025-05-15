@@ -1,0 +1,100 @@
+/run/verbose 2
+#
+# Use this open statement to create an OpenGL view:
+/vis/open OGL 600x600-0+0
+
+#/vis/ogl/flushAt endOfEvent
+/vis/ogl/flushAt NthPrimitive 1000000
+
+# Disable auto refresh and quieten vis messages whilst scene and
+# trajectories are established:
+/vis/viewer/set/autoRefresh false
+/vis/verbose errors
+
+# Draw geometry:
+/vis/drawVolume
+
+# Specify view angle:
+/vis/viewer/set/viewpointThetaPhi 70. 45.
+
+# Specify zoom value:
+/vis/viewer/zoom 15.
+
+# Specify style (surface or wireframe):
+#/vis/viewer/set/style wireframe
+
+# Draw coordinate axes:
+/vis/scene/add/axes 0 0 0 10 cm
+
+# Draw smooth trajectories at end of event, showing trajectory points
+# as markers 2 pixels wide:
+/vis/scene/add/trajectories smooth
+/vis/modeling/trajectories/create/drawByCharge
+/vis/modeling/trajectories/drawByCharge-0/default/setDrawStepPts true
+/vis/modeling/trajectories/drawByCharge-0/default/setStepPtsSize 2
+# (if too many tracks cause core dump => /tracking/storeTrajectory 0)
+
+# Draw hits at end of event:
+/vis/scene/add/hits
+
+# To draw only gammas:
+#/vis/filtering/trajectories/create/particleFilter
+#/vis/filtering/trajectories/particleFilter-0/add gamma
+
+# To invert the above, drawing all particles except gammas,
+# keep the above two lines but also add:
+#/vis/filtering/trajectories/particleFilter-0/invert true
+
+# Many other options are available with /vis/modeling and /vis/filtering.
+# For example, to select colour by particle ID:
+#/vis/modeling/trajectories/create/drawByParticleID
+#/vis/modeling/trajectories/drawByParticleID-0/set e- blue
+
+# To superimpose all of the events from a given run:
+/vis/scene/endOfEventAction accumulate 10
+
+# Re-establish auto refreshing and verbosity:
+/vis/viewer/set/autoRefresh true
+/vis/verbose warnings
+
+# For file-based drivers, use this to create an empty detector view:
+/vis/viewer/flush
+
+############# RUN SPECIFIC #####################
+#/process/em/fluo true #by default anyways
+/process/em/auger true
+#/process/em/pixe true
+
+/run/setCutForAGivenParticle gamma 0.1 mm
+/run/setCutForAGivenParticle e- 0.1 mm
+
+#/tracking/verbose 1
+# Initialisation procedure
+#/run/initialize
+
+# GENERAL PARTICLE SOURCE
+# general setup
+/gps/verbose 0
+/gps/particle gamma
+/gps/pos/centre -0.5 -0.5 -61.5 mm
+#/gps/pos/centre 0 0 0 mm
+/gps/direction 0 0 1 # in z-direction
+#/gps/ene/type Gauss
+/gps/ene/mono 50.0 keV
+#/gps/ene/sigma 20.0 keV
+
+
+# Point source
+/gps/pos/type Point
+#/gps/ang/type iso
+
+# Plane source
+#/gps/pos/type Plane
+#/gps/pos/shape Square
+#/gps/pos/halfx 3. mm
+#/gps/pos/halfy 3. mm
+
+############# RUN SPECIFIC #####################
+
+/run/beamOn 100
+/vis/viewer/update

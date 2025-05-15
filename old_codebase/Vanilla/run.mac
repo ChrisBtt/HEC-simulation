@@ -1,0 +1,33 @@
+###################################################
+# Set of the verboses 
+/control/verbose 0
+/tracking/verbose 0
+/run/verbose 0
+/event/verbose 0
+
+#/vis/open OGL 600x600-0+0
+
+
+####################################################
+# Randomiser
+#/random/setDirectoryName .
+#/random/setSavingFlag 1
+
+####################################################
+# Initialisation procedure
+/run/initialize
+
+/gun/particle gamma
+/beam/momentum/momentumX 	0
+/beam/momentum/momentumX/sigmaX	0.
+
+/beam/momentum/momentumY 	0
+/beam/momentum/momentumY/sigmaY	0.
+
+/beam/momentum/momentumZ	1
+/beam/momentum/momentumZ/sigmaZ	0.
+
+/beam/energy/meanEnergy 30 keV
+/beam/energy/sigmaEnergy  0.  keV
+
+/run/beamOn 1000000

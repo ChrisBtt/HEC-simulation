@@ -1,0 +1,10 @@
+8
+G4_AIR                          0.0     0.0     0.0     1.0
+G4_LUNG_ICRP                    0.7     0.7     0.7     1.0
+G4_ADIPOSE_TISSUE_ICRP          1.0     0.8     0.8     1.0
+G4_WATER                        0.9     0.8     0.8     1.0
+G4_MUSCLE_WITH_SUCROSE          0.8     0.3     0.3     1.0
+G4_B-100_BONE                   0.8     0.8     0.8     1.0
+G4_BONE_COMPACT_ICRU            0.9     0.9     0.9     1.0
+G4_BONE_CORTICAL_ICRP           1.0     1.0     1.0     1.0
+material                        red     green   blue    opacity
