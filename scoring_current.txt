@@ -1,0 +1,144 @@
+includeFile = scoring_dose.txt scoring_phasespace.txt
+
+# -- Current Scorer
+
+# Current Proton X
+s:Sc/volCurrPrX/Quantity = "volumeCurrent"
+s:Sc/volCurrPrX/Component = "WaterGridPar"
+i:Sc/volCurrPrX/XBins = Par/GridXBins
+i:Sc/volCurrPrX/YBins = Par/GridYBins
+i:Sc/volCurrPrX/ZBins = Par/GridZBins
+b:Sc/volCurrPrX/OutputToConsole = "False"
+s:Sc/volCurrPrX/OutputType = "csv"
+s:Sc/volCurrPrX/IfOutputFileAlreadyExists = "Overwrite"
+sv:Sc/volCurrPrX/OnlyIncludeParticlesNamed = 1 "proton"
+sv:Sc/volCurrPrX/Report = 3 "Sum" "Standard_Deviation" "Histories" 
+b:Sc/volCurrPrX/Active="True"
+s:Sc/volCurrPrX/direction = "x"
+
+# Current Proton Y
+s:Sc/volCurrPrY/Quantity = "volumeCurrent"
+s:Sc/volCurrPrY/Component = "WaterGridPar"
+i:Sc/volCurrPrY/XBins = Par/GridXBins
+i:Sc/volCurrPrY/YBins = Par/GridYBins
+i:Sc/volCurrPrY/ZBins = Par/GridZBins
+b:Sc/volCurrPrY/OutputToConsole = "False"
+s:Sc/volCurrPrY/OutputType = "csv"
+s:Sc/volCurrPrY/IfOutputFileAlreadyExists = "Overwrite"
+sv:Sc/volCurrPrY/OnlyIncludeParticlesNamed = 1 "proton"
+sv:Sc/volCurrPrY/Report = 3 "Sum" "Standard_Deviation" "Histories" 
+b:Sc/volCurrPrY/Active="True"
+s:Sc/volCurrPrY/direction = "y"
+
+# Current Proton Z
+s:Sc/volCurrPrZ/Quantity = "volumeCurrent"
+s:Sc/volCurrPrZ/Component = "WaterGridPar"
+i:Sc/volCurrPrZ/XBins = Par/GridXBins
+i:Sc/volCurrPrZ/YBins = Par/GridYBins
+i:Sc/volCurrPrZ/ZBins = Par/GridZBins
+b:Sc/volCurrPrZ/OutputToConsole = "False"
+s:Sc/volCurrPrZ/OutputType = "csv"
+s:Sc/volCurrPrZ/IfOutputFileAlreadyExists = "Overwrite"
+sv:Sc/volCurrPrZ/OnlyIncludeParticlesNamed = 1 "proton"
+sv:Sc/volCurrPrZ/Report = 3 "Sum" "Standard_Deviation" "Histories" 
+b:Sc/volCurrPrZ/Active="True"
+s:Sc/volCurrPrZ/direction = "z"
+
+
+# Current Electron X
+s:Sc/volCurrElX/Quantity = "volumeCurrent"
+s:Sc/volCurrElX/Component = "WaterGridPar"
+i:Sc/volCurrElX/XBins = Par/GridXBins
+i:Sc/volCurrElX/YBins = Par/GridYBins
+i:Sc/volCurrElX/ZBins = Par/GridZBins
+b:Sc/volCurrElX/OutputToConsole = "False"
+s:Sc/volCurrElX/OutputType = "csv"
+s:Sc/volCurrElX/IfOutputFileAlreadyExists = "Overwrite"
+sv:Sc/volCurrElX/OnlyIncludeParticlesNamed = 1 "e-"
+sv:Sc/volCurrElX/Report = 3 "Sum" "Standard_Deviation" "Histories" 
+b:Sc/volCurrElX/Active="True"
+s:Sc/volCurrElX/direction = "x"
+
+# Current Electron Y
+s:Sc/volCurrElY/Quantity = "volumeCurrent"
+s:Sc/volCurrElY/Component = "WaterGridPar"
+i:Sc/volCurrElY/XBins = Par/GridXBins
+i:Sc/volCurrElY/YBins = Par/GridYBins
+i:Sc/volCurrElY/ZBins = Par/GridZBins
+b:Sc/volCurrElY/OutputToConsole = "False"
+s:Sc/volCurrElY/OutputType = "csv"
+s:Sc/volCurrElY/IfOutputFileAlreadyExists = "Overwrite"
+sv:Sc/volCurrElY/OnlyIncludeParticlesNamed = 1 "e-"
+sv:Sc/volCurrElY/Report = 3 "Sum" "Standard_Deviation" "Histories" 
+b:Sc/volCurrElY/Active="True"
+s:Sc/volCurrElY/direction = "y"
+
+# Current Electron Z
+s:Sc/volCurrElZ/Quantity = "volumeCurrent"
+s:Sc/volCurrElZ/Component = "WaterGridPar"
+i:Sc/volCurrElZ/XBins = Par/GridXBins
+i:Sc/volCurrElZ/YBins = Par/GridYBins
+i:Sc/volCurrElZ/ZBins = Par/GridZBins
+b:Sc/volCurrElZ/OutputToConsole = "False"
+s:Sc/volCurrElZ/OutputType = "csv"
+s:Sc/volCurrElZ/IfOutputFileAlreadyExists = "Overwrite"
+sv:Sc/volCurrElZ/OnlyIncludeParticlesNamed = 1 "e-"
+sv:Sc/volCurrElZ/Report = 3 "Sum" "Standard_Deviation" "Histories" 
+b:Sc/volCurrElZ/Active="True"
+s:Sc/volCurrElZ/direction = "z"
+
+
+# Current Positron X
+s:Sc/volCurrPoX/Quantity = "volumeCurrent"
+s:Sc/volCurrPoX/Component = "WaterGridPar"
+i:Sc/volCurrPoX/XBins = Par/GridXBins
+i:Sc/volCurrPoX/YBins = Par/GridYBins
+i:Sc/volCurrPoX/ZBins = Par/GridZBins
+b:Sc/volCurrPoX/OutputToConsole = "False"
+s:Sc/volCurrPoX/OutputType = "csv"
+s:Sc/volCurrPoX/IfOutputFileAlreadyExists = "Overwrite"
+sv:Sc/volCurrPoX/OnlyIncludeParticlesNamed = 1 "e+"
+sv:Sc/volCurrPoX/Report = 3 "Sum" "Standard_Deviation" "Histories" 
+b:Sc/volCurrPoX/Active="True"
+s:Sc/volCurrPoX/direction = "x"
+
+
+# Current Positron Y
+s:Sc/volCurrPoY/Quantity = "volumeCurrent"
+s:Sc/volCurrPoY/Component = "WaterGridPar"
+i:Sc/volCurrPoY/XBins = Par/GridXBins
+i:Sc/volCurrPoY/YBins = Par/GridYBins
+i:Sc/volCurrPoY/ZBins = Par/GridZBins
+b:Sc/volCurrPoY/OutputToConsole = "False"
+s:Sc/volCurrPoY/OutputType = "csv"
+s:Sc/volCurrPoY/IfOutputFileAlreadyExists = "Overwrite"
+sv:Sc/volCurrPoY/OnlyIncludeParticlesNamed = 1 "e+"
+sv:Sc/volCurrPoY/Report = 3 "Sum" "Standard_Deviation" "Histories" 
+b:Sc/volCurrPoY/Active="True"
+s:Sc/volCurrPoY/direction = "y"
+
+
+# Current Positron Z
+s:Sc/volCurrPoZ/Quantity = "volumeCurrent"
+s:Sc/volCurrPoZ/Component = "WaterGridPar"
+i:Sc/volCurrPoZ/XBins = Par/GridXBins
+i:Sc/volCurrPoZ/YBins = Par/GridYBins
+i:Sc/volCurrPoZ/ZBins = Par/GridZBins
+b:Sc/volCurrPoZ/OutputToConsole = "False"
+s:Sc/volCurrPoZ/OutputType = "csv"
+s:Sc/volCurrPoZ/IfOutputFileAlreadyExists = "Overwrite"
+sv:Sc/volCurrPoZ/OnlyIncludeParticlesNamed = 1 "e+"
+sv:Sc/volCurrPoZ/Report = 3 "Sum" "Standard_Deviation" "Histories" 
+b:Sc/volCurrPoZ/Active="True"
+s:Sc/volCurrPoZ/direction = "z"
+
+
+s:Sc/volCurrPrX/OutputFile = "./TOPAS_simulation_data/broad_beam/volCurrPrX" 
+s:Sc/volCurrPrY/OutputFile = "./TOPAS_simulation_data/broad_beam/volCurrPrY" 
+s:Sc/volCurrPrZ/OutputFile = "./TOPAS_simulation_data/broad_beam/volCurrPrZ" 
+s:Sc/volCurrElX/OutputFile = "./TOPAS_simulation_data/broad_beam/volCurrElX" 
+s:Sc/volCurrElY/OutputFile = "./TOPAS_simulation_data/broad_beam/volCurrElY" 
+s:Sc/volCurrElZ/OutputFile = "./TOPAS_simulation_data/broad_beam/volCurrElZ" 
+s:Sc/volCurrPoX/OutputFile = "./TOPAS_simulation_data/broad_beam/volCurrPoX" 
+s:Sc/volCurrPoY/OutputFile = "./TOPAS_simulation_data/broad_beam/volCurrPoY" 
+s:Sc/volCurrPoZ/OutputFile = "./TOPAS_simulation_data/broad_beam/volCurrPoZ" 
