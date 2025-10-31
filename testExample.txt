@@ -1,0 +1,227 @@
+i:Ts/NumberOfThreads = 48
+
+# --- World ----------------------------------------------------
+s:Ge/World/Material  = "Vacuum"
+d:Ge/World/HLX       = 1.0 m
+d:Ge/World/HLY       = 1.0 m
+d:Ge/World/HLZ       = 1.0 m
+b:Ge/World/Invisible = "True"
+
+# --- Water cube (10 cm side; half-lengths = 5 cm) --------------
+s:Ge/Water/Type     = "TsBox"
+s:Ge/Water/Parent   = "World"
+s:Ge/Water/Material = "G4_WATER"
+d:Ge/Water/HLX      = 5.0 cm
+d:Ge/Water/HLY      = 5.0 cm
+d:Ge/Water/HLZ      = 5.0 cm
+d:Ge/Water/TransZ   = 10.0 cm     # move cube downstream so beam enters from +Z
+b:Ge/Water/Invisible= "False"
+
+# (Optional) make it easy to see in the viewer
+s:Ge/Water/Color    = "white"
+
+# --- A tiny, invisible component to anchor the beam ------------
+#   Sources in TOPAS are placed at the center & orientation of an associated component.
+s:Ge/BeamPos/Type     = "TsBox"
+s:Ge/BeamPos/Parent   = "World"
+s:Ge/BeamPos/Material = "Vacuum"
+d:Ge/BeamPos/HLX      = 1.0 mm
+d:Ge/BeamPos/HLY      = 1.0 mm
+d:Ge/BeamPos/HLZ      = 1.0 mm
+d:Ge/BeamPos/TransZ   = 0.0 cm
+b:Ge/BeamPos/Invisible= "True"
+
+# --- Physics (simple EM for photons) ---------------------------
+sv:Ph/Default/Modules = 1 "g4em-standard_opt0"
+
+# --- Photon beam -----------------------------------------------
+s:So/Beam/Type                     = "Beam"
+s:So/Beam/Component                = "BeamPos"  # emit along +Z of this component
+s:So/Beam/BeamParticle             = "gamma"
+d:So/Beam/BeamEnergy               = 6.0 MeV
+s:So/Beam/BeamEnergyDistribution   = "SpectrumFromFile"
+s:So/Beam/BeamEnergySpectrumFile   = "6MV_spectrum.txt"
+s:So/Beam/BeamEnergyNormalization  = "Probability"
+s:So/Beam/BeamPositionDistribution = "Flat"
+d:So/Beam/BeamPositionSpreadX      = 2.0 mm
+d:So/Beam/BeamPositionSpreadY      = 2.0 mm
+s:So/Beam/BeamAngularDistribution  = "None"
+i:So/Beam/NumberOfHistoriesInRun   = 10000     # increase for smoother stats
+s:So/Beam/BeamPositionCutoffShape  = "Circle"
+d:So/Beam/BeamPositionCutoffX      = 2.5 cm
+d:So/Beam/BeamPositionCutoffY      = 2.5 cm
+
+# --- (Optional) simple 3D viewer -------------------------------
+b:Ts/UseQt              = "True"
+s:Gr/View/Type          = "OpenGL"
+b:Gr/View/Active        = "False"
+b:Gr/View/HiddenLineRemovalForTrajectories = "True"
+b:Gr/View/IncludeAxes   = "True"  # defaults to "False"
+s:Gr/View/AxesComponent = "World"  # Component in which to center the axes. Defaults to World.
+d:Gr/View/AxesSize      = 0.2 m  # size of axes
+
+# --- Phantom child component to score in 
+s:Ge/WaterGridPar/Type       = "TsBox"
+s:Ge/WaterGridPar/Parent     = "Water"
+s:Ge/WaterGridPar/Material   = "G4_WATER"
+d:Ge/WaterGridPar/HLX        = Ge/Water/HLX cm
+d:Ge/WaterGridPar/HLY        = Ge/Water/HLY cm
+d:Ge/WaterGridPar/HLZ        = Ge/Water/HLZ cm
+b:Ge/WaterGridPar/Invisible  = "False"
+sc:Ge/WaterGridPar/DrawingStyle= "WireFrame"
+
+# Shared bin parameters
+i:Par/GridXBins = 50
+i:Par/GridYBins = 50
+i:Par/GridZBins = 50
+
+# Dose on the mass-world grid
+s:Sc/DoseGrid/Quantity                  = "DoseToWater"
+s:Sc/DoseGrid/Component                 = "WaterGridPar"
+i:Sc/DoseGrid/XBins = Par/GridXBins
+i:Sc/DoseGrid/YBins = Par/GridYBins
+i:Sc/DoseGrid/ZBins = Par/GridZBins
+b:Sc/DoseGrid/OutputToConsole           = "False"
+s:Sc/DoseGrid/OutputType                = "csv"
+s:Sc/DoseGrid/IfOutputFileAlreadyExists = "Overwrite"
+sv:Sc/DoseGrid/Report = 3 "Sum" "Standard_Deviation" "Histories" 
+
+
+# -- Current Scorer
+# Current Proton X
+s:Sc/vCurrentPrX/Quantity = "volumeCurrent"
+s:Sc/vCurrentPrX/Component = "WaterGridPar"
+i:Sc/vCurrentPrX/XBins = Par/GridXBins
+i:Sc/vCurrentPrX/YBins = Par/GridYBins
+i:Sc/vCurrentPrX/ZBins = Par/GridZBins
+b:Sc/vCurrentPrX/OutputToConsole = "False"
+s:Sc/vCurrentPrX/OutputType = "csv"
+s:Sc/vCurrentPrX/IfOutputFileAlreadyExists = "Overwrite"
+sv:Sc/vCurrentPrX/OnlyIncludeParticlesNamed = 1 "proton"
+sv:Sc/vCurrentPrX/Report = 3 "Sum" "Standard_Deviation" "Histories" 
+b:Sc/vCurrentPrX/Active="True"
+s:Sc/vCurrentPrX/direction = "x"
+
+# Current Proton Y
+s:Sc/vCurrentPrY/Quantity = "volumeCurrent"
+s:Sc/vCurrentPrY/Component = "WaterGridPar"
+i:Sc/vCurrentPrY/XBins = Par/GridXBins
+i:Sc/vCurrentPrY/YBins = Par/GridYBins
+i:Sc/vCurrentPrY/ZBins = Par/GridZBins
+b:Sc/vCurrentPrY/OutputToConsole = "False"
+s:Sc/vCurrentPrY/OutputType = "csv"
+s:Sc/vCurrentPrY/IfOutputFileAlreadyExists = "Overwrite"
+sv:Sc/vCurrentPrY/OnlyIncludeParticlesNamed = 1 "proton"
+sv:Sc/vCurrentPrY/Report = 3 "Sum" "Standard_Deviation" "Histories" 
+b:Sc/vCurrentPrY/Active="True"
+s:Sc/vCurrentPrY/direction = "y"
+
+# Current Proton Z
+s:Sc/vCurrentPrZ/Quantity = "volumeCurrent"
+s:Sc/vCurrentPrZ/Component = "WaterGridPar"
+i:Sc/vCurrentPrZ/XBins = Par/GridXBins
+i:Sc/vCurrentPrZ/YBins = Par/GridYBins
+i:Sc/vCurrentPrZ/ZBins = Par/GridZBins
+b:Sc/vCurrentPrZ/OutputToConsole = "False"
+s:Sc/vCurrentPrZ/OutputType = "csv"
+s:Sc/vCurrentPrZ/IfOutputFileAlreadyExists = "Overwrite"
+sv:Sc/vCurrentPrZ/OnlyIncludeParticlesNamed = 1 "proton"
+sv:Sc/vCurrentPrZ/Report = 3 "Sum" "Standard_Deviation" "Histories" 
+b:Sc/vCurrentPrZ/Active="True"
+s:Sc/vCurrentPrZ/direction = "z"
+
+
+# Current Electron X
+s:Sc/vCurrentElX/Quantity = "volumeCurrent"
+s:Sc/vCurrentElX/Component = "WaterGridPar"
+i:Sc/vCurrentElX/XBins = Par/GridXBins
+i:Sc/vCurrentElX/YBins = Par/GridYBins
+i:Sc/vCurrentElX/ZBins = Par/GridZBins
+b:Sc/vCurrentElX/OutputToConsole = "False"
+s:Sc/vCurrentElX/OutputType = "csv"
+s:Sc/vCurrentElX/IfOutputFileAlreadyExists = "Overwrite"
+sv:Sc/vCurrentElX/OnlyIncludeParticlesNamed = 1 "e-"
+sv:Sc/vCurrentElX/Report = 3 "Sum" "Standard_Deviation" "Histories" 
+b:Sc/vCurrentElX/Active="True"
+s:Sc/vCurrentElX/direction = "x"
+
+# Current Electron Y
+s:Sc/vCurrentElY/Quantity = "volumeCurrent"
+s:Sc/vCurrentElY/Component = "WaterGridPar"
+i:Sc/vCurrentElY/XBins = Par/GridXBins
+i:Sc/vCurrentElY/YBins = Par/GridYBins
+i:Sc/vCurrentElY/ZBins = Par/GridZBins
+b:Sc/vCurrentElY/OutputToConsole = "False"
+s:Sc/vCurrentElY/OutputType = "csv"
+s:Sc/vCurrentElY/IfOutputFileAlreadyExists = "Overwrite"
+sv:Sc/vCurrentElY/OnlyIncludeParticlesNamed = 1 "e-"
+sv:Sc/vCurrentElY/Report = 3 "Sum" "Standard_Deviation" "Histories" 
+b:Sc/vCurrentElY/Active="True"
+s:Sc/vCurrentElY/direction = "y"
+
+# Current Electron Z
+s:Sc/vCurrentElZ/Quantity = "volumeCurrent"
+s:Sc/vCurrentElZ/Component = "WaterGridPar"
+i:Sc/vCurrentElZ/XBins = Par/GridXBins
+i:Sc/vCurrentElZ/YBins = Par/GridYBins
+i:Sc/vCurrentElZ/ZBins = Par/GridZBins
+b:Sc/vCurrentElZ/OutputToConsole = "False"
+s:Sc/vCurrentElZ/OutputType = "csv"
+s:Sc/vCurrentElZ/IfOutputFileAlreadyExists = "Overwrite"
+sv:Sc/vCurrentElZ/OnlyIncludeParticlesNamed = 1 "e-"
+sv:Sc/vCurrentElZ/Report = 3 "Sum" "Standard_Deviation" "Histories" 
+b:Sc/vCurrentElZ/Active="True"
+s:Sc/vCurrentElZ/direction = "z"
+
+
+# Current Positron X
+s:Sc/vCurrentPoX/Quantity = "volumeCurrent"
+s:Sc/vCurrentPoX/Component = "WaterGridPar"
+i:Sc/vCurrentPoX/XBins = Par/GridXBins
+i:Sc/vCurrentPoX/YBins = Par/GridYBins
+i:Sc/vCurrentPoX/ZBins = Par/GridZBins
+b:Sc/vCurrentPoX/OutputToConsole = "False"
+s:Sc/vCurrentPoX/OutputType = "csv"
+s:Sc/vCurrentPoX/IfOutputFileAlreadyExists = "Overwrite"
+sv:Sc/vCurrentPoX/OnlyIncludeParticlesNamed = 1 "e+"
+sv:Sc/vCurrentPoX/Report = 3 "Sum" "Standard_Deviation" "Histories" 
+b:Sc/vCurrentPoX/Active="True"
+s:Sc/vCurrentPoX/direction = "x"
+
+
+# Current Positron Y
+s:Sc/vCurrentPoY/Quantity = "volumeCurrent"
+s:Sc/vCurrentPoY/Component = "WaterGridPar"
+i:Sc/vCurrentPoY/XBins = Par/GridXBins
+i:Sc/vCurrentPoY/YBins = Par/GridYBins
+i:Sc/vCurrentPoY/ZBins = Par/GridZBins
+b:Sc/vCurrentPoY/OutputToConsole = "False"
+s:Sc/vCurrentPoY/OutputType = "csv"
+s:Sc/vCurrentPoY/IfOutputFileAlreadyExists = "Overwrite"
+sv:Sc/vCurrentPoY/OnlyIncludeParticlesNamed = 1 "e+"
+sv:Sc/vCurrentPoY/Report = 3 "Sum" "Standard_Deviation" "Histories" 
+b:Sc/vCurrentPoY/Active="True"
+s:Sc/vCurrentPoY/direction = "y"
+
+
+# Current Positron Z
+s:Sc/vCurrentPoZ/Quantity = "volumeCurrent"
+s:Sc/vCurrentPoZ/Component = "WaterGridPar"
+i:Sc/vCurrentPoZ/XBins = Par/GridXBins
+i:Sc/vCurrentPoZ/YBins = Par/GridYBins
+i:Sc/vCurrentPoZ/ZBins = Par/GridZBins
+b:Sc/vCurrentPoZ/OutputToConsole = "False"
+s:Sc/vCurrentPoZ/OutputType = "csv"
+s:Sc/vCurrentPoZ/IfOutputFileAlreadyExists = "Overwrite"
+sv:Sc/vCurrentPoZ/OnlyIncludeParticlesNamed = 1 "e+"
+sv:Sc/vCurrentPoZ/Report = 3 "Sum" "Standard_Deviation" "Histories" 
+b:Sc/vCurrentPoZ/Active="True"
+s:Sc/vCurrentPoZ/direction = "z"
+
+
+s:Sc/vCurrentPrPlus/OutputFile = "vCurrentPrPlus" 
+s:Sc/vCurrentPrMinus/OutputFile = "vCurrentPrMinus" 
+s:Sc/vCurrentElPlus/OutputFile = "vCurrentElPlus" 
+s:Sc/vCurrentElMinus/OutputFile = "vCurrentElMinus" 
+s:Sc/vCurrentPoPlus/OutputFile = "vCurrentPoPlus" 
+s:Sc/vCurrentPoMinus/OutputFile = "vCurrentPoMinus"
