@@ -1,0 +1,7 @@
+includeFile beam_6MeV.txt
+
+# --- Extension to photon beam (monoenergetic to spectrum) -----
+
+s:So/Beam/BeamEnergyDistribution   = "SpectrumFromFile"
+s:So/Beam/BeamEnergySpectrumFile   = "6MV_spectrum.txt"
+s:So/Beam/BeamEnergyNormalization  = "Probability"

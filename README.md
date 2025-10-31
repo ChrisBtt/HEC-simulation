@@ -15,3 +15,4 @@ Install Geant4 and Topas from: https://opentopas.github.io/installation.html to 
 
 After testing your first simulation using a macrofile, you are ready to go! 
 
+TOPAS also allows macrofiles in a modular structure for cleaner configuration and easy experiment adjustment. Therefore, `simulation.txt` serves as top-level macrofile and included files can be adjusted using the hierarchical files with chained include-statements. 
