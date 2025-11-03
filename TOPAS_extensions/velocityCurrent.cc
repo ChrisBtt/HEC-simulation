@@ -1,12 +1,12 @@
-// Scorer for volumeCurrent
-// Scorer to score the orthogonal particle currents*distance for HEC calculations. 
+// Scorer for velocityCurrent
+// Scorer to score the orthogonal particle currents*velocity for HEC calculations. 
 // Will account for particle direction!
-#include "volumeCurrent.hh"
+#include "velocityCurrent.hh"
 #include "G4UnitsTable.hh"
 
 #include "G4PSDirectionFlag.hh"
 
-volumeCurrent::volumeCurrent(TsParameterManager* pM, TsMaterialManager* mM, TsGeometryManager* gM, TsScoringManager* scM, TsExtensionManager* eM,
+velocityCurrent::velocityCurrent(TsParameterManager* pM, TsMaterialManager* mM, TsGeometryManager* gM, TsScoringManager* scM, TsExtensionManager* eM,
     G4String scorerName, G4String quantity, G4String outFileName, G4bool isSubScorer)
 : TsVBinnedScorer(pM, mM, gM, scM, eM, scorerName, quantity, outFileName, isSubScorer)
 {
@@ -23,10 +23,10 @@ else             dirAxis_ = 'z'; // default
 }
 
 
-volumeCurrent::~volumeCurrent() {;}
+velocityCurrent::~velocityCurrent() {;}
 
 
-G4bool volumeCurrent::ProcessHits(G4Step* aStep, G4TouchableHistory*)
+G4bool velocityCurrent::ProcessHits(G4Step* aStep, G4TouchableHistory*)
 {
   if (!fIsActive) { fSkippedWhileInactive++; return false; }
 
@@ -38,18 +38,20 @@ G4bool volumeCurrent::ProcessHits(G4Step* aStep, G4TouchableHistory*)
 
   const G4double charge = pre->GetCharge();
 
-  const G4ThreeVector dGlobal = aStep->GetDeltaPosition();
+  G4ThreeVector dir = pre->GetMomentumDirection();
+  G4double vMag = pre->GetVelocity(); // mm/ns
 
+  G4ThreeVector velocity = dir * vMag;
   const G4TouchableHandle& th = pre->GetTouchableHandle();
 
   const G4RotationMatrix* rot = th->GetRotation();
-  G4ThreeVector dLocal = rot ? rot->inverse() * dGlobal : dGlobal;
+  G4ThreeVector vLocal = rot ? rot->inverse() * velocity : velocity;
 
-  G4double proj = 0.0;
+  G4double vProj = 0.0;
   switch (dirAxis_) {
-    case 'x': proj = dLocal.x(); break;
-    case 'y': proj = dLocal.y(); break;
-    default:  proj = dLocal.z(); break;
+    case 'x': vProj = vLocal.x(); break;
+    case 'y': vProj = vLocal.y(); break;
+    default:  vProj = vLocal.z(); break;
   }
 
   const G4double volume = th->GetVolume()->GetLogicalVolume()->GetSolid()->GetCubicVolume();
@@ -59,7 +61,8 @@ G4bool volumeCurrent::ProcessHits(G4Step* aStep, G4TouchableHistory*)
     return false;
   }
 
-  const G4double val = (weight * proj * charge) / volume;
+  const G4double deltaT = aStep->GetDeltaTime();
+  const G4double val = (weight * vProj * charge * deltaT) / volume;
 
   AccumulateHit(aStep, val);
   return true;
