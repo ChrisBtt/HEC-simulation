@@ -1,4 +1,5 @@
-i:Ts/NumberOfThreads = 48
+# --- multi-threading ------------
+i:Ts/NumberOfThreads = 24
 
 includeFile = geometry_water.txt
 includeFile = beam_6MV.txt
@@ -14,7 +15,7 @@ b:Ge/World/Invisible = "True"
 # --- Physics ---------------------
 sv:Ph/Default/Modules = 1 "g4em-standard_opt0"   # simple EM for photons
 
-# --- simple 3D viewer -------------------------------
+# --- simple 3D viewer ------------
 b:Ts/UseQt              = "True"
 s:Gr/View/Type          = "OpenGL"
 b:Gr/View/Active        = "False"

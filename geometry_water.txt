@@ -32,7 +32,7 @@ sc:Ge/WaterGridPar/DrawingStyle= "WireFrame"
 # --- simple 3D viewer -----------
 b:Ts/UseQt              = "True"
 s:Gr/View/Type          = "OpenGL"
-b:Gr/View/Active        = "False"
+b:Gr/View/Active        = "True"
 b:Gr/View/HiddenLineRemovalForTrajectories = "True"
 b:Gr/View/IncludeAxes   = "True"  # defaults to "False"
 s:Gr/View/AxesComponent = "World"  # Component in which to center the axes. Defaults to World.

@@ -1,7 +1,16 @@
-includeFile beam_6MeV.txt
-
-# --- Extension to photon beam (monoenergetic to spectrum) -----
-
+# --- Photon beam -----------------------------------------------
+s:So/Beam/Type                     = "Beam"
+s:So/Beam/Component                = "BeamPos"  # emit along +Z of this component
+s:So/Beam/BeamParticle             = "gamma"
+d:So/Beam/BeamEnergy               = 6.0 MeV
 s:So/Beam/BeamEnergyDistribution   = "SpectrumFromFile"
 s:So/Beam/BeamEnergySpectrumFile   = "6MV_spectrum.txt"
 s:So/Beam/BeamEnergyNormalization  = "Probability"
+s:So/Beam/BeamPositionDistribution = "Flat"
+d:So/Beam/BeamPositionSpreadX      = 2.0 mm
+d:So/Beam/BeamPositionSpreadY      = 2.0 mm
+s:So/Beam/BeamAngularDistribution  = "None"
+i:So/Beam/NumberOfHistoriesInRun   = 1000000     # increase for smoother stats
+s:So/Beam/BeamPositionCutoffShape  = "Ellipse"
+d:So/Beam/BeamPositionCutoffX      = 2.5 cm
+d:So/Beam/BeamPositionCutoffY      = 2.5 cm

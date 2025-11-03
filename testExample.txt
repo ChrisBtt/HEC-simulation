@@ -47,7 +47,7 @@ d:So/Beam/BeamPositionSpreadX      = 2.0 mm
 d:So/Beam/BeamPositionSpreadY      = 2.0 mm
 s:So/Beam/BeamAngularDistribution  = "None"
 i:So/Beam/NumberOfHistoriesInRun   = 10000     # increase for smoother stats
-s:So/Beam/BeamPositionCutoffShape  = "Circle"
+s:So/Beam/BeamPositionCutoffShape  = "Ellipse"
 d:So/Beam/BeamPositionCutoffX      = 2.5 cm
 d:So/Beam/BeamPositionCutoffY      = 2.5 cm
 

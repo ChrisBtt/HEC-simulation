@@ -1,7 +1,7 @@
 # Shared bin parameters
-i:Par/GridXBins = 50
-i:Par/GridYBins = 50
-i:Par/GridZBins = 50
+i:Par/GridXBins = 25
+i:Par/GridYBins = 25
+i:Par/GridZBins = 25
 
 # Dose on the mass-world grid
 s:Sc/DoseGrid/Quantity                  = "DoseToWater"
