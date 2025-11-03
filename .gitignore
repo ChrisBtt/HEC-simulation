@@ -1,0 +1,4 @@
+TOPAS_simulation_data/
+
+**/__pycache__/
+*.pyc
