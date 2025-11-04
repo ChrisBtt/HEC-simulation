@@ -1,5 +1,8 @@
 # --- multi-threading ------------
-i:Ts/NumberOfThreads = 24
+i:Ts/NumberOfThreads = 48
+
+# --- Random seed ----------------
+i:Ts/Seed = 1 # default is 1
 
 includeFile = geometry_water.txt
 includeFile = beam_6MV.txt

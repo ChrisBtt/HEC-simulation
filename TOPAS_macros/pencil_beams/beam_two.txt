@@ -1,0 +1,40 @@
+# --- Photon beam -----------------------------------------------
+s:So/Beam1/Type                       = "Beam"
+s:So/Beam1/Component                  = "BeamPos"  # emit along +Z of this component
+s:So/Beam1/BeamParticle               = "gamma"
+s:So/Beam1/BeamEnergySpectrumType     = "Continuous"
+dv:So/Beam1/BeamEnergySpectrumValues  = 25 0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00 2.25 2.50 2.75 3.00 3.25 3.50 3.75 4.00 4.25 4.50 4.75 5.00 5.25 5.50 5.75 6.00 6.25 MeV
+uv:So/Beam1/BeamEnergySpectrumWeights = 25 .06 .124 .121 .10 .092 .078 .067 .06 .05 .04 .04 .03 .03 .02 .02 .02 .014 .012 .009 .008 .006 .004 .003 .001 .0001
+s:So/Beam1/BeamPositionDistribution   = "Flat"
+d:So/Beam1/BeamPositionSpreadX        = 2.0 mm
+d:So/Beam1/BeamPositionSpreadY        = 2.0 mm
+s:So/Beam1/BeamAngularDistribution    = "None"
+i:So/Beam1/NumberOfHistoriesInRun     = 10     # increase for smoother stats
+s:So/Beam1/BeamPositionCutoffShape    = "Ellipse"
+d:So/Beam1/BeamPositionCutoffX        = 0.5 cm
+d:So/Beam1/BeamPositionCutoffY        = 0.5 cm
+
+
+# Second beam component
+s:Ge/BeamPos2/Parent = "World"
+s:Ge/BeamPos2/Type   = "Group"
+d:Ge/BeamPos2/TransX = 0. cm
+d:Ge/BeamPos2/TransY = 5. cm
+d:Ge/BeamPos2/TransZ = 0. cm
+
+
+# --- Photon beam -----------------------------------------------
+s:So/Beam2/Type                       = "Beam"
+s:So/Beam2/Component                  = "BeamPos2"  # emit along +Z of this component
+s:So/Beam2/BeamParticle               = "gamma"
+s:So/Beam2/BeamEnergySpectrumType     = "Continuous"
+dv:So/Beam2/BeamEnergySpectrumValues  = 25 0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00 2.25 2.50 2.75 3.00 3.25 3.50 3.75 4.00 4.25 4.50 4.75 5.00 5.25 5.50 5.75 6.00 6.25 MeV
+uv:So/Beam2/BeamEnergySpectrumWeights = 25 .06 .124 .121 .10 .092 .078 .067 .06 .05 .04 .04 .03 .03 .02 .02 .02 .014 .012 .009 .008 .006 .004 .003 .001 .0001
+s:So/Beam2/BeamPositionDistribution   = "Flat"
+d:So/Beam2/BeamPositionSpreadX        = 2.0 mm
+d:So/Beam2/BeamPositionSpreadY        = 2.0 mm
+s:So/Beam2/BeamAngularDistribution    = "None"
+i:So/Beam2/NumberOfHistoriesInRun     = 10     # increase for smoother stats
+s:So/Beam2/BeamPositionCutoffShape    = "Ellipse"
+d:So/Beam2/BeamPositionCutoffX        = 0.5 cm
+d:So/Beam2/BeamPositionCutoffY        = 0.5 cm

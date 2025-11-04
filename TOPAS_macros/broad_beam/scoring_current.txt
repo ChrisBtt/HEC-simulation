@@ -1,4 +1,5 @@
 includeFile = scoring_dose.txt
+includeFile = scoring_phasespace.txt
 
 # -- Current Scorer
 
