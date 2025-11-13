@@ -1,0 +1,191 @@
+includeFile = scoring_dose.txt
+includeFile = scoring_phasespace.txt
+
+# -- Current Scorer
+
+# Current Electron X Global
+s:Sc/velCurrElXGlob/Quantity = "velocityCurrent"
+s:Sc/velCurrElXGlob/Component = "WaterGridGlobal"
+i:Sc/velCurrElXGlob/XBins = Par/GlobalXBins
+i:Sc/velCurrElXGlob/YBins = Par/GlobalYBins
+i:Sc/velCurrElXGlob/ZBins = Par/GlobalZBins
+b:Sc/velCurrElXGlob/OutputToConsole = "False"
+s:Sc/velCurrElXGlob/OutputType = "csv"
+s:Sc/velCurrElXGlob/IfOutputFileAlreadyExists = "Overwrite"
+sv:Sc/velCurrElXGlob/OnlyIncludeParticlesNamed = 1 "e-"
+sv:Sc/velCurrElXGlob/Report = 3 "Sum" "Standard_Deviation" "Histories" 
+b:Sc/velCurrElXGlob/Active="True"
+s:Sc/velCurrElXGlob/direction = "x"
+
+# Current Electron Y Global
+s:Sc/velCurrElYGlob/Quantity = "velocityCurrent"
+s:Sc/velCurrElYGlob/Component = "WaterGridGlobal"
+i:Sc/velCurrElYGlob/XBins = Par/GlobalXBins
+i:Sc/velCurrElYGlob/YBins = Par/GlobalYBins
+i:Sc/velCurrElYGlob/ZBins = Par/GlobalZBins
+b:Sc/velCurrElYGlob/OutputToConsole = "False"
+s:Sc/velCurrElYGlob/OutputType = "csv"
+s:Sc/velCurrElYGlob/IfOutputFileAlreadyExists = "Overwrite"
+sv:Sc/velCurrElYGlob/OnlyIncludeParticlesNamed = 1 "e-"
+sv:Sc/velCurrElYGlob/Report = 3 "Sum" "Standard_Deviation" "Histories" 
+b:Sc/velCurrElYGlob/Active="True"
+s:Sc/velCurrElYGlob/direction = "y"
+
+# Current Electron Z Global
+s:Sc/velCurrElZGlob/Quantity = "velocityCurrent"
+s:Sc/velCurrElZGlob/Component = "WaterGridGlobal"
+i:Sc/velCurrElZGlob/XBins = Par/GlobalXBins
+i:Sc/velCurrElZGlob/YBins = Par/GlobalYBins
+i:Sc/velCurrElZGlob/ZBins = Par/GlobalZBins
+b:Sc/velCurrElZGlob/OutputToConsole = "False"
+s:Sc/velCurrElZGlob/OutputType = "csv"
+s:Sc/velCurrElZGlob/IfOutputFileAlreadyExists = "Overwrite"
+sv:Sc/velCurrElZGlob/OnlyIncludeParticlesNamed = 1 "e-"
+sv:Sc/velCurrElZGlob/Report = 3 "Sum" "Standard_Deviation" "Histories" 
+b:Sc/velCurrElZGlob/Active="True"
+s:Sc/velCurrElZGlob/direction = "z"
+
+# Current Electron X Fine
+s:Sc/velCurrElXFine/Quantity = "velocityCurrent"
+s:Sc/velCurrElXFine/Component = "WaterGridFine"
+i:Sc/velCurrElXFine/XBins = Par/FineXBins
+i:Sc/velCurrElXFine/YBins = Par/FineYBins
+i:Sc/velCurrElXFine/ZBins = Par/FineZBins
+b:Sc/velCurrElXFine/OutputToConsole = "False"
+s:Sc/velCurrElXFine/OutputType = "csv"
+s:Sc/velCurrElXFine/IfOutputFileAlreadyExists = "Overwrite"
+sv:Sc/velCurrElXFine/OnlyIncludeParticlesNamed = 1 "e-"
+sv:Sc/velCurrElXFine/Report = 3 "Sum" "Standard_Deviation" "Histories" 
+b:Sc/velCurrElXFine/Active="True"
+s:Sc/velCurrElXFine/direction = "x"
+
+# Current Electron Y Fine
+s:Sc/velCurrElYFine/Quantity = "velocityCurrent"
+s:Sc/velCurrElYFine/Component = "WaterGridFine"
+i:Sc/velCurrElYFine/XBins = Par/FineXBins
+i:Sc/velCurrElYFine/YBins = Par/FineYBins
+i:Sc/velCurrElYFine/ZBins = Par/FineZBins
+b:Sc/velCurrElYFine/OutputToConsole = "False"
+s:Sc/velCurrElYFine/OutputType = "csv"
+s:Sc/velCurrElYFine/IfOutputFileAlreadyExists = "Overwrite"
+sv:Sc/velCurrElYFine/OnlyIncludeParticlesNamed = 1 "e-"
+sv:Sc/velCurrElYFine/Report = 3 "Sum" "Standard_Deviation" "Histories" 
+b:Sc/velCurrElYFine/Active="True"
+s:Sc/velCurrElYFine/direction = "y"
+
+# Current Electron Z Fine
+s:Sc/velCurrElZFine/Quantity = "velocityCurrent"
+s:Sc/velCurrElZFine/Component = "WaterGridFine"
+i:Sc/velCurrElZFine/XBins = Par/FineXBins
+i:Sc/velCurrElZFine/YBins = Par/FineYBins
+i:Sc/velCurrElZFine/ZBins = Par/FineZBins
+b:Sc/velCurrElZFine/OutputToConsole = "False"
+s:Sc/velCurrElZFine/OutputType = "csv"
+s:Sc/velCurrElZFine/IfOutputFileAlreadyExists = "Overwrite"
+sv:Sc/velCurrElZFine/OnlyIncludeParticlesNamed = 1 "e-"
+sv:Sc/velCurrElZFine/Report = 3 "Sum" "Standard_Deviation" "Histories" 
+b:Sc/velCurrElZFine/Active="True"
+s:Sc/velCurrElZFine/direction = "z"
+
+
+
+# Current Electron X Global
+s:Sc/angCurrElXGlob/Quantity = "angularCurrent"
+s:Sc/angCurrElXGlob/Component = "WaterGridGlobal"
+i:Sc/angCurrElXGlob/XBins = Par/GlobalXBins
+i:Sc/angCurrElXGlob/YBins = Par/GlobalYBins
+i:Sc/angCurrElXGlob/ZBins = Par/GlobalZBins
+b:Sc/angCurrElXGlob/OutputToConsole = "False"
+s:Sc/angCurrElXGlob/OutputType = "csv"
+s:Sc/angCurrElXGlob/IfOutputFileAlreadyExists = "Overwrite"
+sv:Sc/angCurrElXGlob/OnlyIncludeParticlesNamed = 1 "e-"
+sv:Sc/angCurrElXGlob/Report = 3 "Sum" "Standard_Deviation" "Histories" 
+b:Sc/angCurrElXGlob/Active="True"
+s:Sc/angCurrElXGlob/direction = "x"
+
+# Current Electron Y Global
+s:Sc/angCurrElYGlob/Quantity = "angularCurrent"
+s:Sc/angCurrElYGlob/Component = "WaterGridGlobal"
+i:Sc/angCurrElYGlob/XBins = Par/GlobalXBins
+i:Sc/angCurrElYGlob/YBins = Par/GlobalYBins
+i:Sc/angCurrElYGlob/ZBins = Par/GlobalZBins
+b:Sc/angCurrElYGlob/OutputToConsole = "False"
+s:Sc/angCurrElYGlob/OutputType = "csv"
+s:Sc/angCurrElYGlob/IfOutputFileAlreadyExists = "Overwrite"
+sv:Sc/angCurrElYGlob/OnlyIncludeParticlesNamed = 1 "e-"
+sv:Sc/angCurrElYGlob/Report = 3 "Sum" "Standard_Deviation" "Histories" 
+b:Sc/angCurrElYGlob/Active="True"
+s:Sc/angCurrElYGlob/direction = "y"
+
+# Current Electron Z Global
+s:Sc/angCurrElZGlob/Quantity = "angularCurrent"
+s:Sc/angCurrElZGlob/Component = "WaterGridGlobal"
+i:Sc/angCurrElZGlob/XBins = Par/GlobalXBins
+i:Sc/angCurrElZGlob/YBins = Par/GlobalYBins
+i:Sc/angCurrElZGlob/ZBins = Par/GlobalZBins
+b:Sc/angCurrElZGlob/OutputToConsole = "False"
+s:Sc/angCurrElZGlob/OutputType = "csv"
+s:Sc/angCurrElZGlob/IfOutputFileAlreadyExists = "Overwrite"
+sv:Sc/angCurrElZGlob/OnlyIncludeParticlesNamed = 1 "e-"
+sv:Sc/angCurrElZGlob/Report = 3 "Sum" "Standard_Deviation" "Histories" 
+b:Sc/angCurrElZGlob/Active="True"
+s:Sc/angCurrElZGlob/direction = "z"
+
+# Current Electron X Fine
+s:Sc/angCurrElXFine/Quantity = "angularCurrent"
+s:Sc/angCurrElXFine/Component = "WaterGridFine"
+i:Sc/angCurrElXFine/XBins = Par/FineXBins
+i:Sc/angCurrElXFine/YBins = Par/FineYBins
+i:Sc/angCurrElXFine/ZBins = Par/FineZBins
+b:Sc/angCurrElXFine/OutputToConsole = "False"
+s:Sc/angCurrElXFine/OutputType = "csv"
+s:Sc/angCurrElXFine/IfOutputFileAlreadyExists = "Overwrite"
+sv:Sc/angCurrElXFine/OnlyIncludeParticlesNamed = 1 "e-"
+sv:Sc/angCurrElXFine/Report = 3 "Sum" "Standard_Deviation" "Histories" 
+b:Sc/angCurrElXFine/Active="True"
+s:Sc/angCurrElXFine/direction = "x"
+
+# Current Electron Y Fine
+s:Sc/angCurrElYFine/Quantity = "angularCurrent"
+s:Sc/angCurrElYFine/Component = "WaterGridFine"
+i:Sc/angCurrElYFine/XBins = Par/FineXBins
+i:Sc/angCurrElYFine/YBins = Par/FineYBins
+i:Sc/angCurrElYFine/ZBins = Par/FineZBins
+b:Sc/angCurrElYFine/OutputToConsole = "False"
+s:Sc/angCurrElYFine/OutputType = "csv"
+s:Sc/angCurrElYFine/IfOutputFileAlreadyExists = "Overwrite"
+sv:Sc/angCurrElYFine/OnlyIncludeParticlesNamed = 1 "e-"
+sv:Sc/angCurrElYFine/Report = 3 "Sum" "Standard_Deviation" "Histories" 
+b:Sc/angCurrElYFine/Active="True"
+s:Sc/angCurrElYFine/direction = "y"
+
+# Current Electron Z Fine
+s:Sc/angCurrElZFine/Quantity = "angularCurrent"
+s:Sc/angCurrElZFine/Component = "WaterGridFine"
+i:Sc/angCurrElZFine/XBins = Par/FineXBins
+i:Sc/angCurrElZFine/YBins = Par/FineYBins
+i:Sc/angCurrElZFine/ZBins = Par/FineZBins
+b:Sc/angCurrElZFine/OutputToConsole = "False"
+s:Sc/angCurrElZFine/OutputType = "csv"
+s:Sc/angCurrElZFine/IfOutputFileAlreadyExists = "Overwrite"
+sv:Sc/angCurrElZFine/OnlyIncludeParticlesNamed = 1 "e-"
+sv:Sc/angCurrElZFine/Report = 3 "Sum" "Standard_Deviation" "Histories" 
+b:Sc/angCurrElZFine/Active="True"
+s:Sc/angCurrElZFine/direction = "z"
+
+
+s:Sc/angCurrElXGlob/OutputFile = "../../TOPAS_simulation_data/plate_experiment/angCurrElXGlob" 
+s:Sc/angCurrElYGlob/OutputFile = "../../TOPAS_simulation_data/plate_experiment/angCurrElYGlob" 
+s:Sc/angCurrElZGlob/OutputFile = "../../TOPAS_simulation_data/plate_experiment/angCurrElZGlob" 
+ 
+s:Sc/angCurrElXFine/OutputFile = "../../TOPAS_simulation_data/plate_experiment/angCurrElXFine" 
+s:Sc/angCurrElYFine/OutputFile = "../../TOPAS_simulation_data/plate_experiment/angCurrElYFine" 
+s:Sc/angCurrElZFine/OutputFile = "../../TOPAS_simulation_data/plate_experiment/angCurrElZFine" 
+
+s:Sc/velCurrElXGlob/OutputFile = "../../TOPAS_simulation_data/plate_experiment/velCurrElXGlob" 
+s:Sc/velCurrElYGlob/OutputFile = "../../TOPAS_simulation_data/plate_experiment/velCurrElYGlob" 
+s:Sc/velCurrElZGlob/OutputFile = "../../TOPAS_simulation_data/plate_experiment/velCurrElZGlob" 
+ 
+s:Sc/velCurrElXFine/OutputFile = "../../TOPAS_simulation_data/plate_experiment/velCurrElXFine" 
+s:Sc/velCurrElYFine/OutputFile = "../../TOPAS_simulation_data/plate_experiment/velCurrElYFine" 
+s:Sc/velCurrElZFine/OutputFile = "../../TOPAS_simulation_data/plate_experiment/velCurrElZFine" 

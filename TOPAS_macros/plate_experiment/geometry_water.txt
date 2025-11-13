@@ -1,0 +1,54 @@
+# --- Water cube ---------------
+s:Ge/Water/Type     = "TsBox"
+s:Ge/Water/Parent   = "World"
+s:Ge/Water/Material = "G4_WATER"
+d:Ge/Water/HLX      = 15.0 cm
+d:Ge/Water/HLY      = 15.0 cm
+d:Ge/Water/HLZ      = 5 cm
+d:Ge/Water/TransZ   = 5 cm     # move cube downstream so beam enters from +Z
+b:Ge/Water/Invisible= "False"
+s:Ge/Water/Color    = "white"
+
+# --- Beam anchor ---------------
+s:Ge/BeamPos/Type     = "TsBox"
+s:Ge/BeamPos/Parent   = "World"
+s:Ge/BeamPos/Material = "Vacuum"
+d:Ge/BeamPos/HLX      = 1.0 mm
+d:Ge/BeamPos/HLY      = 1.0 mm
+d:Ge/BeamPos/HLZ      = 1.0 mm
+d:Ge/BeamPos/TransZ   = -5 cm
+b:Ge/BeamPos/Invisible= "True"
+
+# --- Global coarse scorer
+s:Ge/WaterGridGlobal/Type          = "TsBox"
+s:Ge/WaterGridGlobal/Parent        = "World"
+b:Ge/WaterGridGlobal/IsParallel    = "True"
+s:Ge/WaterGridGlobal/Material      = "G4_WATER"
+d:Ge/WaterGridGlobal/HLX           = Ge/Water/HLX cm
+d:Ge/WaterGridGlobal/HLY           = Ge/Water/HLY cm
+d:Ge/WaterGridGlobal/HLZ           = Ge/Water/HLZ cm
+d:Ge/WaterGridGlobal/TransZ        = Ge/Water/TransZ cm
+b:Ge/WaterGridGlobal/Invisible     = "False"
+sc:Ge/WaterGridGlobal/DrawingStyle = "WireFrame"
+
+# --- Inner high-resolution scorer
+s:Ge/WaterGridFine/Type            = "TsBox"
+s:Ge/WaterGridFine/Parent          = "World"
+b:Ge/WaterGridFine/IsParallel      = "True"
+s:Ge/WaterGridFine/Material        = "G4_WATER"
+d:Ge/WaterGridFine/HLX             = 1.0 cm
+d:Ge/WaterGridFine/HLY             = 1.0 cm
+d:Ge/WaterGridFine/HLZ             = 5.0 cm
+d:Ge/WaterGridFine/TransZ          = 5.0 cm
+b:Ge/WaterGridFine/Invisible       = "False"
+sc:Ge/WaterGridFine/DrawingStyle   = "WireFrame"
+
+# --- thin plane just upstream of water (records what enters water)
+s:Ge/PSPlane/Type     = "TsBox"
+s:Ge/PSPlane/Parent   = "World"
+s:Ge/PSPlane/Material = "Vacuum"
+d:Ge/PSPlane/HLX      = 6.0 cm
+d:Ge/PSPlane/HLY      = 6.0 cm
+d:Ge/PSPlane/HLZ      = 0.01 mm
+d:Ge/PSPlane/TransZ   = -2 mm    # epsilon < 5.0 cm (water upstream face)
+b:Ge/PSPlane/Invisible= "True"

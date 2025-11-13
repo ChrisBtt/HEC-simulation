@@ -1,0 +1,100 @@
+includeFile = geometry_water.txt
+
+# --- Aluminum Electrode Start -----------
+s:Ge/ElectrodeStart/Type          = "TsBox"
+s:Ge/ElectrodeStart/Parent        = "Water"
+s:Ge/ElectrodeStart/Material      = "G4_Al"
+d:Ge/ElectrodeStart/HLX           = Ge/Water/HLX cm
+d:Ge/ElectrodeStart/HLY           = Ge/Water/HLY cm
+d:Ge/ElectrodeStart/HLZ           = 0.005 mm
+d:Ge/ElectrodeStart/TransZ        = -4.8 cm
+b:Ge/ElectrodeStart/Invisible     = "False"
+sc:Ge/ElectrodeStart/DrawingStyle = "WireFrame"
+
+# --- Aluminum Electrode 1 ---------------
+s:Ge/Electrode1/Type          = "TsBox"
+s:Ge/Electrode1/Parent        = "Water"
+s:Ge/Electrode1/Material      = "G4_Al"
+d:Ge/Electrode1/HLX           = Ge/Water/HLX cm
+d:Ge/Electrode1/HLY           = Ge/Water/HLY cm
+d:Ge/Electrode1/HLZ           = 0.005 mm
+d:Ge/Electrode1/TransZ        = -4.3 cm
+b:Ge/Electrode1/Invisible     = "False"
+sc:Ge/Electrode1/DrawingStyle = "WireFrame"
+
+# --- Aluminum Electrode 2 ---------------
+s:Ge/Electrode2/Type          = "TsBox"
+s:Ge/Electrode2/Parent        = "Water"
+s:Ge/Electrode2/Material      = "G4_Al"
+d:Ge/Electrode2/HLX           = Ge/Water/HLX cm
+d:Ge/Electrode2/HLY           = Ge/Water/HLY cm
+d:Ge/Electrode2/HLZ           = 0.005 mm
+d:Ge/Electrode2/TransZ        = -3.8 cm
+b:Ge/Electrode2/Invisible     = "False"
+sc:Ge/Electrode2/DrawingStyle = "WireFrame"
+
+# --- Aluminum Electrode 3 ---------------
+s:Ge/Electrode3/Type          = "TsBox"
+s:Ge/Electrode3/Parent        = "Water"
+s:Ge/Electrode3/Material      = "G4_Al"
+d:Ge/Electrode3/HLX           = Ge/Water/HLX cm
+d:Ge/Electrode3/HLY           = Ge/Water/HLY cm
+d:Ge/Electrode3/HLZ           = 0.005 mm
+d:Ge/Electrode3/TransZ        = -3.3 cm
+b:Ge/Electrode3/Invisible     = "False"
+sc:Ge/Electrode3/DrawingStyle = "WireFrame"
+
+# --- Aluminum Electrode 4 ---------------
+s:Ge/Electrode4/Type          = "TsBox"
+s:Ge/Electrode4/Parent        = "Water"
+s:Ge/Electrode4/Material      = "G4_Al"
+d:Ge/Electrode4/HLX           = Ge/Water/HLX cm
+d:Ge/Electrode4/HLY           = Ge/Water/HLY cm
+d:Ge/Electrode4/HLZ           = 0.005 mm
+d:Ge/Electrode4/TransZ        = -2.8 cm
+b:Ge/Electrode4/Invisible     = "False"
+sc:Ge/Electrode4/DrawingStyle = "WireFrame"
+
+# --- Aluminum Electrode 5 ---------------
+s:Ge/Electrode5/Type          = "TsBox"
+s:Ge/Electrode5/Parent        = "Water"
+s:Ge/Electrode5/Material      = "G4_Al"
+d:Ge/Electrode5/HLX           = Ge/Water/HLX cm
+d:Ge/Electrode5/HLY           = Ge/Water/HLY cm
+d:Ge/Electrode5/HLZ           = 0.005 mm
+d:Ge/Electrode5/TransZ        = -2.3 cm
+b:Ge/Electrode5/Invisible     = "False"
+sc:Ge/Electrode5/DrawingStyle = "WireFrame"
+
+# --- Aluminum Electrode 6 ---------------
+s:Ge/Electrode6/Type          = "TsBox"
+s:Ge/Electrode6/Parent        = "Water"
+s:Ge/Electrode6/Material      = "G4_Al"
+d:Ge/Electrode6/HLX           = Ge/Water/HLX cm
+d:Ge/Electrode6/HLY           = Ge/Water/HLY cm
+d:Ge/Electrode6/HLZ           = 0.005 mm
+d:Ge/Electrode6/TransZ        = -1.8 cm
+b:Ge/Electrode6/Invisible     = "False"
+sc:Ge/Electrode6/DrawingStyle = "WireFrame"
+
+# --- Aluminum Electrode 7 ---------------
+s:Ge/Electrode7/Type          = "TsBox"
+s:Ge/Electrode7/Parent        = "Water"
+s:Ge/Electrode7/Material      = "G4_Al"
+d:Ge/Electrode7/HLX           = Ge/Water/HLX cm
+d:Ge/Electrode7/HLY           = Ge/Water/HLY cm
+d:Ge/Electrode7/HLZ           = 0.005 mm
+d:Ge/Electrode7/TransZ        = -1.3 cm
+b:Ge/Electrode7/Invisible     = "False"
+sc:Ge/Electrode7/DrawingStyle = "WireFrame"
+
+# --- Aluminum Electrode End -------------
+s:Ge/ElectrodeEnd/Type          = "TsBox"
+s:Ge/ElectrodeEnd/Parent        = "Water"
+s:Ge/ElectrodeEnd/Material      = "G4_Al"
+d:Ge/ElectrodeEnd/HLX           = Ge/Water/HLX cm
+d:Ge/ElectrodeEnd/HLY           = Ge/Water/HLY cm
+d:Ge/ElectrodeEnd/HLZ           = 0.005 mm
+d:Ge/ElectrodeEnd/TransZ        = -0.8 cm
+b:Ge/ElectrodeEnd/Invisible     = "False"
+sc:Ge/ElectrodeEnd/DrawingStyle = "WireFrame"
