@@ -14,7 +14,7 @@ import seaborn as sns
 
 # ---------------------- CONFIG ----------------------
 # Beam source
-TOTAL_HISTORIES = 1_000_000
+TOTAL_HISTORIES = 10_000_000
 ENERGY_MEV = 6.0
 PARTICLE = "gamma"
 
@@ -27,7 +27,7 @@ SPACING_MM = 2.0                    # center-to-center spacing of pencil beams
 PENCIL_HAS_SPREAD = False           # set True for finite mini-spots
 PENCIL_SPREAD_MM = 0.5              # only used if PENCIL_HAS_SPREAD=True
 
-out_path = Path("pencil_beams.txt")
+out_path = Path("beam_pencils.txt")
 
 # Build grid covering the ellipse bounding box
 xs = np.arange(-RX_MM, RX_MM + 1e-6, SPACING_MM)
@@ -74,7 +74,9 @@ for idx, ((x_mm, y_mm), nh) in enumerate(zip(positions, histories), start=1):
         f's:So/{src}/Type        = "Beam"',
         f's:So/{src}/Component   = "{comp}"',
         f's:So/{src}/BeamParticle = "{PARTICLE}"',
-        f'd:So/{src}/BeamEnergy   = {ENERGY_MEV:.3f} MeV',
+        f's:So/{src}/BeamEnergySpectrumType     = "Continuous"',
+        f'dv:So/{src}/BeamEnergySpectrumValues  = 25 0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00 2.25 2.50 2.75 3.00 3.25 3.50 3.75 4.00 4.25 4.50 4.75 5.00 5.25 5.50 5.75 6.00 6.25 MeV',
+        f'uv:So/{src}/BeamEnergySpectrumWeights = 25 .06 .124 .121 .10 .092 .078 .067 .06 .05 .04 .04 .03 .03 .02 .02 .02 .014 .012 .009 .008 .006 .004 .003 .001 .0001',
     ]
     if PENCIL_HAS_SPREAD:
         lines += [
@@ -127,4 +129,5 @@ plt.ylabel("Y position [mm]")
 plt.title("Pencil Beam Grid in XY Plane")
 plt.legend()
 plt.tight_layout()
+plt.savefig("pencil_beam_grid.png", dpi=300)
 plt.show()
