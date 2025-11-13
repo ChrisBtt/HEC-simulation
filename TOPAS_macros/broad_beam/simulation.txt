@@ -10,10 +10,10 @@ includeFile = scoring_current.txt
 
 # --- World -----------------------
 s:Ge/World/Material  = "Vacuum"
-d:Ge/World/HLX       = 1.0 m
-d:Ge/World/HLY       = 1.0 m
-d:Ge/World/HLZ       = 1.0 m
-b:Ge/World/Invisible = "True"
+d:Ge/World/HLX       = 15.0 cm
+d:Ge/World/HLY       = 15.0 m
+d:Ge/World/HLZ       = 15.0 m
+#b:Ge/World/Invisible = "True"
 
 # --- Physics ---------------------
 sv:Ph/Default/Modules = 1 "g4em-standard_opt0"   # simple EM for photons

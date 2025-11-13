@@ -1,0 +1,49 @@
+# --- Water cube ---------------
+s:Ge/Water/Type     = "TsBox"
+s:Ge/Water/Parent   = "World"
+s:Ge/Water/Material = "G4_WATER"
+d:Ge/Water/HLX      = 5.0 cm
+d:Ge/Water/HLY      = 5.0 cm
+d:Ge/Water/HLZ      = 12.5 cm
+d:Ge/Water/TransZ   = 25.0 cm     # move cube downstream so beam enters from +Z
+b:Ge/Water/Invisible= "False"
+s:Ge/Water/Color    = "white"
+
+# --- Beam anchor ---------------
+s:Ge/BeamPos/Type     = "TsBox"
+s:Ge/BeamPos/Parent   = "World"
+s:Ge/BeamPos/Material = "Vacuum"
+d:Ge/BeamPos/HLX      = 1.0 mm
+d:Ge/BeamPos/HLY      = 1.0 mm
+d:Ge/BeamPos/HLZ      = 1.0 mm
+d:Ge/BeamPos/TransZ   = 0.0 mm
+b:Ge/BeamPos/Invisible= "True"
+
+# --- Phantom child component to score in 
+s:Ge/WaterGridPar/Type       = "TsBox"
+s:Ge/WaterGridPar/Parent     = "Water"
+s:Ge/WaterGridPar/Material   = "G4_WATER"
+d:Ge/WaterGridPar/HLX        = Ge/Water/HLX cm
+d:Ge/WaterGridPar/HLY        = Ge/Water/HLY cm
+d:Ge/WaterGridPar/HLZ        = Ge/Water/HLZ cm
+b:Ge/WaterGridPar/Invisible  = "False"
+sc:Ge/WaterGridPar/DrawingStyle= "WireFrame"
+
+# --- simple 3D viewer -----------
+b:Ts/UseQt              = "True"
+s:Gr/View/Type          = "OpenGL"
+b:Gr/View/Active        = "True"
+b:Gr/View/HiddenLineRemovalForTrajectories = "True"
+b:Gr/View/IncludeAxes   = "True"  # defaults to "False"
+s:Gr/View/AxesComponent = "World"  # Component in which to center the axes. Defaults to World.
+d:Gr/View/AxesSize      = 0.2 m  # size of axes
+
+# --- thin plane just upstream of water (records what enters water)
+s:Ge/PSPlane/Type     = "TsBox"
+s:Ge/PSPlane/Parent   = "World"
+s:Ge/PSPlane/Material = "Vacuum"
+d:Ge/PSPlane/HLX      = 6.0 cm
+d:Ge/PSPlane/HLY      = 6.0 cm
+d:Ge/PSPlane/HLZ      = 0.01 mm
+d:Ge/PSPlane/TransZ   = 4.999 cm      # epsilon < 5.0 cm (water upstream face)
+b:Ge/PSPlane/Invisible= "True"

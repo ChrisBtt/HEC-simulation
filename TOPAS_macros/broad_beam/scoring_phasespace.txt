@@ -6,7 +6,7 @@ b:Sc/PS/IncludeRunID    = "True"
 b:Sc/PS/IncludeEventID  = "True"
 b:Sc/PS/IncludeTrackID  = "True"
 s:Sc/PS/IfOutputFileAlreadyExists = "Overwrite"
-s:Sc/PS/OutputFile = "./TOPAS_simulation_data/broad_beam/PS" 
+s:Sc/PS/OutputFile = "../../TOPAS_simulation_data/broad_beam/PS" 
 
 # Filters: primaries only, gammas only, moving out of plane toward water
 s:Sc/PS/OnlyIncludeParticlesOfGeneration = "Primary"
