@@ -19,7 +19,7 @@ d:So/Beam1/BeamPositionCutoffY        = 0.5 cm
 s:Ge/BeamPos2/Parent = "World"
 s:Ge/BeamPos2/Type   = "Group"
 d:Ge/BeamPos2/TransX = 0. cm
-d:Ge/BeamPos2/TransY = 5. cm
+d:Ge/BeamPos2/TransY = 2.5 cm
 d:Ge/BeamPos2/TransZ = 0. cm
 
 

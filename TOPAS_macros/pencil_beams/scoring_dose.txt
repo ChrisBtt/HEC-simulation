@@ -1,16 +1,34 @@
 # Shared bin parameters
-i:Par/GridXBins = 25
-i:Par/GridYBins = 25
-i:Par/GridZBins = 25
+i:Par/GlobalXBins = 21
+i:Par/GlobalYBins = 21
+i:Par/GlobalZBins = 50
+
+i:Par/FineXBins = 21
+i:Par/FineYBins = 21
+i:Par/FineZBins = 100
 
 # Dose on the mass-world grid
-s:Sc/DoseGrid/Quantity                  = "DoseToWater"
-s:Sc/DoseGrid/Component                 = "WaterGridPar"
-i:Sc/DoseGrid/XBins = Par/GridXBins
-i:Sc/DoseGrid/YBins = Par/GridYBins
-i:Sc/DoseGrid/ZBins = Par/GridZBins
-b:Sc/DoseGrid/OutputToConsole           = "False"
-s:Sc/DoseGrid/OutputType                = "csv"
-s:Sc/DoseGrid/IfOutputFileAlreadyExists = "Overwrite"
-sv:Sc/DoseGrid/Report = 3 "Sum" "Standard_Deviation" "Histories"
-s:Sc/DoseGrid/OutputFile = "TOPAS_simulation_data/broad_beam/DoseGrid" 
+s:Sc/DoseScorerGlobal/Quantity                  = "DoseToWater"
+s:Sc/DoseScorerGlobal/Component                 = "WaterGridGlobal"
+s:Sc/DoseScorerGlobal/PropagateToChildren       = "True"
+i:Sc/DoseScorerGlobal/XBins                     = Par/GlobalXBins
+i:Sc/DoseScorerGlobal/YBins                     = Par/GlobalYBins
+i:Sc/DoseScorerGlobal/ZBins                     = Par/GlobalZBins
+b:Sc/DoseScorerGlobal/OutputToConsole           = "False"
+s:Sc/DoseScorerGlobal/OutputType                = "csv"
+s:Sc/DoseScorerGlobal/IfOutputFileAlreadyExists = "Overwrite"
+sv:Sc/DoseScorerGlobal/Report                   = 3 "Sum" "Standard_Deviation" "Histories"
+s:Sc/DoseScorerGlobal/OutputFile                = "../../TOPAS_simulation_data/pencil_beam/DoseGlobal" 
+
+# Dose on the mass-world grid
+s:Sc/DoseScorerFine/Quantity                  = "DoseToWater"
+s:Sc/DoseScorerFine/Component                 = "WaterGridFine"
+s:Sc/DoseScorerFine/PropagateToChildren       = "True"
+i:Sc/DoseScorerFine/XBins                     = Par/GlobalXBins
+i:Sc/DoseScorerFine/YBins                     = Par/GlobalYBins
+i:Sc/DoseScorerFine/ZBins                     = Par/GlobalZBins
+b:Sc/DoseScorerFine/OutputToConsole           = "False"
+s:Sc/DoseScorerFine/OutputType                = "csv"
+s:Sc/DoseScorerFine/IfOutputFileAlreadyExists = "Overwrite"
+sv:Sc/DoseScorerFine/Report                   = 3 "Sum" "Standard_Deviation" "Histories"
+s:Sc/DoseScorerFine/OutputFile                = "../../TOPAS_simulation_data/pencil_beam/DoseFine" 
