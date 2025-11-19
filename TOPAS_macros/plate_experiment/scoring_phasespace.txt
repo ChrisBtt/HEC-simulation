@@ -12,3 +12,33 @@ s:Sc/PS/OutputFile = "../../TOPAS_simulation_data/plate_experiment/PS"
 s:Sc/PS/OnlyIncludeParticlesOfGeneration = "Primary"
 sv:Sc/PS/OnlyIncludeParticlesNamed       = 1 "gamma"
 s:Sc/PS/OnlyIncludeParticlesGoing        = "Out"
+
+s:Sc/Energy_1p5cm/Quantity     = "Fluence"
+s:Sc/Energy_1p5cm/Component    = "EnergySlab_1p5cm"
+sv:Sc/Energy_1p5cm/OnlyIncludeParticlesNamed    = 1 "e-"    # track only electrons
+s:Sc/Energy_1p5cm/OutputType   = "csv"
+i:Sc/Energy_1p5cm/EBins       = 20
+d:Sc/Energy_1p5cm/EBinMin     = 0.1 MeV      
+d:Sc/Energy_1p5cm/EBinMax     = 5 MeV    
+s:Sc/Energy_1p5cm/IfOutputFileAlreadyExists = "Overwrite"
+s:Sc/Energy_1p5cm/OutputFile   = "../../TOPAS_simulation_data/plate_experiment/energySpectrum_1p5cm"
+
+s:Sc/Energy_5cm/Quantity     = "Fluence"
+s:Sc/Energy_5cm/Component    = "EnergySlab_5cm"
+sv:Sc/Energy_5cm/OnlyIncludeParticlesNamed    = 1 "e-"
+s:Sc/Energy_5cm/OutputType   = "csv"
+i:Sc/Energy_5cm/EBins       = 20
+d:Sc/Energy_5cm/EBinMin     = 0.01 MeV
+d:Sc/Energy_5cm/EBinMax     = 5 MeV
+s:Sc/Energy_5cm/IfOutputFileAlreadyExists = "Overwrite"
+s:Sc/Energy_5cm/OutputFile   = "../../TOPAS_simulation_data/plate_experiment/energySpectrum_5cm"
+
+s:Sc/Energy_10cm/Quantity     = "Fluence"
+s:Sc/Energy_10cm/Component    = "EnergySlab_10cm"
+sv:Sc/Energy_10cm/OnlyIncludeParticlesNamed    = 1 "e-"
+s:Sc/Energy_10cm/OutputType   = "csv"
+i:Sc/Energy_10cm/EBins       = 20
+d:Sc/Energy_10cm/EBinMin     = 0.01 MeV
+d:Sc/Energy_10cm/EBinMax     = 5 MeV
+s:Sc/Energy_10cm/IfOutputFileAlreadyExists = "Overwrite"
+s:Sc/Energy_10cm/OutputFile   = "../../TOPAS_simulation_data/plate_experiment/energySpectrum_10cm"

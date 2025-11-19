@@ -1,11 +1,11 @@
 # --- multi-threading ------------
-i:Ts/NumberOfThreads = 48
+i:Ts/NumberOfThreads = 24
 
 # --- Random seed ----------------
 i:Ts/Seed = 1  # default is 1
 
 includeFile = geometry_plates.txt
-includeFile = beam_pencil.txt
+includeFile = beam_6MV.txt
 includeFile = scoring_current.txt
 
 # --- World -----------------------
@@ -20,9 +20,9 @@ sv:Ph/Default/Modules = 1 "g4em-standard_opt0"   # simple EM for photons
 sv:Ph/Default/LayeredMassGeometryWorlds = 2 "WaterGridGlobal" "WaterGridFine"
 
 # --- simple 3D viewer ------------
-b:Ts/UseQt              = "True"
+b:Ts/UseQt              = "False"
 s:Gr/View/Type          = "OpenGL"
-b:Gr/View/Active        = "True"
+b:Gr/View/Active        = "False"
 b:Gr/View/HiddenLineRemovalForTrajectories = "True"
 b:Gr/View/IncludeAxes   = "True"  # defaults to "False"
 s:Gr/View/AxesComponent = "World"  # Component in which to center the axes. Defaults to World.

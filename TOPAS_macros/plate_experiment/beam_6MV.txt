@@ -1,5 +1,6 @@
 # --- Photon beam -----------------------------------------------
-# --- Spectrum from Valian linac: https://primoproject.net/energy-spectra-of-varian-linacs/s:So/Beam/Type                       = "Beam"
+# --- Spectrum from Valian linac: https://primoproject.net/energy-spectra-of-varian-linacs/
+s:So/Beam/Type                       = "Beam"
 s:So/Beam/Component                  = "BeamPos"  # emit along +Z of this component
 s:So/Beam/BeamParticle               = "gamma"
 s:So/Beam/BeamEnergySpectrumType     = "Continuous"
@@ -9,7 +10,7 @@ s:So/Beam/BeamPositionDistribution   = "Flat"
 d:So/Beam/BeamPositionSpreadX        = 2.0 mm
 d:So/Beam/BeamPositionSpreadY        = 2.0 mm
 s:So/Beam/BeamAngularDistribution    = "None"
-i:So/Beam/NumberOfHistoriesInRun     = 100     # increase for smoother stats
+i:So/Beam/NumberOfHistoriesInRun     = 100000000     # increase for smoother stats
 s:So/Beam/BeamPositionCutoffShape    = "Ellipse"
 d:So/Beam/BeamPositionCutoffX        = 2.5 cm
 d:So/Beam/BeamPositionCutoffY        = 2.5 cm

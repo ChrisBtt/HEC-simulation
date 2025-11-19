@@ -3,22 +3,9 @@ i:Par/GlobalXBins = 61
 i:Par/GlobalYBins = 61
 i:Par/GlobalZBins = 20
 
-i:Par/FineXBins = 21
-i:Par/FineYBins = 21
+i:Par/FineXBins = 101
+i:Par/FineYBins = 101
 i:Par/FineZBins = 100
-
-# Dose on the mass-world grid
-s:Sc/DoseScorerGlobal/Quantity                  = "DoseToWater"
-s:Sc/DoseScorerGlobal/Component                 = "WaterGridGlobal"
-i:Sc/DoseScorerGlobal/XBins                     = Par/GlobalXBins
-i:Sc/DoseScorerGlobal/YBins                     = Par/GlobalYBins
-i:Sc/DoseScorerGlobal/ZBins                     = Par/GlobalZBins
-b:Sc/DoseScorerGlobal/OutputToConsole           = "False"
-s:Sc/DoseScorerGlobal/OutputType                = "csv"
-s:Sc/DoseScorerGlobal/IfOutputFileAlreadyExists = "Overwrite"
-sv:Sc/DoseScorerGlobal/Report                   = 3 "Sum" "Standard_Deviation" "Histories"
-s:Sc/DoseScorerGlobal/OutputFile                = "../../TOPAS_simulation_data/plate_experiment/DoseGlobal" 
-
 
 # Dose on the mass-world grid
 s:Sc/DoseScorerFine/Quantity                  = "DoseToWater"
