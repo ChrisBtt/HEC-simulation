@@ -1,0 +1,54 @@
+includeFile = scoring_dose.txt
+includeFile = scoring_phasespace.txt
+
+# -- Current Scorer
+
+# Current Electron X
+s:Sc/velCurrElX/Quantity                   = "velocityCurrent"
+s:Sc/velCurrElX/Component                  = "WaterGridPar"
+i:Sc/velCurrElX/XBins                      = Par/GridXBins
+i:Sc/velCurrElX/YBins                      = Par/GridYBins
+i:Sc/velCurrElX/ZBins                      = Par/GridZBins
+b:Sc/velCurrElX/OutputToConsole            = "False"
+s:Sc/velCurrElX/OutputType                 = "csv"
+s:Sc/velCurrElX/IfOutputFileAlreadyExists  = "Increment"
+sv:Sc/velCurrElX/OnlyIncludeParticlesNamed = 1 "e-"
+sv:Sc/velCurrElX/Report                    = 3 "Sum" "Standard_Deviation" "Histories"
+b:Sc/velCurrElX/Active                     = "True"
+s:Sc/velCurrElX/direction                  = "x"
+b:Sc/velCurrElX/OutputAfterRun             = "True"
+
+# Current Electron Y
+s:Sc/velCurrElY/Quantity = "velocityCurrent"
+s:Sc/velCurrElY/Component = "WaterGridPar"
+i:Sc/velCurrElY/XBins = Par/GridXBins
+i:Sc/velCurrElY/YBins = Par/GridYBins
+i:Sc/velCurrElY/ZBins = Par/GridZBins
+b:Sc/velCurrElY/OutputToConsole = "False"
+s:Sc/velCurrElY/OutputType = "csv"
+s:Sc/velCurrElY/IfOutputFileAlreadyExists = "Increment"
+sv:Sc/velCurrElY/OnlyIncludeParticlesNamed = 1 "e-"
+sv:Sc/velCurrElY/Report = 3 "Sum" "Standard_Deviation" "Histories" 
+b:Sc/velCurrElY/Active="True"
+s:Sc/velCurrElY/direction = "y"
+b:Sc/velCurrElY/OutputAfterRun = "True"
+
+# Current Electron Z
+s:Sc/velCurrElZ/Quantity = "velocityCurrent"
+s:Sc/velCurrElZ/Component = "WaterGridPar"
+i:Sc/velCurrElZ/XBins = Par/GridXBins
+i:Sc/velCurrElZ/YBins = Par/GridYBins
+i:Sc/velCurrElZ/ZBins = Par/GridZBins
+b:Sc/velCurrElZ/OutputToConsole = "False"
+s:Sc/velCurrElZ/OutputType = "csv"
+s:Sc/velCurrElZ/IfOutputFileAlreadyExists = "Increment"
+sv:Sc/velCurrElZ/OnlyIncludeParticlesNamed = 1 "e-"
+sv:Sc/velCurrElZ/Report = 3 "Sum" "Standard_Deviation" "Histories" 
+b:Sc/velCurrElZ/Active="True"
+s:Sc/velCurrElZ/direction = "z"
+b:Sc/velCurrElZ/OutputAfterRun = "True"
+
+
+s:Sc/velCurrElX/OutputFile = "../../TOPAS_simulation_data/tumor_materials/velCurrElX"
+s:Sc/velCurrElY/OutputFile = "../../TOPAS_simulation_data/tumor_materials/velCurrElY"
+s:Sc/velCurrElZ/OutputFile = "../../TOPAS_simulation_data/tumor_materials/velCurrElZ"
