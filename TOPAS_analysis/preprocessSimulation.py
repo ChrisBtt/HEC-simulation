@@ -60,7 +60,11 @@ class Preprocessor(object):
             raise ValueError("Path must be a string or a list of strings.")
 
         if self.downsample_factor > 1:
-            data = data.iloc[::self.downsample_factor, :].reset_index(drop=True)
+            data = self._downsample_data(data)
+
+        print(f"Range x: {data['x'].min()} to {data['x'].max()}")
+        print(f"Range y: {data['y'].min()} to {data['y'].max()}")
+        print(f"Range z: {data['z'].min()} to {data['z'].max()}")
 
         data['jx_abs'] = data['jx'].abs()
         data['jy_abs'] = data['jy'].abs()
@@ -74,6 +78,7 @@ class Preprocessor(object):
         """
 
         dataOut = data.copy()
+        dataOut.drop(columns=['x', 'y', 'z'], inplace=True)
         dataOut["x_new"] = (data["x"] // self.downsample_factor)
         dataOut["y_new"] = (data["y"] // self.downsample_factor)
         dataOut["z_new"] = (data["z"] // self.downsample_factor)
@@ -137,10 +142,13 @@ class Preprocessor(object):
         """
         Calculate the radial distance from the center in the xy-plane.
         """
-        self.center_x = (self.data['x'].max()) / 2
-        self.center_y = (self.data['y'].max()) / 2        
-        self.center_x_cm = (self.data['x_cm'].max()) / 2
-        self.center_y_cm = (self.data['y_cm'].max()) / 2
+        print(f"Range x: {self.data['x'].min()} to {self.data['x'].max()}")
+        print(f"Range y: {self.data['y'].min()} to {self.data['y'].max()}")
+        print(f"Range z: {self.data['z'].min()} to {self.data['z'].max()}")
+        self.center_x = (self.data['x'].max() + self.data['x'].min()) / 2
+        self.center_y = (self.data['y'].max() + self.data['y'].min()) / 2        
+        self.center_x_cm = (self.data['x_cm'].max() + self.data['x_cm'].min()) / 2
+        self.center_y_cm = (self.data['y_cm'].max() + self.data['y_cm'].min()) / 2
         self.data['r'] = np.sqrt((self.data['x'] - self.center_x) ** 2 + (self.data['y'] - self.center_y) ** 2)
         self.data['r_cm'] = self.data['r'] * ((self.bin_x + self.bin_y) / 2)
         print(f"Calculated radial distances from {self.data['r'].min()} to {self.data['r'].max()} with center at ({self.center_x}, {self.center_y})")
