@@ -1,12 +1,12 @@
-// Scorer for angularCurrent
+// Scorer for distanceCurrent
 // Scorer to score the orthogonal particle currents*angle for HEC calculations. 
 // Will account for particle direction!
-#include "angularCurrent.hh"
+#include "distanceCurrent.hh"
 #include "G4UnitsTable.hh"
 
 #include "G4PSDirectionFlag.hh"
 
-angularCurrent::angularCurrent(TsParameterManager* pM, TsMaterialManager* mM, TsGeometryManager* gM, TsScoringManager* scM, TsExtensionManager* eM,
+distanceCurrent::distanceCurrent(TsParameterManager* pM, TsMaterialManager* mM, TsGeometryManager* gM, TsScoringManager* scM, TsExtensionManager* eM,
     G4String scorerName, G4String quantity, G4String outFileName, G4bool isSubScorer)
 : TsVBinnedScorer(pM, mM, gM, scM, eM, scorerName, quantity, outFileName, isSubScorer)
 {
@@ -23,10 +23,10 @@ else             dirAxis_ = 'z'; // default
 }
 
 
-angularCurrent::~angularCurrent() {;}
+distanceCurrent::~distanceCurrent() {;}
 
 
-G4bool angularCurrent::ProcessHits(G4Step* aStep, G4TouchableHistory*)
+G4bool distanceCurrent::ProcessHits(G4Step* aStep, G4TouchableHistory*)
 {
   if (!fIsActive) { fSkippedWhileInactive++; return false; }
 
@@ -39,10 +39,13 @@ G4bool angularCurrent::ProcessHits(G4Step* aStep, G4TouchableHistory*)
   const G4double charge = pre->GetCharge();
 
   const G4ThreeVector dGlobal = pre->GetMomentumDirection();
+  const G4double stepLength = aStep->GetStepLength();
+
+  G4ThreeVector distance = dGlobal * stepLength;
   const G4TouchableHandle& th = pre->GetTouchableHandle();
 
   const G4RotationMatrix* rot = th->GetRotation();
-  G4ThreeVector dLocal = rot ? rot->inverse() * dGlobal : dGlobal;
+  G4ThreeVector dLocal = rot ? rot->inverse() * distance : distance;
 
   G4double proj = 0.0;
   switch (dirAxis_) {
