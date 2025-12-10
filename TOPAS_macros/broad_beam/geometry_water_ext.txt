@@ -4,8 +4,8 @@ s:Ge/Water/Parent   = "World"
 s:Ge/Water/Material = "G4_WATER"
 d:Ge/Water/HLX      = 5.0 cm
 d:Ge/Water/HLY      = 5.0 cm
-d:Ge/Water/HLZ      = 12.5 cm
-d:Ge/Water/TransZ   = 25.0 cm     # move cube downstream so beam enters from +Z
+d:Ge/Water/HLZ      = 7.5 cm
+d:Ge/Water/TransZ   = 7.5 cm     # move cube downstream so beam enters from +Z
 b:Ge/Water/Invisible= "False"
 s:Ge/Water/Color    = "white"
 
@@ -19,15 +19,17 @@ d:Ge/BeamPos/HLZ      = 1.0 mm
 d:Ge/BeamPos/TransZ   = 0.0 mm
 b:Ge/BeamPos/Invisible= "True"
 
-# --- Phantom child component to score in 
-s:Ge/WaterGridPar/Type       = "TsBox"
-s:Ge/WaterGridPar/Parent     = "Water"
-s:Ge/WaterGridPar/Material   = "G4_WATER"
-d:Ge/WaterGridPar/HLX        = Ge/Water/HLX cm
-d:Ge/WaterGridPar/HLY        = Ge/Water/HLY cm
-d:Ge/WaterGridPar/HLZ        = Ge/Water/HLZ cm
-b:Ge/WaterGridPar/Invisible  = "False"
-sc:Ge/WaterGridPar/DrawingStyle= "WireFrame"
+# --- Inner high-resolution scorer
+s:Ge/WaterGrid/Type            = "TsBox"
+s:Ge/WaterGrid/Parent          = "World"
+b:Ge/WaterGrid/IsParallel      = "True"
+s:Ge/WaterGrid/Material        = "G4_WATER"
+d:Ge/WaterGrid/HLX             = 5.05 cm
+d:Ge/WaterGrid/HLY             = 5.05 cm
+d:Ge/WaterGrid/HLZ             = 7.5 cm
+d:Ge/WaterGrid/TransZ          = 7.5 cm
+b:Ge/WaterGrid/Invisible       = "False"
+sc:Ge/WaterGrid/DrawingStyle   = "WireFrame"
 
 # --- simple 3D viewer -----------
 b:Ts/UseQt              = "True"
@@ -45,5 +47,5 @@ s:Ge/PSPlane/Material = "Vacuum"
 d:Ge/PSPlane/HLX      = 6.0 cm
 d:Ge/PSPlane/HLY      = 6.0 cm
 d:Ge/PSPlane/HLZ      = 0.01 mm
-d:Ge/PSPlane/TransZ   = 4.999 cm      # epsilon < 5.0 cm (water upstream face)
+d:Ge/PSPlane/TransZ   = -2 mm      # epsilon < 5.0 cm (water upstream face)
 b:Ge/PSPlane/Invisible= "True"

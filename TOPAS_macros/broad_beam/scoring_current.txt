@@ -1,50 +1,144 @@
-includeFile = scoring_dose.txt
-includeFile = scoring_phasespace.txt
+includeFile = /mnt/e/Christoph/applications/hec-dose-distribution/TOPAS_macros/broad_beam/scoring_dose.txt
+includeFile = /mnt/e/Christoph/applications/hec-dose-distribution/TOPAS_macros/broad_beam/scoring_phasespace.txt
 
 # -- Current Scorer
 
-# Current Electron X
-s:Sc/velCurrElX/Quantity                   = "velocityCurrent"
-s:Sc/velCurrElX/Component                  = "WaterGridPar"
-i:Sc/velCurrElX/XBins                      = Par/GridXBins
-i:Sc/velCurrElX/YBins                      = Par/GridYBins
-i:Sc/velCurrElX/ZBins                      = Par/GridZBins
-b:Sc/velCurrElX/OutputToConsole            = "False"
-s:Sc/velCurrElX/OutputType                 = "csv"
-s:Sc/velCurrElX/IfOutputFileAlreadyExists  = "Overwrite"
-sv:Sc/velCurrElX/OnlyIncludeParticlesNamed = 1 "e-"
-sv:Sc/velCurrElX/Report                    = 3 "Sum" "Standard_Deviation" "Histories" 
-b:Sc/velCurrElX/Active                     = "True"
-s:Sc/velCurrElX/direction                  = "x"
+# Current Electron X Vel
+s:Sc/velWeightCurrElX/Quantity                   = "velWeightedCurrent"
+s:Sc/velWeightCurrElX/Component                  = "WaterGrid"
+i:Sc/velWeightCurrElX/XBins                      = Par/GridXBins
+i:Sc/velWeightCurrElX/YBins                      = Par/GridYBins
+i:Sc/velWeightCurrElX/ZBins                      = Par/GridZBins
+b:Sc/velWeightCurrElX/OutputToConsole            = "False"
+s:Sc/velWeightCurrElX/OutputType                 = "csv"
+s:Sc/velWeightCurrElX/IfOutputFileAlreadyExists  = "Overwrite"
+sv:Sc/velWeightCurrElX/OnlyIncludeParticlesNamed = 1 "e-"
+sv:Sc/velWeightCurrElX/Report                    = 3 "Sum" "Standard_Deviation" "Histories" 
+b:Sc/velWeightCurrElX/Active                     = "True"
+s:Sc/velWeightCurrElX/direction                  = "x"
 
-# Current Electron Y
-s:Sc/velCurrElY/Quantity = "velocityCurrent"
-s:Sc/velCurrElY/Component = "WaterGridPar"
-i:Sc/velCurrElY/XBins = Par/GridXBins
-i:Sc/velCurrElY/YBins = Par/GridYBins
-i:Sc/velCurrElY/ZBins = Par/GridZBins
-b:Sc/velCurrElY/OutputToConsole = "False"
-s:Sc/velCurrElY/OutputType = "csv"
-s:Sc/velCurrElY/IfOutputFileAlreadyExists = "Overwrite"
-sv:Sc/velCurrElY/OnlyIncludeParticlesNamed = 1 "e-"
-sv:Sc/velCurrElY/Report = 3 "Sum" "Standard_Deviation" "Histories" 
-b:Sc/velCurrElY/Active="True"
-s:Sc/velCurrElY/direction = "y"
+# Current Electron Y Vel
+s:Sc/velWeightCurrElY/Quantity = "velWeightedCurrent"
+s:Sc/velWeightCurrElY/Component = "WaterGrid"
+i:Sc/velWeightCurrElY/XBins = Par/GridXBins
+i:Sc/velWeightCurrElY/YBins = Par/GridYBins
+i:Sc/velWeightCurrElY/ZBins = Par/GridZBins
+b:Sc/velWeightCurrElY/OutputToConsole = "False"
+s:Sc/velWeightCurrElY/OutputType = "csv"
+s:Sc/velWeightCurrElY/IfOutputFileAlreadyExists = "Overwrite"
+sv:Sc/velWeightCurrElY/OnlyIncludeParticlesNamed = 1 "e-"
+sv:Sc/velWeightCurrElY/Report = 3 "Sum" "Standard_Deviation" "Histories" 
+b:Sc/velWeightCurrElY/Active="True"
+s:Sc/velWeightCurrElY/direction = "y"
 
-# Current Electron Z
-s:Sc/velCurrElZ/Quantity = "velocityCurrent"
-s:Sc/velCurrElZ/Component = "WaterGridPar"
-i:Sc/velCurrElZ/XBins = Par/GridXBins
-i:Sc/velCurrElZ/YBins = Par/GridYBins
-i:Sc/velCurrElZ/ZBins = Par/GridZBins
-b:Sc/velCurrElZ/OutputToConsole = "False"
-s:Sc/velCurrElZ/OutputType = "csv"
-s:Sc/velCurrElZ/IfOutputFileAlreadyExists = "Overwrite"
-sv:Sc/velCurrElZ/OnlyIncludeParticlesNamed = 1 "e-"
-sv:Sc/velCurrElZ/Report = 3 "Sum" "Standard_Deviation" "Histories" 
-b:Sc/velCurrElZ/Active="True"
-s:Sc/velCurrElZ/direction = "z"
+# Current Electron Z Vel
+s:Sc/velWeightCurrElZ/Quantity = "velWeightedCurrent"
+s:Sc/velWeightCurrElZ/Component = "WaterGrid"
+i:Sc/velWeightCurrElZ/XBins = Par/GridXBins
+i:Sc/velWeightCurrElZ/YBins = Par/GridYBins
+i:Sc/velWeightCurrElZ/ZBins = Par/GridZBins
+b:Sc/velWeightCurrElZ/OutputToConsole = "False"
+s:Sc/velWeightCurrElZ/OutputType = "csv"
+s:Sc/velWeightCurrElZ/IfOutputFileAlreadyExists = "Overwrite"
+sv:Sc/velWeightCurrElZ/OnlyIncludeParticlesNamed = 1 "e-"
+sv:Sc/velWeightCurrElZ/Report = 3 "Sum" "Standard_Deviation" "Histories" 
+b:Sc/velWeightCurrElZ/Active="True"
+s:Sc/velWeightCurrElZ/direction = "z"
 
-s:Sc/velCurrElX/OutputFile = "../../TOPAS_simulation_data/broad_beam/velCurrElX" 
-s:Sc/velCurrElY/OutputFile = "../../TOPAS_simulation_data/broad_beam/velCurrElY" 
-s:Sc/velCurrElZ/OutputFile = "../../TOPAS_simulation_data/broad_beam/velCurrElZ" 
+# Current Electron X Ang
+s:Sc/angCurrElX/Quantity = "angularCurrent"
+s:Sc/angCurrElX/Component = "WaterGrid"
+i:Sc/angCurrElX/XBins = Par/GridXBins
+i:Sc/angCurrElX/YBins = Par/GridYBins
+i:Sc/angCurrElX/ZBins = Par/GridZBins
+b:Sc/angCurrElX/OutputToConsole = "False"
+s:Sc/angCurrElX/OutputType = "csv"
+s:Sc/angCurrElX/IfOutputFileAlreadyExists = "Overwrite"
+sv:Sc/angCurrElX/OnlyIncludeParticlesNamed = 1 "e-"
+sv:Sc/angCurrElX/Report = 3 "Sum" "Standard_Deviation" "Histories" 
+b:Sc/angCurrElX/Active="True"
+s:Sc/angCurrElX/direction = "x"
+
+# Current Electron Y Ang
+s:Sc/angCurrElY/Quantity = "angularCurrent"
+s:Sc/angCurrElY/Component = "WaterGrid"
+i:Sc/angCurrElY/XBins = Par/GridXBins
+i:Sc/angCurrElY/YBins = Par/GridYBins
+i:Sc/angCurrElY/ZBins = Par/GridZBins
+b:Sc/angCurrElY/OutputToConsole = "False"
+s:Sc/angCurrElY/OutputType = "csv"
+s:Sc/angCurrElY/IfOutputFileAlreadyExists = "Overwrite"
+sv:Sc/angCurrElY/OnlyIncludeParticlesNamed = 1 "e-"
+sv:Sc/angCurrElY/Report = 3 "Sum" "Standard_Deviation" "Histories" 
+b:Sc/angCurrElY/Active="True"
+s:Sc/angCurrElY/direction = "y"
+
+# Current Electron Z Ang
+s:Sc/angCurrElZ/Quantity = "angularCurrent"
+s:Sc/angCurrElZ/Component = "WaterGrid"
+i:Sc/angCurrElZ/XBins = Par/GridXBins
+i:Sc/angCurrElZ/YBins = Par/GridYBins
+i:Sc/angCurrElZ/ZBins = Par/GridZBins
+b:Sc/angCurrElZ/OutputToConsole = "False"
+s:Sc/angCurrElZ/OutputType = "csv"
+s:Sc/angCurrElZ/IfOutputFileAlreadyExists = "Overwrite"
+sv:Sc/angCurrElZ/OnlyIncludeParticlesNamed = 1 "e-"
+sv:Sc/angCurrElZ/Report = 3 "Sum" "Standard_Deviation" "Histories" 
+b:Sc/angCurrElZ/Active="True"
+s:Sc/angCurrElZ/direction = "z"
+
+
+# Current Electron X Fine
+s:Sc/distCurrElX/Quantity = "distanceCurrent"
+s:Sc/distCurrElX/Component = "WaterGrid"
+i:Sc/distCurrElX/XBins = Par/GridXBins
+i:Sc/distCurrElX/YBins = Par/GridYBins
+i:Sc/distCurrElX/ZBins = Par/GridZBins
+b:Sc/distCurrElX/OutputToConsole = "False"
+s:Sc/distCurrElX/OutputType = "csv"
+s:Sc/distCurrElX/IfOutputFileAlreadyExists = "Overwrite"
+sv:Sc/distCurrElX/OnlyIncludeParticlesNamed = 1 "e-"
+sv:Sc/distCurrElX/Report = 3 "Sum" "Standard_Deviation" "Histories" 
+b:Sc/distCurrElX/Active="True"
+s:Sc/distCurrElX/direction = "x"
+
+# Current Electron Y Fine
+s:Sc/distCurrElY/Quantity = "distanceCurrent"
+s:Sc/distCurrElY/Component = "WaterGrid"
+i:Sc/distCurrElY/XBins = Par/GridXBins
+i:Sc/distCurrElY/YBins = Par/GridYBins
+i:Sc/distCurrElY/ZBins = Par/GridZBins
+b:Sc/distCurrElY/OutputToConsole = "False"
+s:Sc/distCurrElY/OutputType = "csv"
+s:Sc/distCurrElY/IfOutputFileAlreadyExists = "Overwrite"
+sv:Sc/distCurrElY/OnlyIncludeParticlesNamed = 1 "e-"
+sv:Sc/distCurrElY/Report = 3 "Sum" "Standard_Deviation" "Histories" 
+b:Sc/distCurrElY/Active="True"
+s:Sc/distCurrElY/direction = "y"
+
+# Current Electron Z Fine
+s:Sc/distCurrElZ/Quantity = "distanceCurrent"
+s:Sc/distCurrElZ/Component = "WaterGrid"
+i:Sc/distCurrElZ/XBins = Par/GridXBins
+i:Sc/distCurrElZ/YBins = Par/GridYBins
+i:Sc/distCurrElZ/ZBins = Par/GridZBins
+b:Sc/distCurrElZ/OutputToConsole = "False"
+s:Sc/distCurrElZ/OutputType = "csv"
+s:Sc/distCurrElZ/IfOutputFileAlreadyExists = "Overwrite"
+sv:Sc/distCurrElZ/OnlyIncludeParticlesNamed = 1 "e-"
+sv:Sc/distCurrElZ/Report = 3 "Sum" "Standard_Deviation" "Histories" 
+b:Sc/distCurrElZ/Active="True"
+s:Sc/distCurrElZ/direction = "z"
+ 
+
+s:Sc/velWeightCurrElX/OutputFile = "../../TOPAS_simulation_data/plate_experiment/velWeightCurrElX" 
+s:Sc/velWeightCurrElY/OutputFile = "../../TOPAS_simulation_data/plate_experiment/velWeightCurrElY" 
+s:Sc/velWeightCurrElZ/OutputFile = "../../TOPAS_simulation_data/plate_experiment/velWeightCurrElZ"
+
+s:Sc/angCurrElX/OutputFile = "../../TOPAS_simulation_data/plate_experiment/angCurrElX" 
+s:Sc/angCurrElY/OutputFile = "../../TOPAS_simulation_data/plate_experiment/angCurrElY" 
+s:Sc/angCurrElZ/OutputFile = "../../TOPAS_simulation_data/plate_experiment/angCurrElZ" 
+
+s:Sc/distCurrElX/OutputFile = "../../TOPAS_simulation_data/plate_experiment/distCurrElX" 
+s:Sc/distCurrElY/OutputFile = "../../TOPAS_simulation_data/plate_experiment/distCurrElY" 
+s:Sc/distCurrElZ/OutputFile = "../../TOPAS_simulation_data/plate_experiment/distCurrElZ"

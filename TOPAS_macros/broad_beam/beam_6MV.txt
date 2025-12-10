@@ -1,15 +1,16 @@
 # --- Photon beam -----------------------------------------------
+# --- Spectrum from Valian linac: https://primoproject.net/energy-spectra-of-varian-linacs/
 s:So/Beam/Type                       = "Beam"
 s:So/Beam/Component                  = "BeamPos"  # emit along +Z of this component
 s:So/Beam/BeamParticle               = "gamma"
 s:So/Beam/BeamEnergySpectrumType     = "Continuous"
-dv:So/Beam/BeamEnergySpectrumValues  = 25 0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00 2.25 2.50 2.75 3.00 3.25 3.50 3.75 4.00 4.25 4.50 4.75 5.00 5.25 5.50 5.75 6.00 6.25 MeV
-uv:So/Beam/BeamEnergySpectrumWeights = 25 .06 .124 .121 .10 .092 .078 .067 .06 .05 .04 .04 .03 .03 .02 .02 .02 .014 .012 .009 .008 .006 .004 .003 .001 .0001
+dv:So/Beam/BeamEnergySpectrumValues  = 23 0.1 0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00 2.25 2.50 2.75 3.00 3.25 3.50 3.75 4.00 4.25 4.50 4.75 5.00 5.25 5.50 MeV
+uv:So/Beam/BeamEnergySpectrumWeights = 23 .82 8.11 9.81 7.80 6.5 5.42 4.60 3.85 3.25 2.78 2.37 2.04 1.74 1.49 1.29 1.12 0.949 0.80 .662 .509 .373 .209 .0
 s:So/Beam/BeamPositionDistribution   = "Flat"
 d:So/Beam/BeamPositionSpreadX        = 2.0 mm
 d:So/Beam/BeamPositionSpreadY        = 2.0 mm
 s:So/Beam/BeamAngularDistribution    = "None"
-i:So/Beam/NumberOfHistoriesInRun     = 10000000     # increase for smoother stats
+i:So/Beam/NumberOfHistoriesInRun     = 1000000     # increase for smoother stats
 s:So/Beam/BeamPositionCutoffShape    = "Ellipse"
 d:So/Beam/BeamPositionCutoffX        = 2.5 cm
 d:So/Beam/BeamPositionCutoffY        = 2.5 cm

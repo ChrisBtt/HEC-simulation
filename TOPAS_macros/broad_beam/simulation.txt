@@ -1,25 +1,25 @@
 # --- multi-threading ------------
-i:Ts/NumberOfThreads = 48
+i:Ts/NumberOfThreads = 32
 
 # --- Random seed ----------------
 i:Ts/Seed = 1 # default is 1
 
-includeFile = geometry_water.txt
-includeFile = beam_6MV.txt
-includeFile = scoring_current.txt
+includeFile = /mnt/e/Christoph/applications/hec-dose-distribution/TOPAS_macros/broad_beam/geometry_water_ext.txt
+includeFile = /mnt/e/Christoph/applications/hec-dose-distribution/TOPAS_macros/broad_beam/beam_6MV.txt
+includeFile = /mnt/e/Christoph/applications/hec-dose-distribution/TOPAS_macros/broad_beam/scoring_current.txt
 
 # --- World -----------------------
 s:Ge/World/Material  = "Vacuum"
-d:Ge/World/HLX       = 15.0 cm
-d:Ge/World/HLY       = 15.0 cm
-d:Ge/World/HLZ       = 15.0 m
+d:Ge/World/HLX       = 25.0 cm
+d:Ge/World/HLY       = 25.0 cm
+d:Ge/World/HLZ       = 25.0 cm
 #b:Ge/World/Invisible = "True"
 
 # --- Physics ---------------------
 sv:Ph/Default/Modules = 1 "g4em-standard_opt0"   # simple EM for photons
-
+sv:Ph/Default/LayeredMassGeometryWorlds = 1 "WaterGrid"
 # --- simple 3D viewer ------------
-b:Ts/UseQt              = "True"
+b:Ts/UseQt              = "False"
 s:Gr/View/Type          = "OpenGL"
 b:Gr/View/Active        = "False"
 b:Gr/View/HiddenLineRemovalForTrajectories = "True"

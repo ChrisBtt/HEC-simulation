@@ -1,16 +1,16 @@
 # Shared bin parameters
-i:Par/GridXBins = 25
-i:Par/GridYBins = 25
-i:Par/GridZBins = 25
+i:Par/GridXBins = 101
+i:Par/GridYBins = 101
+i:Par/GridZBins = 150
 
 # Dose on the mass-world grid
 s:Sc/DoseGrid/Quantity                  = "DoseToWater"
-s:Sc/DoseGrid/Component                 = "WaterGridPar"
-i:Sc/DoseGrid/XBins = Par/GridXBins
-i:Sc/DoseGrid/YBins = Par/GridYBins
-i:Sc/DoseGrid/ZBins = Par/GridZBins
+s:Sc/DoseGrid/Component                 = "WaterGrid"
+i:Sc/DoseGrid/XBins                     = Par/GridXBins
+i:Sc/DoseGrid/YBins                     = Par/GridYBins
+i:Sc/DoseGrid/ZBins                     = Par/GridZBins
 b:Sc/DoseGrid/OutputToConsole           = "False"
 s:Sc/DoseGrid/OutputType                = "csv"
 s:Sc/DoseGrid/IfOutputFileAlreadyExists = "Overwrite"
-sv:Sc/DoseGrid/Report = 3 "Sum" "Standard_Deviation" "Histories"
-s:Sc/DoseGrid/OutputFile = "../../TOPAS_simulation_data/broad_beam/DoseGrid" 
+sv:Sc/DoseGrid/Report                   = 3 "Sum" "Standard_Deviation" "Histories"
+s:Sc/DoseGrid/OutputFile                = "../../TOPAS_simulation_data/beam_experiment/DoseGrid" 
