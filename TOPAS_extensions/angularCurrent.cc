@@ -39,10 +39,13 @@ G4bool angularCurrent::ProcessHits(G4Step* aStep, G4TouchableHistory*)
   const G4double charge = pre->GetCharge();
 
   const G4ThreeVector dGlobal = pre->GetMomentumDirection();
+  const G4double stepLength = aStep->GetStepLength();
+
+  G4ThreeVector distance = dGlobal * stepLength;
   const G4TouchableHandle& th = pre->GetTouchableHandle();
 
   const G4RotationMatrix* rot = th->GetRotation();
-  G4ThreeVector dLocal = rot ? rot->inverse() * dGlobal : dGlobal;
+  G4ThreeVector dLocal = rot ? rot->inverse() * distance : distance;
 
   G4double proj = 0.0;
   switch (dirAxis_) {
