@@ -60,9 +60,8 @@ G4bool velocityCurrent::ProcessHits(G4Step* aStep, G4TouchableHistory*)
     G4cout << "WARNING: Invalid volume (" << volume << "), skipping hit" << G4endl;
     return false;
   }
-
-  const G4double deltaT = aStep->GetDeltaTime();
-  const G4double val = (weight * vProj * charge * deltaT) / volume;
+  
+  const G4double val = (weight * vProj * charge) / volume;
 
   AccumulateHit(aStep, val);
   return true;
