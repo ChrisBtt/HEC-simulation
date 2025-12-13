@@ -1,0 +1,11 @@
+%YAML 1.2
+--- # HEC Pipeline Configuration
+physics: [g4em-standard_opt0]
+particleCount: 1000000
+geometryType: parametrized # "parametrized", "3dct" or "4dct"
+outputDir: ""
+dicomDir: ""
+initialPosition:
+  Translation: [0, 0, 0]
+  Rotation: [0, 0, 0]
+transformSequence:
