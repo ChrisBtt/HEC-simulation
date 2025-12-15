@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import (QMainWindow, QTreeWidget, QTreeWidgetItem,
                              QVBoxLayout, QWidget, QPushButton, QFileDialog, QHBoxLayout,
                              QLineEdit, QLabel, QGridLayout, QButtonGroup, QRadioButton,
                              QScrollArea, QFrame, QMessageBox)
-from PyQt5.QtGui import QRegExpValidator
+from PyQt5.QtGui import QRegExpValidator, QDoubleValidator
 from PyQt5.QtCore import QRegExp
 
 from hecTool.ConfigModel import SimulationConfig
@@ -78,7 +78,7 @@ class TransformEditor(QWidget):
         for widget in [self.tx, self.ty, self.tz, self.rx, self.ry, self.rz,
                        self.sx, self.sy, self.sz, self.shxy, self.shyx, self.shxz,
                        self.shzx, self.shyz, self.shzy]:
-            widget.setValidator(QRegExpValidator(QRegExp(r'-?\d*\.?\d*'))) # or QDoubleValidator()
+            widget.setValidator(QDoubleValidator())
             widget.textChanged.connect(self.on_change)
 
     def on_change(self):
@@ -186,6 +186,13 @@ class ConfigGUI(QMainWindow):
             if isinstance(value, dict):
                 item.setText(0, str(key))
                 self.populate_tree(tree, value, item)
+            elif isinstance(value, list):
+                # Represent lists as expandable nodes so long values (e.g., matrices) don't get forced into one line.
+                item.setText(0, str(key))
+
+                for idx, elem in enumerate(value):
+                    child = QTreeWidgetItem(item)
+                    child.setText(0, f"{idx}: {elem}")
             else:
                 item.setText(0, f"{key}: {value}")
 
