@@ -1,18 +1,16 @@
 from PyQt5.QtWidgets import (QMainWindow, QTreeWidget, QTreeWidgetItem,
                              QVBoxLayout, QWidget, QPushButton, QFileDialog, QHBoxLayout,
                              QLineEdit, QLabel, QGridLayout, QButtonGroup, QRadioButton,
-                             QScrollArea, QFrame, QMessageBox)
-from PyQt5.QtGui import QRegExpValidator, QDoubleValidator
-from PyQt5.QtCore import QRegExp
+                             QScrollArea, QFrame, QMessageBox, QListWidgetItem)
+from PyQt5.QtGui import QRegExpValidator, QDoubleValidator, QIntValidator
+from PyQt5.QtCore import pyqtSignal, QRegExp
 
 from hecTool.ConfigModel import SimulationConfig
-from hecTool.ConfigHandler import ConfigHandler
+from hecTool.ConfigHandler import save_config
 from hecTool.TransformAffine import TransformParams, params_to_flat_4x4, flat_4x4_to_params
 
 
 class TransformEditor(QWidget):
-    from PyQt5.QtCore import pyqtSignal
-
     changed = pyqtSignal()
     delete_requested = pyqtSignal(object)
 
@@ -20,7 +18,7 @@ class TransformEditor(QWidget):
         super().__init__(parent)
         self.initUI()
         if transform_data:
-            self.set_values(transform_data)
+            self.set_value(transform_data)
 
     def initUI(self):
         layout = QGridLayout(self)
@@ -84,40 +82,29 @@ class TransformEditor(QWidget):
     def on_change(self):
         self.changed.emit()
 
-    def params_to_matrix(self):
-        params = TransformParams(
-            translation=(float(self.tx.text()), float(self.ty.text()), float(self.tz.text())),
-            rotation_deg=(float(self.rx.text()), float(self.ry.text()), float(self.rz.text())),
-            scale=(float(self.sx.text()), float(self.sy.text()), float(self.sz.text())),
-            shear=(
-                float(self.shxy.text()),
-                float(self.shyx.text()),
-                float(self.shxz.text()),
-                float(self.shzx.text()),
-                float(self.shyz.text()),
-                float(self.shzy.text()),
-            ),
-        )
-        return params_to_flat_4x4(params)
-
-    def matrix_to_params(self, matrix):
-        p = flat_4x4_to_params(matrix)
-        return {
-            "translation": list(p.translation),
-            "rotation": list(p.rotation_deg),
-            "scale": list(p.scale),
-            "shear": list(p.shear),
-        }
-
-    def get_matrix(self):
+    def get_value(self):
         try:
-            return self.params_to_matrix()
+            params = TransformParams(
+                translation=(float(self.tx.text()), float(self.ty.text()), float(self.tz.text())),
+                rotation_deg=(float(self.rx.text()), float(self.ry.text()), float(self.rz.text())),
+                scale=(float(self.sx.text()), float(self.sy.text()), float(self.sz.text())),
+                shear=(
+                    float(self.shxy.text()), float(self.shyx.text()),
+                    float(self.shxz.text()), float(self.shzx.text()),
+                    float(self.shyz.text()), float(self.shzy.text()),
+                ),
+            )
+            return params_to_flat_4x4(params)
         except ValueError:
             return None
 
-    def set_values(self, data):
+    def set_value(self, data):
         if isinstance(data, list) and len(data) == 16:
-            params = self.matrix_to_params(data)
+            p = flat_4x4_to_params(data)
+            params = {
+                "translation": list(p.translation), "rotation": list(p.rotation_deg),
+                "scale": list(p.scale), "shear": list(p.shear),
+            }
         else:
             params = data
 
@@ -143,10 +130,97 @@ class TransformEditor(QWidget):
         self.shzy.setText(str(sh[5]))
 
 
+class VectorEditor(QWidget):
+    changed = pyqtSignal()
+
+    def __init__(self, labels, values, parent=None):
+        super().__init__(parent)
+        layout = QHBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        self.edits = []
+        for label, val in zip(labels, values):
+            layout.addWidget(QLabel(label))
+            edit = QLineEdit(str(val))
+            edit.setValidator(QDoubleValidator())
+            edit.textChanged.connect(self.changed.emit)
+            layout.addWidget(edit)
+            self.edits.append(edit)
+
+    def get_value(self):
+        return [float(e.text() or 0) for e in self.edits]
+
+
+class StringItemEditor(QWidget):
+    changed = pyqtSignal()
+    delete_requested = pyqtSignal(object)
+
+    def __init__(self, value="", parent=None):
+        super().__init__(parent)
+        layout = QHBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        self.edit = QLineEdit(value)
+        self.edit.textChanged.connect(self.changed.emit)
+        self.del_btn = QPushButton("✕")
+        self.del_btn.setFixedWidth(30)
+        self.del_btn.clicked.connect(lambda: self.delete_requested.emit(self))
+        layout.addWidget(self.edit)
+        layout.addWidget(self.del_btn)
+
+    def get_value(self):
+        return self.edit.text().strip()
+
+    def set_value(self, value):
+        self.edit.setText(value)
+
+class CollectionEditor(QWidget):
+    changed = pyqtSignal()
+
+    def __init__(self, item_class, initial_data=None, title="Items", parent=None):
+        super().__init__(parent)
+        self.item_class = item_class
+        layout = QVBoxLayout(self)
+
+        self.scroll = QScrollArea()
+        self.scroll.setWidgetResizable(True)
+        container = QWidget()
+        self.item_layout = QVBoxLayout(container)
+        self.item_layout.addStretch()
+        self.scroll.setWidget(container)
+        layout.addWidget(self.scroll)
+
+        self.add_btn = QPushButton(f"Add {title}")
+        self.add_btn.clicked.connect(lambda: self.add_item())
+        layout.addWidget(self.add_btn)
+
+        self.editors = []
+        if initial_data:
+            for data in initial_data:
+                self.add_item(data)
+
+    def add_item(self, data=None):
+        editor = self.item_class(data)
+        editor.changed.connect(self.changed.emit)
+        editor.delete_requested.connect(self.remove_item)
+        self.editors.append(editor)
+        # Insert before the stretch
+        self.item_layout.insertWidget(self.item_layout.count() - 1, editor)
+        self.changed.emit()
+
+    def remove_item(self, editor):
+        self.editors.remove(editor)
+        editor.setParent(None)
+        editor.deleteLater()
+        self.changed.emit()
+
+    def get_values(self):
+        return [e.get_value() for e in self.editors if e.get_value() is not None]
+
 class ConfigGUI(QMainWindow):
     def __init__(self, cfg: SimulationConfig):
         super().__init__()
         self.cfg = cfg
+        self.saved_filename = None
+
         self.initUI()
         self.setup_parameter_editors()
         self.refresh_tree()
@@ -199,21 +273,29 @@ class ConfigGUI(QMainWindow):
     def setup_parameter_editors(self):
         editor_layout = self.centralWidget().layout().itemAt(0).layout()
 
-        physics_label = QLabel("Modular Physics List:")
-        self.physics_edit = QLineEdit(", ".join(self.cfg.physics))
-        self.physics_edit.textChanged.connect(self.update_physics)
-        editor_layout.addWidget(physics_label, 0, 0)
-        editor_layout.addWidget(self.physics_edit, 0, 1)
+        # Physics
+        editor_layout.addWidget(QLabel("Physics:"), 0, 0)
+        self.physics_editor = CollectionEditor(StringItemEditor, self.cfg.physics, "Physics")
+        self.physics_editor.changed.connect(self.update_physics)
+        editor_layout.addWidget(self.physics_editor, 0, 1)
 
-        particle_label = QLabel("Particle Count:")
-        self.particle_edit = QLineEdit(str(self.cfg.particleCount))
-        self.particle_edit.setValidator(QRegExpValidator(QRegExp(r'[0-9]+')))
-        self.particle_edit.textChanged.connect(self.update_particle_count)
-        editor_layout.addWidget(particle_label, 1, 0)
-        editor_layout.addWidget(self.particle_edit, 1, 1)
+        # Random Seed
+        seed_label = QLabel("Random Seed:")
+        self.seed_edit = QLineEdit(str(self.cfg.seed))
+        self.seed_edit.setValidator(QIntValidator())
+        self.seed_edit.textChanged.connect(self.update_seed)
+        editor_layout.addWidget(seed_label, 1, 0)
+        editor_layout.addWidget(self.seed_edit, 1, 1)
 
+        # Particle Source File
+        editor_layout.addWidget(QLabel("Particle Source File:"), 2, 0)
+        self.particle_file_edit = QLineEdit(self.cfg.particleSourceFile)
+        self.particle_file_edit.textChanged.connect(self.update_particle_file)
+        editor_layout.addWidget(self.particle_file_edit, 2, 1)
+
+        # Geometry
         geometry_label = QLabel("Geometry Type:")
-        editor_layout.addWidget(geometry_label, 2, 0)
+        editor_layout.addWidget(geometry_label, 3, 0)
 
         geometry_group = QButtonGroup(self)
         geometry_layout = QHBoxLayout()
@@ -239,85 +321,131 @@ class ConfigGUI(QMainWindow):
             fourdct_radio.setChecked(True)
 
         geometry_group.buttonClicked.connect(self.update_geometry_type)
-        editor_layout.addLayout(geometry_layout, 2, 1)
+        editor_layout.addLayout(geometry_layout, 3, 1)
 
+        # Parametric Geometry (Visible only if parametrized)
+        self.pg_label = QLabel("Parametric Geometry:")
+        self.pg_widget = QWidget()
+        pg_vbox = QVBoxLayout(self.pg_widget)
+
+        self.pg_size = VectorEditor(["X:", "Y:", "Z:"], self.cfg.parametricGeometry.size_mm)
+        self.pg_size.changed.connect(self.update_parametrized_geometry)
+        pg_vbox.addWidget(QLabel("Size (mm):"))
+        pg_vbox.addWidget(self.pg_size)
+
+        self.pg_spacing = VectorEditor(["X:", "Y:", "Z:"], self.cfg.parametricGeometry.spacing_mm)
+        self.pg_spacing.changed.connect(self.update_parametrized_geometry)
+        pg_vbox.addWidget(QLabel("Spacing (mm):"))
+        pg_vbox.addWidget(self.pg_spacing)
+
+        mat_layout = QHBoxLayout()
+        self.mat_name = QLineEdit(self.cfg.parametricGeometry.material.name)
+        self.mat_hu = QLineEdit(str(self.cfg.parametricGeometry.material.hu))
+        self.mat_hu.setValidator(QDoubleValidator())
+        self.mat_name.textChanged.connect(self.update_parametrized_geometry)
+        self.mat_hu.textChanged.connect(self.update_parametrized_geometry)
+        mat_layout.addWidget(QLabel("Material Name:"))
+        mat_layout.addWidget(self.mat_name)
+        mat_layout.addWidget(QLabel("Density (HU):"))
+        mat_layout.addWidget(self.mat_hu)
+        pg_vbox.addLayout(mat_layout)
+
+        editor_layout.addWidget(self.pg_label, 4, 0)
+        editor_layout.addWidget(self.pg_widget, 4, 1)
+
+        # Output Dir
         output_label = QLabel("Output Directory:")
         self.output_edit = QLineEdit(self.cfg.outputDir)
         self.output_edit.textChanged.connect(self.update_output_dir)
-        editor_layout.addWidget(output_label, 3, 0)
-        editor_layout.addWidget(self.output_edit, 3, 1)
+        editor_layout.addWidget(output_label, 5, 0)
+        editor_layout.addWidget(self.output_edit, 5, 1)
 
-        dicom_label = QLabel("DICOM Directory:")
-        self.dicom_edit = QLineEdit(self.cfg.dicomDir)
-        self.dicom_edit.textChanged.connect(self.update_dicom_dir)
-        editor_layout.addWidget(dicom_label, 4, 0)
-        editor_layout.addWidget(self.dicom_edit, 4, 1)
-        self.dicom_edit.setEnabled(False if self.cfg.geometryType == "parametrized" else True)
+        # DICOM Dirs
+        self.dicom_label = QLabel("DICOM Directories:")
+        self.dicom_editor = CollectionEditor(StringItemEditor, self.cfg.dicomDirs, "Directory")
+        self.dicom_editor.changed.connect(self.update_dicom_dirs)
+        editor_layout.addWidget(self.dicom_label, 6, 0)
+        editor_layout.addWidget(self.dicom_editor, 6, 1)
 
-        transform_label = QLabel("Transform Sequence:")
-        editor_layout.addWidget(transform_label, 5, 0)
+        # Transforms
+        self.transform_label = QLabel("Transforms:")
+        self.transform_editor = CollectionEditor(TransformEditor, self.cfg.transformSequence, "Transform")
+        self.transform_editor.changed.connect(self.update_transform_sequence)
+        editor_layout.addWidget(self.transform_label, 7, 0)
+        editor_layout.addWidget(self.transform_editor, 7, 1)
 
-        scroll = QScrollArea()
-        scroll.setWidgetResizable(True)
-        scroll.setFrameShape(QFrame.NoFrame)
+        # Placement
+        editor_layout.addWidget(QLabel("Placement:"), 8, 0)
+        self.placement_widget = QWidget()
+        pl_vbox = QVBoxLayout(self.placement_widget)
 
-        transform_container = QWidget()
-        self.transform_layout = QVBoxLayout(transform_container)
+        self.pl_trans = VectorEditor(["X:", "Y:", "Z:"], self.cfg.placement.translation_mm)
+        self.pl_rot = VectorEditor(["X:", "Y:", "Z:"], self.cfg.placement.rotation_deg)
+        self.pl_trans.changed.connect(self.update_placement)
+        self.pl_rot.changed.connect(self.update_placement)
 
-        self.transforms = []
-        for transform in self.cfg.transformSequence:
-            self.add_transform_editor(transform)
+        pl_vbox.addWidget(QLabel("Translation (mm):"))
+        pl_vbox.addWidget(self.pl_trans)
+        pl_vbox.addWidget(QLabel("Rotation (deg):"))
+        pl_vbox.addWidget(self.pl_rot)
+        editor_layout.addWidget(self.placement_widget, 8, 1)
 
-        scroll.setWidget(transform_container)
-        editor_layout.addWidget(scroll, 5, 1, 1, 2)
+        self.toggle_geometry_fields()
 
-        add_transform_btn = QPushButton("Add Transform")
-        add_transform_btn.clicked.connect(self.add_transform_editor)
-        editor_layout.addWidget(add_transform_btn, 6, 1)
+    def toggle_geometry_fields(self):
+        is_param = self.cfg.geometryType == "parametrized"
+        is_4dct = self.cfg.geometryType == "4dct"
 
-    def add_transform_editor(self, transform_data=None):
-        transform = TransformEditor(transform_data)
-        transform.changed.connect(self.update_transform_sequence)
-        transform.delete_requested.connect(self.remove_transform)
-        self.transforms.append(transform)
-        self.transform_layout.addWidget(transform)
-        self.update_transform_sequence()
-
-    def remove_transform(self, transform):
-        self.transforms.remove(transform)
-        transform.setParent(None)
-        transform.deleteLater()
-        self.update_transform_sequence()
+        self.pg_label.setVisible(is_param)
+        self.pg_widget.setVisible(is_param)
+        self.dicom_label.setVisible(not is_param)
+        self.dicom_editor.setVisible(not is_param)
+        self.transform_label.setVisible(not is_4dct)
+        self.transform_editor.setVisible(not is_4dct)
 
     def update_output_dir(self, value):
         self.cfg.outputDir = value
         self.refresh_tree()
 
-    def update_particle_count(self, value):
+    def update_physics(self):
+        self.cfg.physics = self.physics_editor.get_values()
+        self.refresh_tree()
+
+    def update_seed(self, value):
         if value:
-            self.cfg.particleCount = int(value)
+            self.cfg.seed = int(value)
             self.refresh_tree()
+
+    def update_particle_file(self, value):
+        self.cfg.particleSourceFile = value
+        self.refresh_tree()
 
     def update_geometry_type(self, button):
         self.cfg.geometryType = button.text().lower()
-        self.dicom_edit.setEnabled(False if self.cfg.geometryType == "parametrized" else True)
+        self.toggle_geometry_fields()
         self.refresh_tree()
 
-    def update_physics(self, value):
-        self.cfg.physics = [p.strip() for p in value.split(",") if p.strip()]
+    def update_parametrized_geometry(self):
+        self.cfg.parametricGeometry.size_mm = self.pg_size.get_value()
+        self.cfg.parametricGeometry.spacing_mm = self.pg_spacing.get_value()
+        self.cfg.parametricGeometry.material.name = self.mat_name.text()
+        try:
+            self.cfg.parametricGeometry.material.hu = float(self.mat_hu.text() or 0)
+        except ValueError:
+            pass
         self.refresh_tree()
 
-    def update_dicom_dir(self, value):
-        self.cfg.dicomDir = value
+    def update_dicom_dirs(self):
+        self.cfg.dicomDirs = self.dicom_editor.get_values()
         self.refresh_tree()
 
     def update_transform_sequence(self):
-        sequence = []
-        for transform in self.transforms:
-            matrix = transform.get_matrix()
-            if matrix is not None:
-                sequence.append(matrix)
-        self.cfg.transformSequence = sequence
+        self.cfg.transformSequence = self.transform_editor.get_values()
+        self.refresh_tree()
+
+    def update_placement(self):
+        self.cfg.placement.translation_mm = self.pl_trans.get_value()
+        self.cfg.placement.rotation_deg = self.pl_rot.get_value()
         self.refresh_tree()
 
     def save_to_file(self):
@@ -336,4 +464,5 @@ class ConfigGUI(QMainWindow):
             QMessageBox.critical(self, "Invalid configuration", str(exc), QMessageBox.Ok)
             return
 
-        ConfigHandler.save(self.cfg, filename)
+        save_config(self.cfg, filename)
+        self.saved_filename = filename
