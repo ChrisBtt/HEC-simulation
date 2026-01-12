@@ -1,6 +1,8 @@
 import os
+import shutil
 import sys
 import argparse
+from pathlib import Path
 
 from hecTool.ConfigHandler import load_config
 from hecTool.SyntheticCT import Synthetic3DCT, Synthetic4DCT
@@ -14,7 +16,7 @@ class SimulationRunner:
         parser = argparse.ArgumentParser(description="Simulation Runner")
         parser.add_argument("filename", help="Path to the YAML configuration file")
         parser.add_argument("--threadCount", type=int, default=-1, help="Number of threads to use")
-        parser.add_argument("--perf", action="store_true", help="Enable performance monitoring")
+        parser.add_argument("--profiling", action="store_true", help="Enable performance monitoring")
         parser.add_argument("--interactive", action="store_true", help="Enable interactive config editor")
         return parser.parse_args()
 
@@ -53,44 +55,38 @@ class SimulationRunner:
             for key, value in cfg.to_dict().items():
                 print(f"{key}: {value}")
 
-        #self._handle_synthetic_ct(cfg)
+        self._handle_synthetic_ct(cfg)
 
     def _handle_synthetic_ct(self, cfg):
-        """Processes synthetic CT generation based on config."""
-        output_base = cfg.outputDir or "output"
+        source_dirs = cfg.dicomDirs
 
-        # 1. Generate/Locate Source 3DCT
-        source_dir = cfg.dicomDir
-
+        # Generate synthetic 3DCT
         if cfg.geometryType == "parametrized":
             print("Generating parametrized 3DCT box...")
-            # Example parameters - these could be added to ConfigModel later
-            material = {"name": "water", "hu": 0}
             box = Synthetic3DCT(
-                size_mm=(300.0, 300.0, 300.0),
-                spacing_mm=(1.0, 1.0, 1.0),
-                material=material
+                cfg.parametricGeometry.size_mm,
+                cfg.parametricGeometry.spacing_mm,
+                cfg.parametricGeometry.material.to_dict(),
             )
-            source_dir = os.path.join(output_base, "synthetic_3dct")
-            box.write_dicom_series(source_dir)
-            print(f"3DCT written to: {source_dir}")
+            source_dirs = [os.path.join(cfg.outputDir, "synthetic_3dct")]
+            box.write_dicom_series(source_dirs[0])
+            print(f"3DCT written to: {source_dirs[0]}")
 
-        # 2. Apply Transform Sequence for 4DCT
-        if cfg.transformSequence:
+        # Apply Transform Sequence for 4DCT
+        if cfg.transformSequence and len(source_dirs) == 1:
             print(f"Applying {len(cfg.transformSequence)} transforms to generate 4DCT...")
-            generator = Synthetic4DCT(source_dir)
+            generator = Synthetic4DCT(source_dirs[0])
 
             phases = generator.generate_4dct(cfg.transformSequence)
 
             for i, phase_img in enumerate(phases):
-                phase_dir = os.path.join(output_base, f"phase_{i}")
+                phase_dir = os.path.join(cfg.outputDir, f"phase_{i}")
                 generator.write_dicom_series(phase_img, phase_dir, phase_index=i)
-            print(f"4DCT phases written to {output_base}")
+            print(f"4DCT phases written to {cfg.outputDir}")
 
-        # 3. Write TOPAS configuration
+        # Write TOPAS configuration
         print("Writing TOPAS configuration...")
-        cfg.write_topas_config(os.path.join(output_base, "simulation.txt"))
-
+        cfg.write_topas_config(self.args.threadCount)
 
 if __name__ == "__main__":
     runner = SimulationRunner()

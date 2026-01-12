@@ -24,7 +24,7 @@ class TransformEditor(QWidget):
         layout = QGridLayout(self)
 
         # Translation
-        layout.addWidget(QLabel("Translation:"), 0, 0)
+        layout.addWidget(QLabel("Translation (mm):"), 0, 0)
         self.tx = QLineEdit("0")
         self.ty = QLineEdit("0")
         self.tz = QLineEdit("0")
@@ -33,7 +33,7 @@ class TransformEditor(QWidget):
         layout.addWidget(self.tz, 0, 3)
 
         # Rotation
-        layout.addWidget(QLabel("Rotation:"), 1, 0)
+        layout.addWidget(QLabel("Rotation (deg):"), 1, 0)
         self.rx = QLineEdit("0")
         self.ry = QLineEdit("0")
         self.rz = QLineEdit("0")
@@ -287,11 +287,11 @@ class ConfigGUI(QMainWindow):
         editor_layout.addWidget(seed_label, 1, 0)
         editor_layout.addWidget(self.seed_edit, 1, 1)
 
-        # Particle Source File
-        editor_layout.addWidget(QLabel("Particle Source File:"), 2, 0)
-        self.particle_file_edit = QLineEdit(self.cfg.particleSourceFile)
-        self.particle_file_edit.textChanged.connect(self.update_particle_file)
-        editor_layout.addWidget(self.particle_file_edit, 2, 1)
+        # Include Files
+        editor_layout.addWidget(QLabel("Include Files:"), 2, 0)
+        self.include_files_editor = CollectionEditor(StringItemEditor, self.cfg.includeFiles, "File")
+        self.include_files_editor.changed.connect(self.update_include_files)
+        editor_layout.addWidget(self.include_files_editor, 2, 1)
 
         # Geometry
         geometry_label = QLabel("Geometry Type:")
@@ -416,8 +416,8 @@ class ConfigGUI(QMainWindow):
             self.cfg.seed = int(value)
             self.refresh_tree()
 
-    def update_particle_file(self, value):
-        self.cfg.particleSourceFile = value
+    def update_include_files(self):
+        self.cfg.includeFiles = self.include_files_editor.get_values()
         self.refresh_tree()
 
     def update_geometry_type(self, button):

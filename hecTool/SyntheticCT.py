@@ -262,6 +262,39 @@ class Synthetic4DCT:
         writer.Update()
 
 
+def get_dicom_extent(dicom_dir):
+    # 1. Read the DICOM series
+    pixel_type = itk.SS
+    image_type = itk.Image[pixel_type, 3]
+
+    names_generator = itk.GDCMSeriesFileNames.New()
+    names_generator.SetUseSeriesDetails(True)
+    names_generator.SetDirectory(dicom_dir)
+
+    series_uids = names_generator.GetSeriesUIDs()
+    if not series_uids:
+        raise RuntimeError("No DICOM series found in directory")
+
+    file_names = names_generator.GetFileNames(series_uids[0])
+    reader = itk.ImageSeriesReader[image_type].New()
+    reader.SetFileNames(file_names)
+    reader.Update()
+
+    image = reader.GetOutput()
+
+    # 2. Extract Geometry Information
+    origin = np.array(image.GetOrigin())
+    spacing = np.array(image.GetSpacing())
+    size = np.array(image.GetLargestPossibleRegion().GetSize())
+
+    # 3. Calculate Extent
+    # The extent is the physical range from the first voxel center to the last voxel center
+    # Note: If you want the outer boundary of the voxels, use 'size' instead of 'size - 1'
+    min_physical = origin
+    max_physical = origin + (spacing * (size - 1))
+
+    return min_physical, max_physical
+
 # ---------------- Example usage ----------------
 if __name__ == "__main__":
     material = {
