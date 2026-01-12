@@ -1,0 +1,14 @@
+includeFile = hec_parameters.txt
+
+# Dose on the mass-world grid
+s:Sc/DoseGrid/Quantity                  = "DoseToWater"
+s:Sc/DoseGrid/Component                 = "Patient"
+i:Sc/DoseGrid/XBins                     = Par/ScoringGridXBins
+i:Sc/DoseGrid/YBins                     = Par/ScoringGridYBins
+i:Sc/DoseGrid/ZBins                     = Par/ScoringGridZBins
+b:Sc/DoseGrid/OutputToConsole           = "False"
+s:Sc/DoseGrid/OutputType                = "csv"
+b:Sc/DoseGrid/OutputAfterRun            = "True"
+s:Sc/DoseGrid/IfOutputFileAlreadyExists = "Increment"
+sv:Sc/DoseGrid/Report = 3 "Sum" "Standard_Deviation" "Histories"
+s:Sc/DoseGrid/OutputFile = Par/OutputDir + "/DoseGrid"

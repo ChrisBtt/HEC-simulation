@@ -1,0 +1,28 @@
+%YAML 1.2
+--- # HEC Pipeline Configuration
+seed: 1
+physics: [g4em-standard_opt0]
+geometryType: parametrized # "parametrized", "3dct" or "4dct"
+outputDirectory: output
+dicomDirectories: []
+parametricGeometry:
+  size_mm: [100., 100., 100.]
+  spacing_mm: [1., 1., 1.]
+  material:
+    name: water
+    hu: 0
+placement:
+  translation_mm: [0., 0., 150.]
+  rotation_deg: [0., 0., 0.]
+scoringBins: [25, 25, 25]
+includeFiles:
+- /home/joshua/repos/hec-topas/config/particle_sources.txt
+- /home/joshua/repos/hec-topas/config/scoring_current.txt
+- /home/joshua/repos/hec-topas/config/HUtoMaterialSchneider.txt
+transformSequence:
+- [1., 0., 0., 0., 0., 1., 0., 0., 0., 0., 1.0, 0., 0., 0., 0., 1.]
+- [1., 0., 0., 0., 0., 1., 0., 0., 0., 0., 0.9, 0., 0., 0., 0., 1.]
+- [1., 0., 0., 0., 0., 1., 0., 0., 0., 0., 0.8, 0., 0., 0., 0., 1.]
+- [1., 0., 0., 0., 0., 1., 0., 0., 0., 0., 0.7, 0., 0., 0., 0., 1.]
+- [1., 0., 0., 0., 0., 1., 0., 0., 0., 0., 0.6, 0., 0., 0., 0., 1.]
+- [1., 0., 0., 0., 0., 1., 0., 0., 0., 0., 0.5, 0., 0., 0., 0., 1.]

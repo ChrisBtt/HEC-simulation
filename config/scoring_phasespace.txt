@@ -1,0 +1,27 @@
+includeFile = hec_parameters.txt
+
+# --- thin plane just upstream of water (records what enters water)
+s:Ge/PSPlane/Type     = "TsBox"
+s:Ge/PSPlane/Parent   = "World"
+s:Ge/PSPlane/Material = "Vacuum"
+d:Ge/PSPlane/HLX      = 11.0 cm
+d:Ge/PSPlane/HLY      = 11.0 cm
+d:Ge/PSPlane/HLZ      = 0.01 mm
+d:Ge/PSPlane/TransZ   = 4.999 cm      # epsilon < 5.0 cm (water upstream face)
+b:Ge/PSPlane/Invisible= "True"
+
+# Phase space scorer (ASCII is easy to inspect)
+s:Sc/PS/Quantity        = "PhaseSpace"
+s:Sc/PS/Surface         = "PSPlane/ZPlusSurface"
+s:Sc/PS/OutputType      = "ASCII"
+b:Sc/PS/IncludeRunID    = "True"
+b:Sc/PS/IncludeEventID  = "True"
+b:Sc/PS/IncludeTrackID  = "True"
+s:Sc/PS/IfOutputFileAlreadyExists = "Increment"
+s:Sc/PS/OutputFile = Par/OutputDir + "/PS"
+b:Sc/PS/OutputAfterRun  = "True"
+
+# Filters: primaries only, gammas only, moving out of plane toward water
+s:Sc/PS/OnlyIncludeParticlesOfGeneration = "Primary"
+sv:Sc/PS/OnlyIncludeParticlesNamed       = 1 "gamma"
+s:Sc/PS/OnlyIncludeParticlesGoing        = "Out"
