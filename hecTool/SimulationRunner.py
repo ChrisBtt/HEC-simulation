@@ -26,8 +26,8 @@ class SimulationRunner:
         if self.args.threadCount > 0:
             print(f"Setting thread count to {self.args.threadCount}")
 
-        if self.args.perf:
-            print("Enabling performance monitoring")
+        if self.args.profiling:
+            print("Enabling performance monitoring (Not yet supported)")
 
         if self.args.interactive:
             try:
