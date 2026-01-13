@@ -172,9 +172,14 @@ class Synthetic4DCT:
 
         return reader.GetOutput()
 
-    def _apply_affine(self, affine: itk.AffineTransform):
-        """Apply affine transform to the reference CT."""
+    def _apply_affine(self, affine: itk.AffineTransform, output_origin=None, output_size=None):
+        """Apply affine transform with fixed geometry."""
         image_type = type(self.image)
+
+        # If no specific geometry is provided, default to original (clipping occurs)
+        # If provided, all phases will align to this common frame
+        origin = output_origin if output_origin is not None else self.image.GetOrigin()
+        size = output_size if output_size is not None else self.image.GetLargestPossibleRegion().GetSize()
 
         inverse = itk.AffineTransform[itk.D, 3].New()
         affine.GetInverse(inverse)
@@ -182,30 +187,64 @@ class Synthetic4DCT:
         resampler = itk.ResampleImageFilter[image_type, image_type].New()
         resampler.SetInput(self.image)
         resampler.SetTransform(inverse)
-        resampler.SetReferenceImage(self.image)
-        resampler.UseReferenceImageOn()
+
+        resampler.SetOutputOrigin(origin)
+        resampler.SetSize(size)
+        resampler.SetOutputSpacing(self.image.GetSpacing())
+        resampler.SetOutputDirection(self.image.GetDirection())
+
         resampler.SetInterpolator(itk.LinearInterpolateImageFunction.New(self.image))
         resampler.SetDefaultPixelValue(-1024)
         resampler.Update()
         return resampler.GetOutput()
 
-    def generate_4dct(self, affines: List[itk.AffineTransform]):
-        """
-        Generate transformed phases.
+    def generate_4dct(self, affines: List[itk.AffineTransform], use_center_as_origin: bool = False):
+        """Generate transformed phases using a global common bounding box."""
+        origin = self.image.GetOrigin()
+        spacing = self.image.GetSpacing()
+        original_size = self.image.GetLargestPossibleRegion().GetSize()
 
-        Parameters
-        ----------
-        affines : list of itk.AffineTransform
-            One transform per respiratory phase
-        """
+        converted_affines = [
+            transform if not isinstance(transform, list) else self._matrix_to_itk_affine(transform)
+            for transform in affines
+        ]
+
+        if use_center_as_origin:
+            # Center in physical coordinates: origin + (size * spacing) / 2
+            center = [
+                origin[i] + (original_size[i] * spacing[i]) / 2.0
+                for i in range(3)
+            ]
+
+            for affine in converted_affines:
+                affine.SetCenter(center)
+
+        # Calculate the bounding box for all transforms combined
+        corners = [
+            [0, 0, 0], [original_size[0], 0, 0], [0, original_size[1], 0], [original_size[0], original_size[1], 0],
+            [0, 0, original_size[2]], [original_size[0], 0, original_size[2]], [0, original_size[1], original_size[2]],
+            [original_size[0], original_size[1], original_size[2]]
+        ]
+        corners_phys = [self.image.TransformIndexToPhysicalPoint(c) for c in corners]
+
+        all_transformed_points = []
+        for affine in converted_affines:
+            all_transformed_points.extend([affine.TransformPoint(p) for p in corners_phys])
+
+        # Find the global min/max across all phases
+        global_min = np.min(all_transformed_points, axis=0)
+        global_max = np.max(all_transformed_points, axis=0)
+
+        global_size = [
+            int(np.ceil((global_max[i] - global_min[i]) / spacing[i]))
+            for i in range(3)
+        ]
+
+        # Generate each phase using this global frame
         phases = []
-        for i, transform in enumerate(affines):
-            if isinstance(transform, list):
-                affine = self._matrix_to_itk_affine(transform)
-            else:
-                affine = transform
-
-            phase_img = self._apply_affine(affine)
+        for affine in converted_affines:
+            # Pass the same origin and size to every phase
+            phase_img = self._apply_affine(affine, output_origin=global_min, output_size=global_size)
             phases.append(phase_img)
         return phases
 
