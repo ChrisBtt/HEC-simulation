@@ -2,20 +2,20 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
-from typing import Iterable
+from typing import Iterable, Tuple, List
 
 import numpy as np
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class TransformParams:
-    translation: tuple[float, float, float] = (0.0, 0.0, 0.0)
-    rotation_deg: tuple[float, float, float] = (0.0, 0.0, 0.0)
-    scale: tuple[float, float, float] = (1.0, 1.0, 1.0)
-    shear: tuple[float, float, float, float, float, float] = (0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+    translation: Tuple[float, float, float] = (0.0, 0.0, 0.0)
+    rotation_deg: Tuple[float, float, float] = (0.0, 0.0, 0.0)
+    scale: Tuple[float, float, float] = (1.0, 1.0, 1.0)
+    shear: Tuple[float, float, float, float, float, float] = (0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
 
 
-def params_to_flat_4x4(params: TransformParams) -> list[float]:
+def params_to_flat_4x4(params: TransformParams) -> List[float]:
     tx, ty, tz = params.translation
     rx, ry, rz = params.rotation_deg
     sx, sy, sz = params.scale
