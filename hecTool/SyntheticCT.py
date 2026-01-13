@@ -235,6 +235,14 @@ class Synthetic4DCT:
         global_min = np.min(all_transformed_points, axis=0)
         global_max = np.max(all_transformed_points, axis=0)
 
+        # 2. Add Padding (e.g., 2 voxels on each side)
+        padding_voxels = 2
+        padding_mm = spacing * padding_voxels
+
+        # Expand the physical bounds
+        global_min -= padding_mm
+        global_max += padding_mm
+
         global_size = [
             int(np.ceil((global_max[i] - global_min[i]) / spacing[i]))
             for i in range(3)
