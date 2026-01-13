@@ -18,7 +18,7 @@ b:Sc/PS/IncludeRunID    = "True"
 b:Sc/PS/IncludeEventID  = "True"
 b:Sc/PS/IncludeTrackID  = "True"
 s:Sc/PS/IfOutputFileAlreadyExists = "Increment"
-s:Sc/PS/OutputFile = Par/OutputDir + "/PS"
+s:Sc/PS/OutputFile = Par/ResultsDir + "/PS"
 b:Sc/PS/OutputAfterRun  = "True"
 
 # Filters: primaries only, gammas only, moving out of plane toward water
