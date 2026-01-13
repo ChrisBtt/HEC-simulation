@@ -4,53 +4,53 @@ import os.path
 import shutil
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
+from typing import Any, List, Dict, Set
 
 
-VALID_GEOMETRY_TYPES: set[str] = {"parametrized", "3dct", "4dct"}
+VALID_GEOMETRY_TYPES: Set[str] = {"parametrized", "3dct", "4dct"}
 
 
-@dataclass(slots=True)
+@dataclass
 class MaterialConfig:
     name: str = "water"
     hu: float = 0.0
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> Dict[str, Any]:
         return {
             "name": self.name,
             "hu": self.hu
         }
 
 
-@dataclass(slots=True)
+@dataclass
 class ParametricGeometry:
-    size_mm: list[float] = field(default_factory=lambda: [100.0, 100.0, 100.0])
-    spacing_mm: list[float] = field(default_factory=lambda: [1.0, 1.0, 1.0])
+    size_mm: List[float] = field(default_factory=lambda: [100.0, 100.0, 100.0])
+    spacing_mm: List[float] = field(default_factory=lambda: [1.0, 1.0, 1.0])
     material: MaterialConfig = field(default_factory=MaterialConfig)
 
 
-@dataclass(slots=True)
+@dataclass
 class Placement:
-    translation_mm: list[float] = field(default_factory=lambda: [0.0, 0.0, 0.0])
-    rotation_deg: list[float] = field(default_factory=lambda: [0.0, 0.0, 0.0])
+    translation_mm: List[float] = field(default_factory=lambda: [0.0, 0.0, 0.0])
+    rotation_deg: List[float] = field(default_factory=lambda: [0.0, 0.0, 0.0])
 
 
-@dataclass(slots=True)
+@dataclass
 class SimulationConfig:
     seed: int = 1
-    physics: list[str] = field(default_factory=list)
+    physics: List[str] = field(default_factory=list)
     geometryType: str = "parametrized"
     outputDir: str = ""
-    dicomDirs: list[str] = field(default_factory=list)
-    transformSequence: list[list[float]] = field(default_factory=list)  # list of 4x4 flattened matrices (len 16)
+    dicomDirs: List[str] = field(default_factory=list)
+    transformSequence: List[List[float]] = field(default_factory=list)  # list of 4x4 flattened matrices (len 16)
     useCenterAsTransformOrigin: bool = False
-    includeFiles: list[str] = field(default_factory=list)
-    scoringBins: list[int] = field(default_factory=list)
+    includeFiles: List[str] = field(default_factory=list)
+    scoringBins: List[int] = field(default_factory=list)
     parametricGeometry: ParametricGeometry = field(default_factory=ParametricGeometry)
     placement: Placement = field(default_factory=Placement)
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "SimulationConfig":
+    def from_dict(cls, data: Dict[str, Any]) -> "SimulationConfig":
         # Parsing nested objects
         pg_data = data.get("parametricGeometry", {})
         mat_data = pg_data.get("material", {})
@@ -80,7 +80,7 @@ class SimulationConfig:
             )
         )
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> Dict[str, Any]:
         return {
             "seed": self.seed,
             "physics": self.physics,
@@ -106,7 +106,7 @@ class SimulationConfig:
         }
 
     def validate(self) -> None:
-        errors: list[str] = []
+        errors: List[str] = []
 
         # physics
         if not isinstance(self.physics, list) or not self.physics:
