@@ -1,8 +1,6 @@
 import os
-import shutil
 import sys
 import argparse
-from pathlib import Path
 
 from hecTool.ConfigHandler import load_config
 from hecTool.SyntheticCT import Synthetic3DCT, Synthetic4DCT
@@ -50,10 +48,10 @@ class SimulationRunner:
             if gui.saved_filename:
                 print(f"Loading updated configuration from: {gui.saved_filename}")
                 cfg = load_config(gui.saved_filename)
-        else:
-            print("Configuration parameters:")
-            for key, value in cfg.to_dict().items():
-                print(f"{key}: {value}")
+        #else:
+        #    print("Configuration parameters:")
+        #    for key, value in cfg.to_dict().items():
+        #        print(f"{key}: {value}")
 
         self._handle_synthetic_ct(cfg)
 
@@ -77,7 +75,7 @@ class SimulationRunner:
             print(f"Applying {len(cfg.transformSequence)} transforms to generate 4DCT...")
             generator = Synthetic4DCT(source_dirs[0])
 
-            phases = generator.generate_4dct(cfg.transformSequence)
+            phases = generator.generate_4dct(cfg.transformSequence, cfg.useCenterAsTransformOrigin)
 
             for i, phase_img in enumerate(phases):
                 phase_dir = os.path.join(cfg.outputDir, f"phase_{i}")
@@ -87,6 +85,7 @@ class SimulationRunner:
         # Write TOPAS configuration
         print("Writing TOPAS configuration...")
         cfg.write_topas_config(self.args.threadCount)
+        print(f"TOPAS configuration written to : {cfg.outputDir}")
 
 if __name__ == "__main__":
     runner = SimulationRunner()
