@@ -52,9 +52,9 @@ class SimulationConfig:
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "SimulationConfig":
         # Parsing nested objects
-        pg_data = data.get("parametricGeometry", {})
-        mat_data = pg_data.get("material", {})
-        placement_data = data.get("placement", {})
+        pg_data = data.get("parametricGeometry", {}) or {}
+        mat_data = pg_data.get("material", {}) or {}
+        placement_data = data.get("placement", {}) or {}
 
         return cls(
             seed=int(data.get("seed", 1) or 1),
