@@ -182,7 +182,7 @@ class SimulationConfig:
             num_phases = len(source_dirs)
             lines.extend([
                 "d:Tf/TimelineStart = 0. s",
-                f"d:Tf/TimelineEnd = {num_phases - 1} s",
+                f"d:Tf/TimelineEnd = {num_phases} s",
                 f"i:Tf/NumberOfSequentialTimes = {num_phases}",
                 's:Ge/Patient/DicomDirectory = Tf/PhaseMap/Value',
                 's:Tf/PhaseMap/Function = "Step"',
