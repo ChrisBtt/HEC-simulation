@@ -7,8 +7,9 @@ python -m hecTool config/your_config.yaml [options]
 ```
 
 *   `--interactive`: Opens a GUI to edit parameters before starting.
-*   `--threadCount N`: Sets the number of CPU threads for TOPAS.
+*   `--threadcount N`: Sets the number of CPU threads for TOPAS.
 *   `--profiling`: Enables performance profiling. (Not yet supported)
+*   `--editonly`: Does not generate TOPAS configuration files.
 
 ---
 

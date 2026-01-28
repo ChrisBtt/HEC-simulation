@@ -13,16 +13,17 @@ class SimulationRunner:
     def parse_arguments(self):
         parser = argparse.ArgumentParser(description="Simulation Runner")
         parser.add_argument("filename", help="Path to the YAML configuration file")
-        parser.add_argument("--threadCount", type=int, default=-1, help="Number of threads to use")
+        parser.add_argument("--threadcount", type=int, default=-1, help="Number of threads to use")
         parser.add_argument("--profiling", action="store_true", help="Enable performance monitoring")
         parser.add_argument("--interactive", action="store_true", help="Enable interactive config editor")
+        parser.add_argument("--editonly", action="store_true", help="Only run the interactive config editor")
         return parser.parse_args()
 
     def run(self):
         cfg = load_config(self.args.filename)
 
-        if self.args.threadCount > 0:
-            print(f"Setting thread count to {self.args.threadCount}")
+        if self.args.threadcount > 0:
+            print(f"Setting thread count to {self.args.threadcount}")
 
         if self.args.profiling:
             print("Enabling performance monitoring (Not yet supported)")
@@ -48,12 +49,20 @@ class SimulationRunner:
             if gui.saved_filename:
                 print(f"Loading updated configuration from: {gui.saved_filename}")
                 cfg = load_config(gui.saved_filename)
-        #else:
-        #    print("Configuration parameters:")
-        #    for key, value in cfg.to_dict().items():
-        #        print(f"{key}: {value}")
+
+        if self.args.editonly:
+            if self.args.interactive:
+                print("Exiting without running simulation because --editonly was specified")
+            else:
+                print("Nothing to do because --editonly was specified without --interactive")
+            return
 
         self._handle_synthetic_ct(cfg)
+
+        # Write TOPAS configuration
+        print("Writing TOPAS configuration...")
+        cfg.write_topas_config(self.args.threadcount)
+        print(f"TOPAS configuration written to : {cfg.outputDir}")
 
     def _handle_synthetic_ct(self, cfg):
         source_dirs = cfg.dicomDirs
@@ -81,11 +90,6 @@ class SimulationRunner:
                 phase_dir = os.path.join(cfg.outputDir, f"phase_{i}")
                 generator.write_dicom_series(phase_img, phase_dir, phase_index=i)
             print(f"4DCT phases written to {cfg.outputDir}")
-
-        # Write TOPAS configuration
-        print("Writing TOPAS configuration...")
-        cfg.write_topas_config(self.args.threadCount)
-        print(f"TOPAS configuration written to : {cfg.outputDir}")
 
 if __name__ == "__main__":
     runner = SimulationRunner()

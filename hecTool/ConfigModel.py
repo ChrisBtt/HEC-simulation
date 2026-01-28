@@ -81,7 +81,7 @@ class SimulationConfig:
         )
 
     def to_dict(self) -> Dict[str, Any]:
-        return {
+        result = {
             "seed": self.seed,
             "physics": self.physics,
             "geometryType": self.geometryType,
@@ -91,19 +91,23 @@ class SimulationConfig:
             "useCenterAsTransformOrigin": self.useCenterAsTransformOrigin,
             "includeFiles": self.includeFiles,
             "scoringBins": self.scoringBins,
-            "parametricGeometry": {
+            "placement": {
+                "translation_mm": self.placement.translation_mm,
+                "rotation_deg": self.placement.rotation_deg
+            }
+        }
+
+        if self.geometryType == "parametrized":
+            result["parametricGeometry"] = {
                 "size_mm": self.parametricGeometry.size_mm,
                 "spacing_mm": self.parametricGeometry.spacing_mm,
                 "material": {
                     "name": self.parametricGeometry.material.name,
                     "hu": self.parametricGeometry.material.hu
                 }
-            },
-            "placement": {
-                "translation_mm": self.placement.translation_mm,
-                "rotation_deg": self.placement.rotation_deg
             }
-        }
+
+        return result
 
     def validate(self) -> None:
         errors: List[str] = []

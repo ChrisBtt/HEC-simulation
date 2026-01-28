@@ -3,7 +3,7 @@
 seed: 1
 physics: [g4em-standard_opt0]
 geometryType: parametrized # "parametrized", "3dct" or "4dct"
-outputDirectory: output
+outputDirectory: TOPAS_simulation_data/example
 dicomDirectories: []
 parametricGeometry:
   size_mm: [100., 100., 100.]
@@ -16,9 +16,9 @@ placement:
   rotation_deg: [0., 0., 0.]
 scoringBins: [25, 25, 25]
 includeFiles:
-- /home/joshua/repos/hec-topas/config/particle_sources.txt
-- /home/joshua/repos/hec-topas/config/scoring_current.txt
-- /home/joshua/repos/hec-topas/config/HUtoMaterialSchneider.txt
+- config/particle_sources.txt
+- config/scoring_current.txt
+- config/HUtoMaterialSchneider.txt
 transformSequence:
 - [1., 0., 0., 0., 0., 1., 0., 0., 0., 0., 1.0, 0., 0., 0., 0., 1.]
 - [1., 0., 0., 0., 0., 1., 0., 0., 0., 0., 0.9, 0., 0., 0., 0., 1.]
