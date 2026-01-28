@@ -1,5 +1,5 @@
 includeFile = scoring_dose.txt
-includeFile = scoring_phasespace.txt
+#includeFile = scoring_phasespace.txt
 
 # Current Electron X
 s:Sc/velCurrElX/Quantity                   = "velocityCurrent"
