@@ -224,7 +224,7 @@ class TumorEditor(QWidget):
 
         # Transform Sequence
         layout.addWidget(QLabel("Transform Sequence:"))
-        self.sequence_editor = CollectionEditor(TransformStepEditor, [], "Step")
+        self.sequence_editor = CollectionEditor(TransformStepEditor, "Step")
         self.sequence_editor.add_btn.disconnect()
         self.sequence_editor.add_btn.clicked.connect(lambda: self.sequence_editor.add_item(show_shear=False))
         self.sequence_editor.changed.connect(self.changed.emit)
@@ -319,9 +319,10 @@ class ConfigGUI(QMainWindow):
 
         # Physics and Includes
         col_layout = QHBoxLayout()
-        self.physics_editor = CollectionEditor(StringItemEditor, [], "Physics Module")
+        self.physics_editor = CollectionEditor(StringItemEditor,  "Physics Module")
         self.physics_editor.changed.connect(self.on_changed)
-        self.includes_editor = CollectionEditor(StringItemEditor, [], "Include File")
+        
+        self.includes_editor = CollectionEditor(StringItemEditor, "Include File")
         self.includes_editor.changed.connect(self.on_changed)
         col_layout.addWidget(QLabel("Physics:"))
         col_layout.addWidget(self.physics_editor)
@@ -375,7 +376,7 @@ class ConfigGUI(QMainWindow):
 
         # DICOM specific
         self.dicom_label = QLabel("DICOM Directories:")
-        self.dicom_editor = CollectionEditor(StringItemEditor, [], "DICOM Directory")
+        self.dicom_editor = CollectionEditor(StringItemEditor, "DICOM Directory")
         self.dicom_editor.changed.connect(self.on_changed)
         self.patient_layout.addWidget(self.dicom_label)
         self.patient_layout.addWidget(self.dicom_editor)
@@ -397,7 +398,7 @@ class ConfigGUI(QMainWindow):
         self.patient_layout.addWidget(self.patient_rot)
         self.patient_layout.addWidget(self.use_center)
 
-        self.patient_seq = CollectionEditor(TransformStepEditor, [], "Step")
+        self.patient_seq = CollectionEditor(TransformStepEditor, "Step")
         self.patient_seq.changed.connect(self.on_changed)
         self.patient_layout.addWidget(QLabel("Transform Sequence:"))
         self.patient_layout.addWidget(self.patient_seq)
@@ -407,7 +408,7 @@ class ConfigGUI(QMainWindow):
         # Tumors Tab
         self.tumors_widget = QWidget()
         self.tumors_layout = QVBoxLayout(self.tumors_widget)
-        self.tumors_collection = CollectionEditor(TumorEditor, [], "Tumor")
+        self.tumors_collection = CollectionEditor(TumorEditor, "Tumor")
         self.tumors_collection.changed.connect(self.on_changed)
         self.tumors_layout.addWidget(self.tumors_collection)
         self.tabs.addTab(self.tumors_widget, "Tumors")
