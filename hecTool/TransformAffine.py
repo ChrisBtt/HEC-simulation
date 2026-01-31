@@ -2,9 +2,13 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
-from typing import Iterable, Tuple, List
+from typing import Iterable, Tuple, List, TYPE_CHECKING
 
 import numpy as np
+
+# Avoids circular dependency
+if TYPE_CHECKING:
+    from hecTool.ConfigModel import TransformStep
 
 
 @dataclass(frozen=True)
@@ -12,14 +16,14 @@ class TransformParams:
     translation: Tuple[float, float, float] = (0.0, 0.0, 0.0)
     rotation_deg: Tuple[float, float, float] = (0.0, 0.0, 0.0)
     scale: Tuple[float, float, float] = (1.0, 1.0, 1.0)
-    shear: Tuple[float, float, float, float, float, float] = (0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+    shear: Tuple[float, float, float] = (0.0, 0.0, 0.0)
 
 
 def params_to_flat_4x4(params: TransformParams) -> List[float]:
     tx, ty, tz = params.translation
     rx, ry, rz = params.rotation_deg
     sx, sy, sz = params.scale
-    shxy, shyx, shxz, shzx, shyz, shzy = params.shear
+    shxy, shxz, shyz = params.shear
 
     rx, ry, rz = math.radians(rx), math.radians(ry), math.radians(rz)
 
@@ -55,6 +59,14 @@ def params_to_flat_4x4(params: TransformParams) -> List[float]:
         dtype=float,
     )
 
+    shear = np.array(
+        [[1, shxy, shxz, 0],
+         [0, 1, shyz, 0],
+         [0, 0, 1, 0],
+         [0, 0, 0, 1]],
+        dtype=float,
+    )
+
     scale = np.array(
         [[sx, 0, 0, 0],
          [0, sy, 0, 0],
@@ -63,53 +75,43 @@ def params_to_flat_4x4(params: TransformParams) -> List[float]:
         dtype=float,
     )
 
-    shear = np.array(
-        [[1, shxy, shxz, 0],
-         [shyx, 1, shyz, 0],
-         [shzx, shzy, 1, 0],
-         [0, 0, 0, 1]],
-        dtype=float,
-    )
-
-    matrix = trans @ rotz @ roty @ rotx @ scale @ shear
+    matrix = trans @ rotz @ roty @ rotx @ shear @ scale
     return matrix.flatten().tolist()
 
 
-def flat_4x4_to_params(matrix_flat: Iterable[float]) -> TransformParams:
-    m = np.array(list(matrix_flat), dtype=float).reshape(4, 4)
+def interpolate_transforms(sequence: List[TransformStep], target_times: Iterable[float]) -> List[TransformParams]:
+    """Interpolate a transform sequence at target time points."""
+    if not sequence:
+        return [TransformParams() for _ in target_times]
 
-    tx = float(m[0, 3])
-    ty = float(m[1, 3])
-    tz = float(m[2, 3])
+    # Sort sequence by time
+    sorted_seq = sorted(sequence, key=lambda x: x.time_s)
+    times = [s.time_s for s in sorted_seq]
 
-    sx = float(np.sqrt(m[0, 0] ** 2 + m[0, 1] ** 2 + m[0, 2] ** 2))
-    sy = float(np.sqrt(m[1, 0] ** 2 + m[1, 1] ** 2 + m[1, 2] ** 2))
-    sz = float(np.sqrt(m[2, 0] ** 2 + m[2, 1] ** 2 + m[2, 2] ** 2))
+    results = []
+    for t in target_times:
+        if t <= times[0]:
+            s = sorted_seq[0]
+            results.append(TransformParams(
+                tuple(s.translation_mm), tuple(s.rotation_deg), tuple(s.scale), tuple(s.shear)
+            ))
+        elif t >= times[-1]:
+            s = sorted_seq[-1]
+            results.append(TransformParams(
+                tuple(s.translation_mm), tuple(s.rotation_deg), tuple(s.scale), tuple(s.shear)
+            ))
+        else:
+            # Linear interpolation
+            idx = next(i for i, time in enumerate(times) if time > t)
+            t0, t1 = times[idx - 1], times[idx]
+            s0, s1 = sorted_seq[idx - 1], sorted_seq[idx]
+            f = (t - t0) / (t1 - t0)
 
-    r = m[:3, :3].copy()
-    if sx != 0:
-        r[:, 0] /= sx
-    if sy != 0:
-        r[:, 1] /= sy
-    if sz != 0:
-        r[:, 2] /= sz
+            interp_trans = tuple(s0.translation_mm[i] + f * (s1.translation_mm[i] - s0.translation_mm[i]) for i in range(3))
+            interp_rot = tuple(s0.rotation_deg[i] + f * (s1.rotation_deg[i] - s0.rotation_deg[i]) for i in range(3))
+            interp_scale = tuple(s0.scale[i] + f * (s1.scale[i] - s0.scale[i]) for i in range(3))
+            interp_shear = tuple(s0.shear[i] + f * (s1.shear[i] - s0.shear[i]) for i in range(len(s0.shear)))
 
-    ry = math.atan2(r[0, 2], math.sqrt(r[0, 0] ** 2 + r[0, 1] ** 2))
-    rx = math.atan2(-r[1, 2], r[2, 2])
-    rz = math.atan2(-r[0, 1], r[0, 0])
+            results.append(TransformParams(interp_trans, interp_rot, interp_scale, interp_shear))
 
-    rx, ry, rz = math.degrees(rx), math.degrees(ry), math.degrees(rz)
-
-    shxy = float(m[0, 1] / sy) if sy != 0 else 0.0
-    shxz = float(m[0, 2] / sz) if sz != 0 else 0.0
-    shyx = float(m[1, 0] / sx) if sx != 0 else 0.0
-    shyz = float(m[1, 2] / sz) if sz != 0 else 0.0
-    shzx = float(m[2, 0] / sx) if sx != 0 else 0.0
-    shzy = float(m[2, 1] / sy) if sy != 0 else 0.0
-
-    return TransformParams(
-        translation=(tx, ty, tz),
-        rotation_deg=(rx, ry, rz),
-        scale=(sx, sy, sz),
-        shear=(shxy, shyx, shxz, shzx, shyz, shzy),
-    )
+    return results

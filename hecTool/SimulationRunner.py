@@ -1,9 +1,12 @@
 import os
 import sys
 import argparse
+import numpy as np
+import multiprocessing as mp
 
 from hecTool.ConfigHandler import load_config
 from hecTool.SyntheticCT import Synthetic3DCT, Synthetic4DCT
+from hecTool.TransformAffine import interpolate_transforms, params_to_flat_4x4
 
 
 class SimulationRunner:
@@ -13,14 +16,30 @@ class SimulationRunner:
     def parse_arguments(self):
         parser = argparse.ArgumentParser(description="Simulation Runner")
         parser.add_argument("filename", help="Path to the YAML configuration file")
+        parser.add_argument("--output_dir", help="Where all generated files and DICOMs are saved")
         parser.add_argument("--threadcount", type=int, default=-1, help="Number of threads to use")
         parser.add_argument("--profiling", action="store_true", help="Enable performance monitoring")
         parser.add_argument("--interactive", action="store_true", help="Enable interactive config editor")
-        parser.add_argument("--editonly", action="store_true", help="Only run the interactive config editor")
         return parser.parse_args()
 
     def run(self):
-        cfg = load_config(self.args.filename)
+        try:
+            cfg = load_config(self.args.filename)
+        except Exception as e:
+            print(f"Error loading config: {e}")
+            return
+
+        # Determine output directory
+        output_dir = self.args.output_dir
+        if not output_dir:
+            config_name = os.path.splitext(os.path.basename(self.args.filename))[0]
+            output_dir = os.path.join("TOPAS_simulation_data", config_name)
+
+        if os.path.exists(output_dir) and os.listdir(output_dir):
+            confirm = input(f"Warning: Output directory '{output_dir}' is not empty. Overwrite existing files? (y/n): ")
+            if confirm.lower() != 'y':
+                print("Simulation aborted by user.")
+                return
 
         if self.args.threadcount > 0:
             print(f"Setting thread count to {self.args.threadcount}")
@@ -50,47 +69,66 @@ class SimulationRunner:
                 print(f"Loading updated configuration from: {gui.saved_filename}")
                 cfg = load_config(gui.saved_filename)
 
-        if self.args.editonly:
-            if self.args.interactive:
-                print("Exiting without running simulation because --editonly was specified")
-            else:
-                print("Nothing to do because --editonly was specified without --interactive")
-            return
-
-        self._handle_synthetic_ct(cfg)
+        timeline = self._get_shared_timeline(cfg)
+        self._handle_synthetic_ct(cfg, timeline, output_dir)
 
         # Write TOPAS configuration
         print("Writing TOPAS configuration...")
-        cfg.write_topas_config(self.args.threadcount)
-        print(f"TOPAS configuration written to : {cfg.outputDir}")
+        cfg.write_topas_config(output_dir, self.args.threadcount, timeline=timeline)
+        print(f"TOPAS configuration written to : {output_dir}")
 
-    def _handle_synthetic_ct(self, cfg):
-        source_dirs = cfg.dicomDirs
+    def _get_shared_timeline(self, cfg):
+        time_points = set()
+        if cfg.patient.transform_sequence:
+            for t in cfg.patient.transform_sequence:
+                time_points.add(t.time_s)
+        for tumor in cfg.tumors:
+            for t in tumor.transform_sequence:
+                time_points.add(t.time_s)
+
+        if not time_points:
+            return [0.0]
+
+        min_t, max_t = min(time_points), max(time_points)
+        num_steps = cfg.interpolation_steps if cfg.interpolation_steps > 0 else len(time_points)
+        if num_steps <= 1:
+            return [min_t]
+        return np.linspace(min_t, max_t, num_steps).tolist()
+
+    def _handle_synthetic_ct(self, cfg, timeline, output_dir):
+        source_dirs = cfg.patient.dicom_directories
 
         # Generate synthetic 3DCT
-        if cfg.geometryType == "parametrized":
+        if cfg.patient.type == "parametrized":
             print("Generating parametrized 3DCT box...")
-            box = Synthetic3DCT(
-                cfg.parametricGeometry.size_mm,
-                cfg.parametricGeometry.spacing_mm,
-                cfg.parametricGeometry.material.to_dict(),
-            )
-            source_dirs = [os.path.join(cfg.outputDir, "synthetic_3dct")]
+            params = cfg.patient.parameters
+
+            box = Synthetic3DCT(params.size_mm, params.spacing_mm, params.radiodensity_hu)
+            source_dirs = [os.path.join(output_dir, "synthetic_3dct")]
             box.write_dicom_series(source_dirs[0])
             print(f"3DCT written to: {source_dirs[0]}")
 
         # Apply Transform Sequence for 4DCT
-        if cfg.transformSequence and len(source_dirs) == 1:
-            print(f"Applying {len(cfg.transformSequence)} transforms to generate 4DCT...")
+        if len(source_dirs) == 1 and (cfg.patient.transform_sequence or cfg.patient.type == "4dct"):
+            print(f"Applying transforms to generate 4DCT with {len(timeline)} phases...")
             generator = Synthetic4DCT(source_dirs[0])
 
-            phases = generator.generate_4dct(cfg.transformSequence, cfg.useCenterAsTransformOrigin)
+            interp_params = interpolate_transforms(cfg.patient.transform_sequence, timeline)
+            flat_matrices = [params_to_flat_4x4(p) for p in interp_params]
 
+            phases = generator.generate_4dct(flat_matrices, cfg.patient.use_center_as_transform_origin)
+
+            pool = mp.Pool()
             for i, phase_img in enumerate(phases):
-                phase_dir = os.path.join(cfg.outputDir, f"phase_{i}")
-                generator.write_dicom_series(phase_img, phase_dir, phase_index=i)
-            print(f"4DCT phases written to {cfg.outputDir}")
+                phase_dir = os.path.join(output_dir, f"phase_{i}")
+                pool.apply_async(generator.write_dicom_series, args=(phase_img, phase_dir, i))
+            print(f"4DCT phases written to {output_dir}")
+            pool.close()
+            pool.join()
 
-if __name__ == "__main__":
+def main():
     runner = SimulationRunner()
     runner.run()
+
+if __name__ == "__main__":
+    main()

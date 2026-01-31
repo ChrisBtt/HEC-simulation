@@ -1,5 +1,5 @@
 import os
-from typing import List, Tuple, Dict, Optional
+from typing import List, Tuple
 import numpy as np
 import itk
 
@@ -18,7 +18,7 @@ class Synthetic3DCT:
         self,
         size_mm: Tuple[float, float, float],
         spacing_mm: Tuple[float, float, float],
-        material: Dict[str, float],
+        radiodensity_hu: int,
         origin_mm: Tuple[float, float, float] = (0.0, 0.0, 0.0),
         patient_name: str = "ANONYMOUS",
         patient_id: str = "0000000",
@@ -30,7 +30,7 @@ class Synthetic3DCT:
             Physical size of the box in mm (X, Y, Z)
         spacing_mm : (float, float, float)
             Voxel spacing in mm
-        material : dict
+        radiodensity_hu : dict
             Material description, e.g.
             {"name": "water", "hu": 0}
             {"name": "lung", "hu": -750}
@@ -46,7 +46,7 @@ class Synthetic3DCT:
         self.patient_name = patient_name
         self.patient_id = patient_id
         self.spacing_mm = spacing_mm
-        self.material = material
+        self.radiodensity_hu = radiodensity_hu
         self.origin_mm = origin_mm
 
         self.image = self._create_image()
@@ -72,8 +72,7 @@ class Synthetic3DCT:
         image.SetDirection(direction)
         image.Allocate()
 
-        hu_value = int(self.material.get("hu", 0))
-        image.FillBuffer(hu_value)
+        image.FillBuffer(self.radiodensity_hu)
 
         return image
 
@@ -210,7 +209,6 @@ class Synthetic4DCT:
         ]
 
         if use_center_as_origin:
-            # Center in physical coordinates: origin + (size * spacing) / 2
             center = [
                 origin[i] + (original_size[i] * spacing[i]) / 2.0
                 for i in range(3)
@@ -267,17 +265,16 @@ class Synthetic4DCT:
 
         affine = itk.AffineTransform[itk.D, 3].New()
 
-        # ITK matrices can be set via GetMatrixFromArray
         itk_matrix = itk.GetMatrixFromArray(matrix_3x3)
         affine.SetMatrix(itk_matrix)
 
-        # Offsets/Translations can be set directly from a NumPy array or list
         affine.SetOffset(translation.tolist())
 
         return affine
 
     def write_dicom_series(self, image, output_dir, phase_index=0):
         """Write a 3D image as a DICOM series."""
+        print(f"Writing phase {phase_index}...")
         os.makedirs(output_dir, exist_ok=True)
 
         pixel_type = itk.SS
@@ -343,16 +340,11 @@ def get_dicom_extent(dicom_dir):
     return min_physical, max_physical
 
 # ---------------- Example usage ----------------
-if __name__ == "__main__":
-    material = {
-        "name": "water",
-        "hu": 0,
-    }
-
+def main():
     box = Synthetic3DCT(
         size_mm=(300.0, 300.0, 300.0),
         spacing_mm=(1.0, 1.0, 1.0),
-        material=material,
+        radiodensity_hu=0,
     )
 
     box.write_dicom_series("output/synthetic_water_box")
@@ -373,3 +365,6 @@ if __name__ == "__main__":
 
     for i, img in enumerate(phases):
         ct.write_dicom_series(img, f"output/phase_{i}", phase_index=i)
+
+if __name__ == "__main__":
+    main()
