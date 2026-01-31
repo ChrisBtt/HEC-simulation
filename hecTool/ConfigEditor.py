@@ -1,7 +1,8 @@
 from PyQt5.QtWidgets import (QMainWindow, QTreeWidget, QTreeWidgetItem,
                              QVBoxLayout, QWidget, QPushButton, QFileDialog, QHBoxLayout,
                              QLineEdit, QLabel, QGridLayout, QButtonGroup, QRadioButton,
-                             QScrollArea, QFrame, QMessageBox, QCheckBox, QTabWidget)
+                             QScrollArea, QFrame, QMessageBox, QCheckBox, QTabWidget, QListView,
+                             QTreeView, QAbstractItemView)
 from PyQt5.QtGui import QDoubleValidator, QIntValidator
 from PyQt5.QtCore import pyqtSignal
 
@@ -12,6 +13,8 @@ from hecTool.ConfigHandler import save_config
 class TransformStepEditor(QWidget):
     changed = pyqtSignal()
     delete_requested = pyqtSignal(object)
+    move_up_requested = pyqtSignal(object)
+    move_down_requested = pyqtSignal(object)
 
     def __init__(self, data: TransformStep = None, show_shear=True, parent=None):
         super().__init__(parent)
@@ -72,9 +75,17 @@ class TransformStepEditor(QWidget):
             self.shxz.hide()
             self.shyz.hide()
 
+        btn_layout = QHBoxLayout()
+        up_btn = QPushButton("↑")
+        up_btn.clicked.connect(lambda: self.move_up_requested.emit(self))
+        down_btn = QPushButton("↓")
+        down_btn.clicked.connect(lambda: self.move_down_requested.emit(self))
         delete_btn = QPushButton("Delete Step")
         delete_btn.clicked.connect(lambda: self.delete_requested.emit(self))
-        layout.addWidget(delete_btn, 5, 0)
+        btn_layout.addWidget(up_btn)
+        btn_layout.addWidget(down_btn)
+        btn_layout.addWidget(delete_btn)
+        layout.addLayout(btn_layout, 5, 0, 1, 4)
 
         for widget in [self.time_s, self.tx, self.ty, self.tz, self.rx, self.ry, self.rz,
                        self.sx, self.sy, self.sz, self.shxy, self.shxz, self.shyz]:
@@ -130,6 +141,8 @@ class VectorEditor(QWidget):
 class StringItemEditor(QWidget):
     changed = pyqtSignal()
     delete_requested = pyqtSignal(object)
+    move_up_requested = pyqtSignal(object)
+    move_down_requested = pyqtSignal(object)
 
     def __init__(self, value="", parent=None):
         super().__init__(parent)
@@ -137,10 +150,22 @@ class StringItemEditor(QWidget):
         layout.setContentsMargins(0, 0, 0, 0)
         self.edit = QLineEdit(value)
         self.edit.textChanged.connect(self.changed.emit)
+        
+        self.up_btn = QPushButton("↑")
+        self.up_btn.setFixedWidth(25)
+        self.up_btn.clicked.connect(lambda: self.move_up_requested.emit(self))
+        
+        self.down_btn = QPushButton("↓")
+        self.down_btn.setFixedWidth(25)
+        self.down_btn.clicked.connect(lambda: self.move_down_requested.emit(self))
+
         self.del_btn = QPushButton("✕")
         self.del_btn.setFixedWidth(30)
         self.del_btn.clicked.connect(lambda: self.delete_requested.emit(self))
+        
         layout.addWidget(self.edit)
+        layout.addWidget(self.up_btn)
+        layout.addWidget(self.down_btn)
         layout.addWidget(self.del_btn)
 
     def get_value(self):
@@ -176,9 +201,35 @@ class CollectionEditor(QWidget):
         editor = self.item_class(data, **kwargs)
         editor.changed.connect(self.changed.emit)
         editor.delete_requested.connect(self.remove_item)
+        if hasattr(editor, "move_up_requested"):
+            editor.move_up_requested.connect(self.move_item_up)
+        if hasattr(editor, "move_down_requested"):
+            editor.move_down_requested.connect(self.move_item_down)
         self.editors.append(editor)
         self.item_layout.insertWidget(self.item_layout.count() - 1, editor)
         self.changed.emit()
+
+    def add_items(self, list_of_data, **kwargs):
+        for data in list_of_data:
+            self.add_item(data, **kwargs)
+
+    def move_item_up(self, editor):
+        idx = self.editors.index(editor)
+        if idx > 0:
+            self.editors[idx], self.editors[idx - 1] = self.editors[idx - 1], self.editors[idx]
+            # Update UI layout
+            self.item_layout.removeWidget(editor)
+            self.item_layout.insertWidget(idx - 1, editor)
+            self.changed.emit()
+
+    def move_item_down(self, editor):
+        idx = self.editors.index(editor)
+        if idx < len(self.editors) - 1:
+            self.editors[idx], self.editors[idx + 1] = self.editors[idx + 1], self.editors[idx]
+            # Update UI layout
+            self.item_layout.removeWidget(editor)
+            self.item_layout.insertWidget(idx + 1, editor)
+            self.changed.emit()
 
     def remove_item(self, editor):
         self.editors.remove(editor)
@@ -193,6 +244,8 @@ class CollectionEditor(QWidget):
 class TumorEditor(QWidget):
     changed = pyqtSignal()
     delete_requested = pyqtSignal(object)
+    move_up_requested = pyqtSignal(object)
+    move_down_requested = pyqtSignal(object)
 
     def __init__(self, data: TumorConfig = None, parent=None):
         super().__init__(parent)
@@ -230,9 +283,17 @@ class TumorEditor(QWidget):
         self.sequence_editor.changed.connect(self.changed.emit)
         layout.addWidget(self.sequence_editor)
 
+        btn_layout = QHBoxLayout()
+        up_btn = QPushButton("Move Up")
+        up_btn.clicked.connect(lambda: self.move_up_requested.emit(self))
+        down_btn = QPushButton("Move Down")
+        down_btn.clicked.connect(lambda: self.move_down_requested.emit(self))
         del_btn = QPushButton("Remove Tumor")
         del_btn.clicked.connect(lambda: self.delete_requested.emit(self))
-        layout.addWidget(del_btn)
+        btn_layout.addWidget(up_btn)
+        btn_layout.addWidget(down_btn)
+        btn_layout.addWidget(del_btn)
+        layout.addLayout(btn_layout)
 
     def get_value(self) -> TumorConfig:
         return TumorConfig(
@@ -324,6 +385,10 @@ class ConfigGUI(QMainWindow):
         
         self.includes_editor = CollectionEditor(StringItemEditor, "Include File")
         self.includes_editor.changed.connect(self.on_changed)
+        self.browse_includes_btn = QPushButton("Browse Files")
+        self.browse_includes_btn.clicked.connect(self.browse_includes)
+        self.includes_editor.layout().addWidget(self.browse_includes_btn)
+
         col_layout.addWidget(QLabel("Physics:"))
         col_layout.addWidget(self.physics_editor)
         col_layout.addWidget(QLabel("Includes:"))
@@ -378,6 +443,10 @@ class ConfigGUI(QMainWindow):
         self.dicom_label = QLabel("DICOM Directories:")
         self.dicom_editor = CollectionEditor(StringItemEditor, "DICOM Directory")
         self.dicom_editor.changed.connect(self.on_changed)
+        self.browse_dicom_btn = QPushButton("Browse Folders")
+        self.browse_dicom_btn.clicked.connect(self.browse_dicoms)
+        self.dicom_editor.layout().addWidget(self.browse_dicom_btn)
+        
         self.patient_layout.addWidget(self.dicom_label)
         self.patient_layout.addWidget(self.dicom_editor)
 
@@ -438,6 +507,32 @@ class ConfigGUI(QMainWindow):
         for step in p.transform_sequence: self.patient_seq.add_item(step)
 
         for tumor in self.cfg.tumors: self.tumors_collection.add_item(tumor)
+
+    def browse_includes(self):
+        files, _ = QFileDialog.getOpenFileNames(self, "Select Include Files", "", "TOPAS Files (*.txt);;All Files (*)")
+        if files:
+            self.includes_editor.add_items(files)
+
+    def browse_dicoms(self):
+        dialog = QFileDialog(self)
+        dialog.setFileMode(QFileDialog.Directory)
+        dialog.setOption(QFileDialog.ShowDirsOnly, True)
+        dialog.setOption(QFileDialog.DontUseNativeDialog, True)
+        
+        # Enable multiple selection in QFileDialog for directories
+        # By default, Directory mode only allows selecting one directory.
+        # We find the internal view and set it to ExtendedSelection.
+        file_view = dialog.findChild(QListView, "listView")
+        if file_view:
+            file_view.setSelectionMode(QAbstractItemView.ExtendedSelection)
+        tree_view = dialog.findChild(QTreeView)
+        if tree_view:
+            tree_view.setSelectionMode(QAbstractItemView.ExtendedSelection)
+
+        if dialog.exec_():
+            paths = dialog.selectedFiles()
+            if paths:
+                self.dicom_editor.add_items(paths)
 
     def on_changed(self):
         if self._loading: return
