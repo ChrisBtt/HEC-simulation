@@ -590,6 +590,7 @@ class ConfigGUI(QMainWindow):
         self.tree.clear()
         self.populate_tree(self.tree, self.cfg.to_dict())
         self.tree.expandAll()
+        self.tree.resizeColumnToContents(0)
 
     def populate_tree(self, tree, data, parent=None):
         if isinstance(data, dict):
@@ -598,10 +599,15 @@ class ConfigGUI(QMainWindow):
                 item.setText(0, str(key))
                 self.populate_tree(tree, value, item)
         elif isinstance(data, list):
-            for idx, value in enumerate(data):
+            # Check if it's a "vector" (list of numbers)
+            if all(isinstance(x, (int, float)) for x in data) and len(data) > 0:
                 item = QTreeWidgetItem(parent)
-                item.setText(0, f"[{idx}]")
-                self.populate_tree(tree, value, item)
+                item.setText(0, str(data))
+            else:
+                for idx, value in enumerate(data):
+                    item = QTreeWidgetItem(parent)
+                    item.setText(0, f"[{idx}]")
+                    self.populate_tree(tree, value, item)
         else:
             item = QTreeWidgetItem(parent)
             item.setText(0, str(data))
