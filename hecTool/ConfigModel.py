@@ -138,7 +138,7 @@ class PatientConfig:
 class SimulationConfig:
     seed: int = 1
     physics: List[str] = field(default_factory=list)
-    interpolation_steps: int = 0
+    simulation_steps: int = 0
     include_files: List[str] = field(default_factory=list)
     patient: PatientConfig = field(default_factory=PatientConfig)
     tumors: List[TumorConfig] = field(default_factory=list)
@@ -153,7 +153,7 @@ class SimulationConfig:
         return cls(
             seed=int(topas_data.get("seed", 1) or 1),
             physics=list(topas_data.get("physics", []) or []),
-            interpolation_steps=int(general_data.get("interpolation_steps", 0) or 0),
+            simulation_steps=int(general_data.get("simulation_steps", 0) or 0),
             include_files=list(general_data.get("include_files", []) or []),
             patient=PatientConfig.from_dict(patient_data),
             tumors=[TumorConfig.from_dict(t) for t in tumors_data],
@@ -166,7 +166,7 @@ class SimulationConfig:
                 "physics": self.physics,
             },
             "general": {
-                "interpolation_steps": self.interpolation_steps,
+                "simulation_steps": self.simulation_steps,
                 "include_files": self.include_files,
             },
             "patient": self.patient.to_dict(),
@@ -208,10 +208,18 @@ class SimulationConfig:
         if timeline is None:
             num_phases = 1
             duration = 1.0
-            timeline = [0.0]
+            topas_timeline = [0.0]
         else:
+            # timeline contains exactly num_phases points.
             num_phases = len(timeline)
-            duration = timeline[-1] - timeline[0] if num_phases > 1 else 1.0
+            # Duration in TOPAS usually defines the total time window.
+            # If we have N steps, and each step is dt, total duration is N * dt.
+            if num_phases > 1:
+                dt = timeline[1] - timeline[0]
+                duration = (timeline[-1] - timeline[0]) + dt
+            else:
+                duration = 1.0
+            topas_timeline = timeline
 
         # Main Topas config
         lines = [
@@ -247,12 +255,12 @@ class SimulationConfig:
         ])
 
         # Handle 4DCT/Time-dependent Patient DICOM
-        if self.patient.type == "4dct" or (self.patient.transform_sequence and num_phases > 1):
+        if self.patient.type == "4dct" or (self.patient.transform_sequence and num_phases > 0):
             source_dirs = [os.path.join(output_dir, f"phase_{i}") for i in range(num_phases)]
             lines.extend([
                 "s:Ge/Patient/DicomDirectory = Tf/PatientPhaseMap/Value",
                 "s:Tf/PatientPhaseMap/Function = \"Step\"",
-                f"dv:Tf/PatientPhaseMap/Times = {num_phases} " + " ".join([f"{t}" for t in timeline]) + " s",
+                f"dv:Tf/PatientPhaseMap/Times = {num_phases} " + " ".join([f"{t}" for t in topas_timeline]) + " s",
                 f"sv:Tf/PatientPhaseMap/Values = {num_phases} " + " ".join([f'"{Path(p).absolute()}"' for p in source_dirs]),
             ])
         else:
@@ -280,21 +288,21 @@ class SimulationConfig:
                     lines.extend([
                         f"d:Ge/{name}/HL{axis} = {tumor.radius_mm[k]} mm * Tf/{name}_HL{axis}/Value",
                         f"s:Tf/{name}_HL{axis}/Function = \"Step\"",
-                        f"dv:Tf/{name}_HL{axis}/Times = {num_phases} " + " ".join([f"{t}" for t in timeline]) + " s",
+                        f"dv:Tf/{name}_HL{axis}/Times = {num_phases} " + " ".join([f"{t}" for t in topas_timeline]) + " s",
                         f"uv:Tf/{name}_HL{axis}/Values = {num_phases} " + " ".join(
                             [f"{p.scale[k]}" for p in interp_params])
                     ])
                     lines.extend([
                         f"d:Ge/{name}/Trans{axis} = {tumor.translation_mm[k]} mm + Tf/{name}_Trans{axis}/Value",
                         f"s:Tf/{name}_Trans{axis}/Function = \"Step\"",
-                        f"dv:Tf/{name}_Trans{axis}/Times = {num_phases} " + " ".join([f"{t}" for t in timeline]) + " s",
+                        f"dv:Tf/{name}_Trans{axis}/Times = {num_phases} " + " ".join([f"{t}" for t in topas_timeline]) + " s",
                         f"dv:Tf/{name}_Trans{axis}/Values = {num_phases} " + " ".join(
                             [f"{p.translation[k]}" for p in interp_params]) + " mm"
                     ])
                     lines.extend([
                         f"d:Ge/{name}/Rot{axis} = {tumor.rotation_deg[k]} deg + Tf/{name}_Rot{axis}/Value",
                         f"s:Tf/{name}_Rot{axis}/Function = \"Step\"",
-                        f"dv:Tf/{name}_Rot{axis}/Times = {num_phases} " + " ".join([f"{t}" for t in timeline]) + " s",
+                        f"dv:Tf/{name}_Rot{axis}/Times = {num_phases} " + " ".join([f"{t}" for t in topas_timeline]) + " s",
                         f"dv:Tf/{name}_Rot{axis}/Values = {num_phases} " + " ".join(
                             [f"{p.rotation_deg[k]}" for p in interp_params]) + " deg"
                     ])

@@ -5,7 +5,7 @@ topas:
   physics:
   - g4em-standard_opt0
 general:
-  interpolation_steps: 10
+  simulation_steps: 10
   include_files:
   - config/particle_sources.txt
   - config/scoring_current.txt

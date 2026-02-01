@@ -90,8 +90,8 @@ class SimulationRunner:
             return [0.0]
 
         min_t, max_t = min(time_points), max(time_points)
-        num_steps = cfg.interpolation_steps if cfg.interpolation_steps > 0 else len(time_points)
-        if num_steps <= 1:
+        num_steps = cfg.simulation_steps if cfg.simulation_steps > 0 else len(time_points)
+        if num_steps < 1:
             return [min_t]
         return np.linspace(min_t, max_t, num_steps).tolist()
 

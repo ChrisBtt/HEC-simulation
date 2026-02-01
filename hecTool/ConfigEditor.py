@@ -364,11 +364,11 @@ class ConfigGUI(QMainWindow):
         gen_layout = QGridLayout(gen_group)
         gen_layout.addWidget(QLabel("<b>General Settings</b>"), 0, 0, 1, 2)
 
-        gen_layout.addWidget(QLabel("Interpolation Steps:"), 1, 0)
-        self.interp_steps = QLineEdit()
-        self.interp_steps.setValidator(QIntValidator(0, 1000))
-        self.interp_steps.textChanged.connect(self.on_changed)
-        gen_layout.addWidget(self.interp_steps, 1, 1)
+        gen_layout.addWidget(QLabel("Simulation Steps:"), 1, 0)
+        self.simulation_steps = QLineEdit()
+        self.simulation_steps.setValidator(QIntValidator(0, 1000))
+        self.simulation_steps.textChanged.connect(self.on_changed)
+        gen_layout.addWidget(self.simulation_steps, 1, 1)
 
         gen_layout.addWidget(QLabel("Random Seed:"), 2, 0)
         self.seed = QLineEdit()
@@ -483,7 +483,7 @@ class ConfigGUI(QMainWindow):
         self.tabs.addTab(self.tumors_widget, "Tumors")
 
     def load_config_to_ui(self):
-        self.interp_steps.setText(str(self.cfg.interpolation_steps))
+        self.simulation_steps.setText(str(self.cfg.simulation_steps))
         self.seed.setText(str(self.cfg.seed))
 
         for p in self.cfg.physics: self.physics_editor.add_item(p)
@@ -538,7 +538,7 @@ class ConfigGUI(QMainWindow):
         if self._loading: return
 
         # Update model from UI
-        self.cfg.interpolation_steps = int(self.interp_steps.text() or 0)
+        self.cfg.simulation_steps = int(self.simulation_steps.text() or 0)
         self.cfg.seed = int(self.seed.text() or 1)
         self.cfg.physics = self.physics_editor.get_values()
         self.cfg.include_files = self.includes_editor.get_values()

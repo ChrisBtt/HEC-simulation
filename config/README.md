@@ -30,10 +30,10 @@ The configuration is divided into four main sections: `topas`, `general`, `patie
 | **`physics`**              | List of Geant4 modules (e.g., `[g4em-standard_opt0]`). |
 
 #### 2.2 `general`
-| Parameter                 | Description                                                              |
-|:--------------------------|:-------------------------------------------------------------------------|
-| **`interpolation_steps`** | Number of time points to interpolate between keyframes (0 = no interp).  |
-| **`include_files`**       | Paths to external TOPAS macros (sources, scorers, etc.).                 |
+| Parameter              | Description                                                                              |
+|:-----------------------|:-----------------------------------------------------------------------------------------|
+| **`simulation_steps`** | Number of simulation steps including interpolation and keyframes (0 = no interpolation). |
+| **`include_files`**    | Paths to external TOPAS macros (sources, scorers, etc.).                                 |
 
 #### 2.3 `patient`
 | Parameter                            | Description                                                                    |
