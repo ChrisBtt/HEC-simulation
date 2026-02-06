@@ -62,7 +62,7 @@ class TransformStep:
 
 @dataclass
 class TumorConfig:
-    topas_material: str = "water"
+    topas_material: str = "G4_WATER"
     translation_mm: List[float] = field(default_factory=lambda: [0.0, 0.0, 0.0])
     rotation_deg: List[float] = field(default_factory=lambda: [0.0, 0.0, 0.0])
     radius_mm: List[float] = field(default_factory=lambda: [10.0, 10.0, 10.0])
@@ -71,11 +71,11 @@ class TumorConfig:
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> TumorConfig:
         return cls(
-            topas_material=str(data.get("topas_material", "water")),
+            topas_material=str(data.get("topas_material", "G4_WATER")),
             translation_mm=list(data.get("translation_mm", [0.0, 0.0, 0.0])),
             rotation_deg=list(data.get("rotation_deg", [0.0, 0.0, 0.0])),
             radius_mm=list(data.get("radius_mm", [10.0, 10.0, 10.0])),
-            transform_sequence=[TransformStep.from_dict(t) for t in data.get("transform_sequence", [])],
+            transform_sequence=[TransformStep.from_dict(t) for t in (data.get("transform_sequence", []) or [])],
         )
 
     def to_dict(self) -> Dict[str, Any]:
@@ -115,7 +115,7 @@ class PatientConfig:
             translation_mm=list(data.get("translation_mm", [0.0, 0.0, 0.0]) or [0.0, 0.0, 0.0]),
             rotation_deg=list(data.get("rotation_deg", [0.0, 0.0, 0.0]) or [0.0, 0.0, 0.0]),
             use_center_as_transform_origin=bool(data.get("use_center_as_transform_origin", False) or False),
-            transform_sequence=[TransformStep.from_dict(t) for t in data.get("transform_sequence", [])],
+            transform_sequence=[TransformStep.from_dict(t) for t in (data.get("transform_sequence", []) or [])],
         )
 
     def to_dict(self) -> Dict[str, Any]:
