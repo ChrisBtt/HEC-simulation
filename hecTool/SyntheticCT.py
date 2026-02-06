@@ -43,12 +43,15 @@ class Synthetic3DCT:
             Patient ID for DICOM metadata
         """
         self.size_mm = size_mm
-        self.patient_name = patient_name
-        self.patient_id = patient_id
         self.spacing_mm = spacing_mm
         self.radiodensity_hu = radiodensity_hu
         self.origin_mm = origin_mm
 
+        self.metadata_dict = {
+            "0010|0010": patient_name,
+            "0010|0020": patient_id,
+            "0008|1030": "Synthetic Study"  # Study Description
+        }
         self.image = self._create_image()
 
     def _create_image(self):
@@ -92,10 +95,9 @@ class Synthetic3DCT:
 
         gdcm_io = itk.GDCMImageIO.New()
         metadata_dict = itk.MetaDataDictionary()
+        for key, value in self.metadata_dict.items():
+            metadata_dict[key] = value
 
-        metadata_dict["0010|0010"] = "ANONYMOUS"  # Patient's Name
-        metadata_dict["0010|0020"] = "00000"  # Patient ID
-        metadata_dict["0008|1030"] = "Synthetic Study"  # Study Description
         metadata_dict["0008|103e"] = "3DCT"  # Series Description
         metadata_dict["0008|0060"] = "CT"  # Modality
 
@@ -162,12 +164,9 @@ class Synthetic4DCT:
         dicom_io.ReadImageInformation()
         metadata = dicom_io.GetMetaDataDictionary()
 
-        if "0010|0010" in metadata:
-            self.metadata_dict["0010|0010"] = metadata["0010|0010"]
-        if "0010|0020" in metadata:
-            self.metadata_dict["0010|0020"] = metadata["0010|0020"]
-        if "0008|1030" in metadata:
-            self.metadata_dict["0008|1030"] = metadata["0008|1030"]
+        for tag in ["0010|0010", "0010|0020", "0008|1030"]:
+            if tag in metadata:
+                self.metadata_dict[tag] = metadata[tag]
 
         return reader.GetOutput()
 
