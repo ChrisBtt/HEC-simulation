@@ -5,7 +5,8 @@ import numpy as np
 import multiprocessing as mp
 
 from hecTool.ConfigHandler import load_config
-from hecTool.SyntheticCT import Synthetic3DCT, Synthetic4DCT
+from hecTool.SyntheticCT import (generate_synthetic_3dct, write_dicom_series, read_dicom_series, generate_4dct,
+                                 get_default_image_metadata)
 from hecTool.TransformAffine import interpolate_transforms, params_to_flat_4x4
 
 
@@ -103,32 +104,36 @@ class SimulationRunner:
             print("Generating parametrized 3DCT box...")
             params = cfg.patient.parameters
 
-            box = Synthetic3DCT(params.size_mm, params.spacing_mm, params.radiodensity_hu)
+            synthetic_3dct = generate_synthetic_3dct(params.size_mm, params.spacing_mm, params.radiodensity_hu)
             source_dirs = [os.path.join(output_dir, "synthetic_3dct")]
-            box.write_dicom_series(source_dirs[0])
+            write_dicom_series(synthetic_3dct, source_dirs[0])
             print(f"3DCT written to: {source_dirs[0]}")
 
         # Apply Transform Sequence for 4DCT
         if len(source_dirs) == 1 and (cfg.patient.transform_sequence or cfg.patient.type == "4dct"):
             print(f"Applying transforms to generate 4DCT with {len(timeline)} phases...")
-            generator = Synthetic4DCT(source_dirs[0])
+            source_3dct, metadata = read_dicom_series(source_dirs[0])
 
-            interp_params = interpolate_transforms(cfg.patient.transform_sequence, timeline)
-            flat_matrices = [params_to_flat_4x4(p) for p in interp_params]
+            patient_transforms_interpolated = interpolate_transforms(cfg.patient.transform_sequence, timeline)
+            flat_matrices = [params_to_flat_4x4(p) for p in patient_transforms_interpolated]
 
-            phases = generator.generate_4dct(flat_matrices, cfg.patient.use_center_as_transform_origin)
+            phases = generate_4dct(source_3dct, flat_matrices, cfg.patient.use_center_as_transform_origin)
 
             pool = mp.Pool()
             for i, phase_img in enumerate(phases):
                 phase_dir = os.path.join(output_dir, f"phase_{i}")
-                pool.apply_async(generator.write_dicom_series, args=(phase_img, phase_dir, i))
+                phase_data = get_default_image_metadata(metadata)
+                phase_data["0008|103e"] = f"4DCT Phase {i}"
+                pool.apply_async(write_dicom_series, args=(phase_img, phase_dir, phase_data))
             print(f"4DCT phases written to {output_dir}")
             pool.close()
             pool.join()
 
+
 def main():
     runner = SimulationRunner()
     runner.run()
+
 
 if __name__ == "__main__":
     main()
