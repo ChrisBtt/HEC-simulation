@@ -168,7 +168,8 @@ def apply_affine(image, affine: itk.AffineTransform, output_origin=None, output_
     resampler.Update()
     return resampler.GetOutput()
 
-def generate_4dct(image, affines: List[itk.AffineTransform], use_center_as_origin: bool = False):
+def generate_4dct(image, affines: List[itk.AffineTransform], tumors=None, timeline=None,
+                  use_center_as_origin: bool = False):
     """Generate transformed phases using a global common bounding box."""
     spacing = image.GetSpacing()
     original_size = image.GetLargestPossibleRegion().GetSize()
@@ -215,9 +216,12 @@ def generate_4dct(image, affines: List[itk.AffineTransform], use_center_as_origi
 
     # Generate each phase using this global frame
     phases = []
-    for affine in converted_affines:
-        # Pass the same origin and size to every phase
-        phase_img = apply_affine(image, affine, output_origin=global_min, output_size=global_size)
+    for i, affine in enumerate(converted_affines):
+        phase_src = image
+        if tumors is not None and timeline is not None:
+            phase_src = clone_itk_image(image)
+            embed_tumors_in_image(phase_src, tumors, time_s=timeline[i])
+        phase_img = apply_affine(phase_src, affine, output_origin=global_min, output_size=global_size)
         phases.append(phase_img)
     return phases
 
@@ -273,11 +277,8 @@ def stamp_ellipsoid_hu(
                     arr[k, j, i] = int(hu)
 
 
-def embed_tumors_in_image(image, tumors, time_s=None, use_center_as_origin=False):
+def embed_tumors_in_image(image, tumors, time_s=None):
     """Embed tumors into the image (in-place) using DICOM HU if configured."""
-    offset = [0., 0., 0.]
-    if use_center_as_origin:
-        offset = get_image_center_mm(image)
     for tumor in tumors:
         if tumor.embed_mode != "dicom": continue
 
@@ -297,7 +298,7 @@ def embed_tumors_in_image(image, tumors, time_s=None, use_center_as_origin=False
 
         stamp_ellipsoid_hu(
             image=image,
-            center_mm=offset + translation,
+            center_mm=get_image_center_mm(image) + translation,
             radii_mm=radii,
             rotation_deg=rotation,
             hu=tumor.radiodensity_hu,

@@ -121,18 +121,17 @@ class SimulationRunner:
             print(f"Applying transforms to generate 4DCT with {len(timeline)} phases...")
             patient_transforms_interpolated = interpolate_transforms(cfg.patient.transform_sequence, timeline)
             flat_matrices = [params_to_flat_4x4(p) for p in patient_transforms_interpolated]
-            phases = generate_4dct(source_3dct, flat_matrices, cfg.patient.use_center_as_transform_origin)
-            phase_times = timeline
+            phases = generate_4dct(source_3dct, flat_matrices, cfg.tumors, timeline,
+                                   cfg.patient.use_center_as_transform_origin)
         elif has_tumor_motion:
             print(f"Generating tumor-motion 4DCT with {len(timeline)} phases...")
             phases = [clone_itk_image(source_3dct) for _ in timeline]
-            phase_times = timeline
+            for phase, t in zip(phases, timeline):
+                embed_tumors_in_image(phase, cfg.tumors, t)
         else:
             phases = [source_3dct]
             phase_times = [timeline[0]]
-
-        for phase, t in zip(phases, phase_times):
-            embed_tumors_in_image(phase, cfg.tumors, t, True)
+            embed_tumors_in_image(phases[0], cfg.tumors, phase_times[0])
 
         pool = mp.Pool()
         for i, phase_img in enumerate(phases):
