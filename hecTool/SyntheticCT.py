@@ -3,7 +3,7 @@ from typing import List, Tuple, Dict
 import numpy as np
 import itk
 
-from hecTool.TransformAffine import interpolate_transforms
+from hecTool.TransformAffine import interpolate_transforms, euler_deg_to_matrix
 
 
 def get_default_image_metadata(metadata=None) -> Dict:
@@ -240,22 +240,7 @@ def stamp_ellipsoid_hu(
     center = np.array(center_mm, dtype=float)
     radii = np.array(radii_mm, dtype=float)
 
-    # Build rotation matrix (XYZ intrinsic, degrees -> radians)
-    rx, ry, rz = np.deg2rad(rotation_deg)
-    cx, sx = np.cos(rx), np.sin(rx)
-    cy, sy = np.cos(ry), np.sin(ry)
-    cz, sz = np.cos(rz), np.sin(rz)
-
-    rot_x = np.array([[1, 0, 0],
-                      [0, cx, -sx],
-                      [0, sx, cx]])
-    rot_y = np.array([[cy, 0, sy],
-                      [0, 1, 0],
-                      [-sy, 0, cy]])
-    rot_z = np.array([[cz, -sz, 0],
-                      [sz,  cz, 0],
-                      [0,   0,  1]])
-    rot = rot_z @ rot_y @ rot_x
+    rot = euler_deg_to_matrix(rotation_deg)
 
     # Precompute inverse rotation for point transform
     inv_rot = rot.T

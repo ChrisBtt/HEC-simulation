@@ -25,8 +25,6 @@ def params_to_flat_4x4(params: TransformParams) -> List[float]:
     sx, sy, sz = params.scale
     shxy, shxz, shyz = params.shear
 
-    rx, ry, rz = math.radians(rx), math.radians(ry), math.radians(rz)
-
     trans = np.array(
         [[1, 0, 0, tx],
          [0, 1, 0, ty],
@@ -35,29 +33,9 @@ def params_to_flat_4x4(params: TransformParams) -> List[float]:
         dtype=float,
     )
 
-    rotx = np.array(
-        [[1, 0, 0, 0],
-         [0, math.cos(rx), -math.sin(rx), 0],
-         [0, math.sin(rx), math.cos(rx), 0],
-         [0, 0, 0, 1]],
-        dtype=float,
-    )
-
-    roty = np.array(
-        [[math.cos(ry), 0, math.sin(ry), 0],
-         [0, 1, 0, 0],
-         [-math.sin(ry), 0, math.cos(ry), 0],
-         [0, 0, 0, 1]],
-        dtype=float,
-    )
-
-    rotz = np.array(
-        [[math.cos(rz), -math.sin(rz), 0, 0],
-         [math.sin(rz), math.cos(rz), 0, 0],
-         [0, 0, 1, 0],
-         [0, 0, 0, 1]],
-        dtype=float,
-    )
+    rot_3x3 = euler_deg_to_matrix((rx, ry, rz))
+    rot = np.eye(4, dtype=float)
+    rot[:3, :3] = rot_3x3
 
     shear = np.array(
         [[1, shxy, shxz, 0],
@@ -75,8 +53,26 @@ def params_to_flat_4x4(params: TransformParams) -> List[float]:
         dtype=float,
     )
 
-    matrix = trans @ rotz @ roty @ rotx @ shear @ scale
+    matrix = trans @ rot @ shear @ scale
     return matrix.flatten().tolist()
+
+
+# Build rotation matrix (XYZ intrinsic, degrees -> radians)
+def euler_deg_to_matrix(rotation_deg: Iterable[float]) -> np.ndarray:
+    rx, ry, rz = np.deg2rad(rotation_deg)
+    cx, sx = np.cos(rx), np.sin(rx)
+    cy, sy = np.cos(ry), np.sin(ry)
+    cz, sz = np.cos(rz), np.sin(rz)
+    rot_x = np.array([[1, 0, 0],
+                      [0, cx, -sx],
+                      [0, sx, cx]])
+    rot_y = np.array([[cy, 0, sy],
+                      [0, 1, 0],
+                      [-sy, 0, cy]])
+    rot_z = np.array([[cz, -sz, 0],
+                      [sz,  cz, 0],
+                      [0,   0,  1]])
+    return rot_z @ rot_y @ rot_x
 
 
 def interpolate_transforms(sequence: List[TransformStep], target_times: Iterable[float]) -> List[TransformParams]:
