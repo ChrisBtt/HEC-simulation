@@ -6,7 +6,7 @@ import multiprocessing as mp
 
 from hecTool.ConfigHandler import load_config
 from hecTool.SyntheticCT import (generate_synthetic_3dct, write_dicom_series, read_dicom_series, generate_4dct,
-                                 get_default_image_metadata)
+                                 get_default_image_metadata, embed_tumors_in_image, clone_itk_image)
 from hecTool.TransformAffine import interpolate_transforms, params_to_flat_4x4
 
 
@@ -76,7 +76,7 @@ class SimulationRunner:
         # Write TOPAS configuration
         print("Writing TOPAS configuration...")
         cfg.write_topas_config(output_dir, self.args.threadcount, timeline=timeline)
-        print(f"TOPAS configuration written to : {output_dir}")
+        print(f"TOPAS configuration written to: {output_dir}")
 
     def _get_shared_timeline(self, cfg):
         time_points = set()
@@ -109,25 +109,40 @@ class SimulationRunner:
             write_dicom_series(synthetic_3dct, source_dirs[0])
             print(f"3DCT written to: {source_dirs[0]}")
 
-        # Apply Transform Sequence for 4DCT
-        if len(source_dirs) == 1 and (cfg.patient.transform_sequence or cfg.patient.type == "4dct"):
-            print(f"Applying transforms to generate 4DCT with {len(timeline)} phases...")
-            source_3dct, metadata = read_dicom_series(source_dirs[0])
+        if len(source_dirs) != 1:
+            return
 
+        source_3dct, metadata = read_dicom_series(source_dirs[0])
+
+        has_patient_motion = bool(cfg.patient.transform_sequence) or cfg.patient.type == "4dct"
+        has_tumor_motion = any(t.embed_mode == "dicom" and t.transform_sequence for t in cfg.tumors)
+
+        if has_patient_motion:
+            print(f"Applying transforms to generate 4DCT with {len(timeline)} phases...")
             patient_transforms_interpolated = interpolate_transforms(cfg.patient.transform_sequence, timeline)
             flat_matrices = [params_to_flat_4x4(p) for p in patient_transforms_interpolated]
-
             phases = generate_4dct(source_3dct, flat_matrices, cfg.patient.use_center_as_transform_origin)
+            phase_times = timeline
+        elif has_tumor_motion:
+            print(f"Generating tumor-motion 4DCT with {len(timeline)} phases...")
+            phases = [clone_itk_image(source_3dct) for _ in timeline]
+            phase_times = timeline
+        else:
+            phases = [source_3dct]
+            phase_times = [timeline[0]]
 
-            pool = mp.Pool()
-            for i, phase_img in enumerate(phases):
-                phase_dir = os.path.join(output_dir, f"phase_{i}")
-                phase_data = get_default_image_metadata(metadata)
-                phase_data["0008|103e"] = f"4DCT Phase {i}"
-                pool.apply_async(write_dicom_series, args=(phase_img, phase_dir, phase_data))
-            print(f"4DCT phases written to {output_dir}")
-            pool.close()
-            pool.join()
+        for phase, t in zip(phases, phase_times):
+            embed_tumors_in_image(phase, cfg.tumors, t, True)
+
+        pool = mp.Pool()
+        for i, phase_img in enumerate(phases):
+            phase_dir = os.path.join(output_dir, f"phase_{i}")
+            phase_data = get_default_image_metadata(metadata)
+            phase_data["0008|103e"] = f"4DCT Phase {i}"
+            pool.apply_async(write_dicom_series, args=(phase_img, phase_dir, phase_data))
+        print(f"4DCT phases written to: {output_dir}")
+        pool.close()
+        pool.join()
 
 
 def main():

@@ -63,6 +63,8 @@ class TransformStep:
 @dataclass
 class TumorConfig:
     topas_material: str = "G4_WATER"
+    radiodensity_hu: int = 0
+    embed_mode: str = "topas"
     translation_mm: List[float] = field(default_factory=lambda: [0.0, 0.0, 0.0])
     rotation_deg: List[float] = field(default_factory=lambda: [0.0, 0.0, 0.0])
     radius_mm: List[float] = field(default_factory=lambda: [10.0, 10.0, 10.0])
@@ -72,6 +74,8 @@ class TumorConfig:
     def from_dict(cls, data: Dict[str, Any]) -> TumorConfig:
         return cls(
             topas_material=str(data.get("topas_material", "G4_WATER")),
+            radiodensity_hu=int(data.get("radiodensity_hu", 0) or 0),
+            embed_mode=str(data.get("embed_mode", "topas") or "topas"),
             translation_mm=list(data.get("translation_mm", [0.0, 0.0, 0.0])),
             rotation_deg=list(data.get("rotation_deg", [0.0, 0.0, 0.0])),
             radius_mm=list(data.get("radius_mm", [10.0, 10.0, 10.0])),
@@ -81,6 +85,8 @@ class TumorConfig:
     def to_dict(self) -> Dict[str, Any]:
         data = {
             "topas_material": self.topas_material,
+            "radiodensity_hu": self.radiodensity_hu,
+            "embed_mode": self.embed_mode,
             "translation_mm": self.translation_mm,
             "rotation_deg": self.rotation_deg,
             "radius_mm": self.radius_mm,
@@ -269,6 +275,8 @@ class SimulationConfig:
 
         # Add Tumors
         for i, tumor in enumerate(self.tumors):
+            if tumor.embed_mode != "topas": continue
+
             name = f"Tumor_{i}"
             lines.extend([
                 "",

@@ -3,6 +3,8 @@ from typing import List, Tuple, Dict
 import numpy as np
 import itk
 
+from hecTool.TransformAffine import interpolate_transforms
+
 
 def get_default_image_metadata(metadata=None) -> Dict:
     metadata = metadata or {}
@@ -13,6 +15,24 @@ def get_default_image_metadata(metadata=None) -> Dict:
         "0008|103e": metadata.get("0008|103e", "3DCT"),            # Series Description
         "0008|0060": metadata.get("0008|0060", "CT")               # Modality
     }
+
+
+def clone_itk_image(img):
+    duplicator = itk.ImageDuplicator[type(img)].New()
+    duplicator.SetInputImage(img)
+    duplicator.Update()
+    out = duplicator.GetOutput()
+    out.DisconnectPipeline()
+    return out
+
+
+def get_image_center_mm(image):
+    origin = np.array(image.GetOrigin(), dtype=float)
+    spacing = np.array(image.GetSpacing(), dtype=float)
+    direction = np.array(image.GetDirection(), dtype=float)
+    size = np.array(image.GetLargestPossibleRegion().GetSize(), dtype=float)
+
+    return origin + direction @ ((size - 1) * spacing / 2.0)
 
 
 def generate_synthetic_3dct(
@@ -150,7 +170,6 @@ def apply_affine(image, affine: itk.AffineTransform, output_origin=None, output_
 
 def generate_4dct(image, affines: List[itk.AffineTransform], use_center_as_origin: bool = False):
     """Generate transformed phases using a global common bounding box."""
-    origin = image.GetOrigin()
     spacing = image.GetSpacing()
     original_size = image.GetLargestPossibleRegion().GetSize()
 
@@ -160,10 +179,7 @@ def generate_4dct(image, affines: List[itk.AffineTransform], use_center_as_origi
     ]
 
     if use_center_as_origin:
-        center = [
-            origin[i] + (original_size[i] * spacing[i]) / 2.0
-            for i in range(3)
-        ]
+        center = get_image_center_mm(image)
 
         for affine in converted_affines:
             affine.SetCenter(center)
@@ -204,6 +220,103 @@ def generate_4dct(image, affines: List[itk.AffineTransform], use_center_as_origi
         phase_img = apply_affine(image, affine, output_origin=global_min, output_size=global_size)
         phases.append(phase_img)
     return phases
+
+
+def stamp_ellipsoid_hu(
+    image: itk.Image,
+    center_mm,
+    radii_mm,
+    rotation_deg=(0.0, 0.0, 0.0),
+    hu=0,
+):
+    """Stamp an oriented ellipsoid into an ITK image by setting voxels to a HU value."""
+    # Convert to numpy view for in-place write
+    arr = itk.array_view_from_image(image)
+
+    origin = np.array(image.GetOrigin(), dtype=float)
+    spacing = np.array(image.GetSpacing(), dtype=float)
+    direction = np.array(image.GetDirection(), dtype=float)
+
+    center = np.array(center_mm, dtype=float)
+    radii = np.array(radii_mm, dtype=float)
+
+    # Build rotation matrix (XYZ intrinsic, degrees -> radians)
+    rx, ry, rz = np.deg2rad(rotation_deg)
+    cx, sx = np.cos(rx), np.sin(rx)
+    cy, sy = np.cos(ry), np.sin(ry)
+    cz, sz = np.cos(rz), np.sin(rz)
+
+    rot_x = np.array([[1, 0, 0],
+                      [0, cx, -sx],
+                      [0, sx, cx]])
+    rot_y = np.array([[cy, 0, sy],
+                      [0, 1, 0],
+                      [-sy, 0, cy]])
+    rot_z = np.array([[cz, -sz, 0],
+                      [sz,  cz, 0],
+                      [0,   0,  1]])
+    rot = rot_z @ rot_y @ rot_x
+
+    # Precompute inverse rotation for point transform
+    inv_rot = rot.T
+
+    # Compute index bounds for a conservative box (sphere with max radius)
+    max_r = float(np.max(radii))
+    # Convert center in physical -> index space (approx)
+    center_idx = np.linalg.inv(direction) @ (center - origin) / spacing
+    center_idx = center_idx.astype(int)
+
+    # Index bounds (clamp to image size)
+    size = np.array(image.GetLargestPossibleRegion().GetSize())
+    min_idx = np.maximum(center_idx - int(np.ceil(max_r / spacing.min())) - 1, 0)
+    max_idx = np.minimum(center_idx + int(np.ceil(max_r / spacing.min())) + 1, size - 1)
+
+    # Iterate bounding box
+    for k in range(min_idx[2], max_idx[2] + 1):
+        for j in range(min_idx[1], max_idx[1] + 1):
+            for i in range(min_idx[0], max_idx[0] + 1):
+                idx = np.array([i, j, k], dtype=float)
+
+                # index -> physical
+                phys = origin + direction @ (idx * spacing)
+
+                # ellipsoid local frame
+                local = inv_rot @ (phys - center)
+
+                # inside ellipsoid?
+                if np.sum((local / radii) ** 2) <= 1.0:
+                    arr[k, j, i] = int(hu)
+
+
+def embed_tumors_in_image(image, tumors, time_s=None, use_center_as_origin=False):
+    """Embed tumors into the image (in-place) using DICOM HU if configured."""
+    offset = [0., 0., 0.]
+    if use_center_as_origin:
+        offset = get_image_center_mm(image)
+    for tumor in tumors:
+        if tumor.embed_mode != "dicom": continue
+
+        # Base params
+        translation = np.array(tumor.translation_mm, dtype=float)
+        rotation = np.array(tumor.rotation_deg, dtype=float)
+        scale = np.array([1.0, 1.0, 1.0], dtype=float)
+
+        # Apply time-dependent transform if present
+        if time_s is not None and tumor.transform_sequence:
+            interp = interpolate_transforms(tumor.transform_sequence, [time_s])[0]
+            translation = translation + np.array(interp.translation)
+            rotation = rotation + np.array(interp.rotation_deg)
+            scale = scale * np.array(interp.scale)
+
+        radii = np.array(tumor.radius_mm, dtype=float) * scale
+
+        stamp_ellipsoid_hu(
+            image=image,
+            center_mm=offset + translation,
+            radii_mm=radii,
+            rotation_deg=rotation,
+            hu=tumor.radiodensity_hu,
+        )
 
 
 def matrix_to_itk_affine(matrix_flat: List[float]) -> itk.AffineTransform:
