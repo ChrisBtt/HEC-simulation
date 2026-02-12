@@ -1,16 +1,17 @@
 # Shared bin parameters
-i:Par/GridXBins = 61
+i:Par/GridXBins = 61 # 5mm
 i:Par/GridYBins = 61
-i:Par/GridZBins = 200
+i:Par/GridZBins = 200 # 1mm
 
 # Dose on the mass-world grid
-s:Sc/DoseGrid/Quantity                  = "DoseToWater"
-s:Sc/DoseGrid/Component                 = "WaterGrid"
-i:Sc/DoseGrid/XBins                     = Par/GridXBins
-i:Sc/DoseGrid/YBins                     = Par/GridYBins
-i:Sc/DoseGrid/ZBins                     = Par/GridZBins
-b:Sc/DoseGrid/OutputToConsole           = "False"
-s:Sc/DoseGrid/OutputType                = "csv"
-s:Sc/DoseGrid/IfOutputFileAlreadyExists = "Overwrite"
-sv:Sc/DoseGrid/Report                   = 3 "Sum" "Standard_Deviation" "Histories"
-s:Sc/DoseGrid/OutputFile                = "../../TOPAS_simulation_data/motor_servo/DoseGrid" 
+s:Sc/DoseGrid/Quantity                        = "DoseToMedium"
+s:Sc/DoseGrid/Component                       = "ScoringGrid"
+i:Sc/DoseGrid/XBins                           = Par/GridXBins
+i:Sc/DoseGrid/YBins                           = Par/GridYBins
+i:Sc/DoseGrid/ZBins                           = Par/GridZBins
+b:Sc/DoseGrid/PreCalculateStoppingPowerRatios = "True"
+b:Sc/DoseGrid/OutputToConsole                 = "False"
+s:Sc/DoseGrid/OutputType                      = "csv"
+s:Sc/DoseGrid/IfOutputFileAlreadyExists       = "Overwrite"
+sv:Sc/DoseGrid/Report                         = 3 "Sum" "Standard_Deviation" "Histories"
+s:Sc/DoseGrid/OutputFile                      = "../../TOPAS_simulation_data/motor_servo/DoseGrid" 

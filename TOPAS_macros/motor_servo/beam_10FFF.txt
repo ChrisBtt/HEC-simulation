@@ -12,5 +12,5 @@ d:So/Beam/BeamPositionSpreadY        = 2.0 mm
 s:So/Beam/BeamAngularDistribution    = "None"
 i:So/Beam/NumberOfHistoriesInRun     = 10000000     # increase for smoother stats
 s:So/Beam/BeamPositionCutoffShape    = "Rectangle"
-d:So/Beam/BeamPositionCutoffX        = 3.0 cm
-d:So/Beam/BeamPositionCutoffY        = 3.0 cm
+d:So/Beam/BeamPositionCutoffX        = 0.5 cm
+d:So/Beam/BeamPositionCutoffY        = 3.5 cm

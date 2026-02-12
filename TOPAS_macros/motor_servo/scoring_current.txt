@@ -5,7 +5,7 @@ includeFile = /mnt/e/Christoph/applications/hec-dose-distribution/TOPAS_macros/m
 
 # Current Electron X Fine
 s:Sc/velCurrElX/Quantity = "velocityCurrent"
-s:Sc/velCurrElX/Component = "WaterGrid"
+s:Sc/velCurrElX/Component = "ScoringGrid"
 i:Sc/velCurrElX/XBins = Par/GridXBins
 i:Sc/velCurrElX/YBins = Par/GridYBins
 i:Sc/velCurrElX/ZBins = Par/GridZBins
@@ -19,7 +19,7 @@ s:Sc/velCurrElX/direction = "x"
 
 # Current Electron Y Fine
 s:Sc/velCurrElY/Quantity = "velocityCurrent"
-s:Sc/velCurrElY/Component = "WaterGrid"
+s:Sc/velCurrElY/Component = "ScoringGrid"
 i:Sc/velCurrElY/XBins = Par/GridXBins
 i:Sc/velCurrElY/YBins = Par/GridYBins
 i:Sc/velCurrElY/ZBins = Par/GridZBins
@@ -33,7 +33,7 @@ s:Sc/velCurrElY/direction = "y"
 
 # Current Electron Z Fine
 s:Sc/velCurrElZ/Quantity = "velocityCurrent"
-s:Sc/velCurrElZ/Component = "WaterGrid"
+s:Sc/velCurrElZ/Component = "ScoringGrid"
 i:Sc/velCurrElZ/XBins = Par/GridXBins
 i:Sc/velCurrElZ/YBins = Par/GridYBins
 i:Sc/velCurrElZ/ZBins = Par/GridZBins

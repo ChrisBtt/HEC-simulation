@@ -17,7 +17,6 @@ d:Ge/World/HLZ       = 25.0 cm
 
 # --- Physics ---------------------
 sv:Ph/Default/Modules = 1 "g4em-standard_opt0"   # simple EM for photons
-sv:Ph/Default/LayeredMassGeometryWorlds = 1 "WaterGrid"
 
 # --- simple 3D viewer ------------
 b:Ts/UseQt              = "False"
