@@ -66,10 +66,6 @@ class Preprocessor(object):
         print(f"Range y: {data['y'].min()} to {data['y'].max()}")
         print(f"Range z: {data['z'].min()} to {data['z'].max()}")
 
-        data['jx_abs'] = data['jx'].abs()
-        data['jy_abs'] = data['jy'].abs()
-        data['jz_abs'] = data['jz'].abs()
-
         return data
     
     def _downsample_data(self, data: pd.DataFrame) -> pd.DataFrame:
@@ -126,15 +122,12 @@ class Preprocessor(object):
         self.data['y_cm'] = self.data['y'] * self.bin_y + self.bin_y / 2 if self.central_voxel else self.data['y'] * self.bin_y
         self.data['z_cm'] = self.data['z'] * self.bin_z + self.bin_z / 2 if self.central_voxel else self.data['z'] * self.bin_z
 
-        self.data['jx_cm'] = self.data['jx'] / self.bin_x**2
-        self.data['jy_cm'] = self.data['jy'] / self.bin_y**2
-        self.data['jz_cm'] = self.data['jz'] / self.bin_z**2
+        self.data['jx_cm'] = -self.data['jx'] / self.bin_x**2
+        self.data['jy_cm'] = -self.data['jy'] / self.bin_y**2
+        self.data['jz_cm'] = -self.data['jz'] / self.bin_z**2
         self.data['stdx_cm'] = self.data['stdx'] / self.bin_x**2
         self.data['stdy_cm'] = self.data['stdy'] / self.bin_y**2
         self.data['stdz_cm'] = self.data['stdz'] / self.bin_z**2
-        self.data['jx_cm_abs'] = self.data['jx_cm'].abs()
-        self.data['jy_cm_abs'] = self.data['jy_cm'].abs()
-        self.data['jz_cm_abs'] = self.data['jz_cm'].abs()
         return True
     
 
