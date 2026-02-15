@@ -234,7 +234,7 @@ class SimulationConfig:
             f"i:Ph/Default/Seed = {self.seed}",
             f"sv:Ph/Default/Modules = {len(self.physics)} " + " ".join([f'"{p}"' for p in self.physics]),
         ]
-        if self.tumors:
+        if any([t.embed_mode == "topas" for t in self.tumors]):
             lines.append("sv:Ph/Default/LayeredMassGeometryWorlds = 1 \"TumorWorld\"")
         lines.extend([
             "",
@@ -261,7 +261,7 @@ class SimulationConfig:
         ])
 
         # Handle 4DCT/Time-dependent Patient DICOM
-        if self.patient.type == "4dct" or (self.patient.transform_sequence and num_phases > 0):
+        if self.patient.type == "4dct" or num_phases > 0:
             source_dirs = [os.path.join(output_dir, f"phase_{i}") for i in range(num_phases)]
             lines.extend([
                 "s:Ge/Patient/DicomDirectory = Tf/PatientPhaseMap/Value",
