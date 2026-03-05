@@ -10,7 +10,7 @@ from hecTool.SyntheticCT import (generate_synthetic_3dct, write_dicom_series, re
 from hecTool.TransformAffine import interpolate_transforms, params_to_flat_4x4
 
 
-class SimulationRunner:
+class HECManager:
     def __init__(self):
         self.args = self.parse_arguments()
 
@@ -144,8 +144,8 @@ class SimulationRunner:
 
 
 def main():
-    runner = SimulationRunner()
-    runner.run()
+    hec_manager = HECManager()
+    hec_manager.run()
 
 
 if __name__ == "__main__":

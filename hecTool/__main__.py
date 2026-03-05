@@ -1,9 +1,9 @@
-from hecTool.SimulationRunner import SimulationRunner
+from hecTool.HECManager import HECManager
 
 
 def main() -> None:
-    runner = SimulationRunner()
-    runner.run()
+    hec_manager = HECManager()
+    hec_manager.run()
 
 
 if __name__ == "__main__":
