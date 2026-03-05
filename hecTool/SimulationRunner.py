@@ -75,7 +75,7 @@ class SimulationRunner:
 
         # Write TOPAS configuration
         print("Writing TOPAS configuration...")
-        cfg.write_topas_config(output_dir, self.args.threadcount, timeline=timeline)
+        cfg.write_topas_config(output_dir, self.args.threadcount, timeline)
         print(f"TOPAS configuration written to: {output_dir}")
 
     def _get_shared_timeline(self, cfg):
@@ -90,11 +90,10 @@ class SimulationRunner:
         if not time_points:
             return [0.0]
 
-        min_t, max_t = min(time_points), max(time_points)
-        num_steps = cfg.simulation_steps if cfg.simulation_steps > 0 else len(time_points)
-        if num_steps < 1:
-            return [min_t]
-        return np.linspace(min_t, max_t, num_steps).tolist()
+        if cfg.simulation_steps < len(time_points):
+            return list(time_points)
+
+        return np.linspace(min(time_points), max(time_points), cfg.simulation_steps).tolist()
 
     def _handle_synthetic_ct(self, cfg, timeline, output_dir):
         source_dirs = cfg.patient.dicom_directories
@@ -114,7 +113,7 @@ class SimulationRunner:
 
         source_3dct, metadata = read_dicom_series(source_dirs[0])
 
-        has_patient_motion = bool(cfg.patient.transform_sequence) or cfg.patient.type == "4dct"
+        has_patient_motion = bool(cfg.patient.transform_sequence)
         has_tumor_motion = any(t.embed_mode == "dicom" and t.transform_sequence for t in cfg.tumors)
 
         if has_patient_motion:

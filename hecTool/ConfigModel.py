@@ -206,26 +206,20 @@ class SimulationConfig:
         if errors:
             raise ValueError("Invalid configuration:\n- " + "\n- ".join(errors))
 
-    def write_topas_config(self, output_dir: str, thread_count: int, timeline: List[float] = None) -> None:
+    def write_topas_config(self, output_dir: str, thread_count: int, timeline: List[float]) -> None:
         if output_dir:
             os.makedirs(os.path.join(output_dir, "results"), exist_ok=True)
 
-        # Timeline setup
-        if timeline is None:
-            num_phases = 1
-            duration = 1.0
-            topas_timeline = [0.0]
+        # timeline contains exactly num_phases points.
+        num_phases = len(timeline)
+        # Duration in TOPAS usually defines the total time window.
+        # If we have N steps, and each step is dt, total duration is N * dt.
+        if num_phases > 1:
+            dt = timeline[1] - timeline[0]
+            duration = (timeline[-1] - timeline[0]) + dt
         else:
-            # timeline contains exactly num_phases points.
-            num_phases = len(timeline)
-            # Duration in TOPAS usually defines the total time window.
-            # If we have N steps, and each step is dt, total duration is N * dt.
-            if num_phases > 1:
-                dt = timeline[1] - timeline[0]
-                duration = (timeline[-1] - timeline[0]) + dt
-            else:
-                duration = 1.0
-            topas_timeline = timeline
+            duration = 1.0
+        topas_timeline = timeline
 
         # Main Topas config
         lines = [
