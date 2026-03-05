@@ -255,7 +255,7 @@ class SimulationConfig:
         ])
 
         # Handle 4DCT/Time-dependent Patient DICOM
-        if self.patient.type == "4dct" or num_phases > 0:
+        if self.patient.type == "4dct" or num_phases > 1:
             source_dirs = [os.path.join(output_dir, f"phase_{i}") for i in range(num_phases)]
             lines.extend([
                 "s:Ge/Patient/DicomDirectory = Tf/PatientPhaseMap/Value",
@@ -264,7 +264,7 @@ class SimulationConfig:
                 f"sv:Tf/PatientPhaseMap/Values = {num_phases} " + " ".join([f'"{Path(p).absolute()}"' for p in source_dirs]),
             ])
         else:
-            dicom_dir = self.patient.dicom_directories[0] if self.patient.dicom_directories else os.path.join(output_dir, "synthetic_3dct")
+            dicom_dir = self.patient.dicom_directories[0] if self.patient.type == "3dct" else os.path.join(output_dir, "phase_0")
             lines.append(f's:Ge/Patient/DicomDirectory = "{Path(dicom_dir).absolute()}"')
 
         # Add Tumors
