@@ -171,7 +171,7 @@ def apply_affine(image, affine: itk.AffineTransform, output_origin=None, output_
 def generate_4dct(image, affines: List[itk.AffineTransform], tumors=None, timeline=None,
                   use_center_as_origin: bool = False):
     """Generate transformed phases using a global common bounding box."""
-    spacing = image.GetSpacing()
+    spacing = np.array(image.GetSpacing(), dtype=float)
     original_size = image.GetLargestPossibleRegion().GetSize()
 
     converted_affines = [
@@ -187,9 +187,9 @@ def generate_4dct(image, affines: List[itk.AffineTransform], tumors=None, timeli
 
     # Calculate the bounding box for all transforms combined
     corners = [
-        [0, 0, 0], [original_size[0], 0, 0], [0, original_size[1], 0], [original_size[0], original_size[1], 0],
-        [0, 0, original_size[2]], [original_size[0], 0, original_size[2]], [0, original_size[1], original_size[2]],
-        [original_size[0], original_size[1], original_size[2]]
+        [0, 0, 0], [original_size[0]-1, 0, 0], [0, original_size[1]-1, 0], [original_size[0]-1, original_size[1]-1, 0],
+        [0, 0, original_size[2]-1], [original_size[0]-1, 0, original_size[2]-1], [0, original_size[1]-1, original_size[2]-1],
+        [original_size[0]-1, original_size[1]-1, original_size[2]-1]
     ]
     corners_phys = [image.TransformIndexToPhysicalPoint(c) for c in corners]
 
@@ -201,18 +201,12 @@ def generate_4dct(image, affines: List[itk.AffineTransform], tumors=None, timeli
     global_min = np.min(all_transformed_points, axis=0)
     global_max = np.max(all_transformed_points, axis=0)
 
-    # 2. Add Padding (e.g., 2 voxels on each side)
-    padding_voxels = 2
-    padding_mm = spacing * padding_voxels
+    eps = 1e-6
+    snapped_min = np.floor(global_min / spacing + eps) * spacing
+    snapped_max = np.ceil(global_max / spacing - eps) * spacing
 
-    # Expand the physical bounds
-    global_min -= padding_mm
-    global_max += padding_mm
-
-    global_size = [
-        int(np.ceil((global_max[i] - global_min[i]) / spacing[i]))
-        for i in range(3)
-    ]
+    global_min = snapped_min
+    global_size = (((snapped_max - snapped_min) / spacing).astype(int) + 1)
 
     # Generate each phase using this global frame
     phases = []
@@ -221,7 +215,7 @@ def generate_4dct(image, affines: List[itk.AffineTransform], tumors=None, timeli
         if tumors is not None and timeline is not None:
             phase_src = clone_itk_image(image)
             embed_tumors_in_image(phase_src, tumors, time_s=timeline[i])
-        phase_img = apply_affine(phase_src, affine, output_origin=global_min, output_size=global_size)
+        phase_img = apply_affine(phase_src, affine, output_origin=global_min, output_size=global_size.tolist())
         phases.append(phase_img)
     return phases
 
@@ -321,40 +315,6 @@ def matrix_to_itk_affine(matrix_flat: List[float]) -> itk.AffineTransform:
     affine.SetOffset(translation.tolist())
 
     return affine
-
-
-def get_dicom_extent(dicom_dir):
-    # 1. Read the DICOM series
-    pixel_type = itk.SS
-    image_type = itk.Image[pixel_type, 3]
-
-    names_generator = itk.GDCMSeriesFileNames.New()
-    names_generator.SetUseSeriesDetails(True)
-    names_generator.SetDirectory(dicom_dir)
-
-    series_uids = names_generator.GetSeriesUIDs()
-    if not series_uids:
-        raise RuntimeError("No DICOM series found in directory")
-
-    file_names = names_generator.GetFileNames(series_uids[0])
-    reader = itk.ImageSeriesReader[image_type].New()
-    reader.SetFileNames(file_names)
-    reader.Update()
-
-    image = reader.GetOutput()
-
-    # 2. Extract Geometry Information
-    origin = np.array(image.GetOrigin())
-    spacing = np.array(image.GetSpacing())
-    size = np.array(image.GetLargestPossibleRegion().GetSize())
-
-    # 3. Calculate Extent
-    # The extent is the physical range from the first voxel center to the last voxel center
-    # Note: If you want the outer boundary of the voxels, use 'size' instead of 'size - 1'
-    min_physical = origin
-    max_physical = origin + (spacing * (size - 1))
-
-    return min_physical, max_physical
 
 
 # ---------------- Example usage ----------------
