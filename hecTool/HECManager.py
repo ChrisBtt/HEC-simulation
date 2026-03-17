@@ -11,19 +11,29 @@ from hecTool.TransformAffine import interpolate_transforms, params_to_flat_4x4
 
 
 class HECManager:
+    """Orchestrate configuration loading and synthetic CT generation."""
     def __init__(self):
+        """Initialize the manager and parse CLI arguments."""
         self.args = self.parse_arguments()
 
     def parse_arguments(self):
+        """Parse command-line arguments for the simulation runner.
+
+        Returns
+        -------
+        argparse.Namespace
+            Parsed CLI arguments.
+        """
         parser = argparse.ArgumentParser(description="Simulation Runner")
         parser.add_argument("filename", help="Path to the YAML configuration file")
-        parser.add_argument("--output_dir", help="Where all generated files and DICOMs are saved")
+        parser.add_argument("--outputdir", help="Where all generated files and DICOMs are saved")
         parser.add_argument("--threadcount", type=int, default=-1, help="Number of threads to use")
         parser.add_argument("--profiling", action="store_true", help="Enable performance monitoring")
         parser.add_argument("--interactive", action="store_true", help="Enable interactive config editor")
         return parser.parse_args()
 
     def run(self):
+        """Execute the end-to-end simulation workflow."""
         try:
             cfg = load_config(self.args.filename)
         except Exception as e:
@@ -31,7 +41,7 @@ class HECManager:
             return
 
         # Determine output directory
-        output_dir = self.args.output_dir
+        output_dir = self.args.outputdir
         if not output_dir:
             config_name = os.path.splitext(os.path.basename(self.args.filename))[0]
             output_dir = os.path.join("TOPAS_simulation_data", config_name)
@@ -79,6 +89,18 @@ class HECManager:
         print(f"TOPAS configuration written to: {output_dir}")
 
     def _get_shared_timeline(self, cfg):
+        """Build a shared time grid from patient and tumor transforms.
+
+        Parameters
+        ----------
+        cfg : ConfigModel
+            Loaded configuration model with patient/tumor sequences.
+
+        Returns
+        -------
+        list of float
+            Time points in seconds for simulation phases.
+        """
         time_points = set()
         if cfg.patient.transform_sequence:
             for t in cfg.patient.transform_sequence:
@@ -96,6 +118,17 @@ class HECManager:
         return np.linspace(min(time_points), max(time_points), cfg.simulation_steps).tolist()
 
     def _handle_synthetic_ct(self, cfg, timeline, output_dir):
+        """Generate synthetic CT data and write DICOM phases.
+
+        Parameters
+        ----------
+        cfg : ConfigModel
+            Loaded configuration model.
+        timeline : list of float
+            Time points in seconds for phases.
+        output_dir : str
+            Output directory for generated series.
+        """
         source_dirs = cfg.patient.dicom_directories
 
         # Generate synthetic 3DCT
@@ -144,6 +177,7 @@ class HECManager:
 
 
 def main():
+    """Entry point for the CLI."""
     hec_manager = HECManager()
     hec_manager.run()
 

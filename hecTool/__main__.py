@@ -1,7 +1,7 @@
 from hecTool.HECManager import HECManager
 
 
-def main() -> None:
+def main():
     hec_manager = HECManager()
     hec_manager.run()
 

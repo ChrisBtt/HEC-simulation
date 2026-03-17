@@ -7,6 +7,19 @@ from hecTool.TransformAffine import interpolate_transforms, euler_deg_to_matrix
 
 
 def get_default_image_metadata(metadata=None) -> Dict:
+    """Return a DICOM metadata dictionary containing only basic patient and study tags.
+
+    Parameters
+    ----------
+    metadata : dict, optional
+        Existing metadata values keyed by DICOM tag strings (e.g., "0010|0010").
+        Any provided values override the defaults.
+
+    Returns
+    -------
+    dict
+        Metadata dictionary containing required keys for a CT series.
+    """
     metadata = metadata or {}
     return {
         "0010|0010": metadata.get("0010|0010", "ANONYMOUS"),       # Patient Name
@@ -18,6 +31,18 @@ def get_default_image_metadata(metadata=None) -> Dict:
 
 
 def clone_itk_image(img):
+    """Deep-copy an ITK image and detach it from the pipeline.
+
+    Parameters
+    ----------
+    img : itk.Image
+        Source ITK image to duplicate.
+
+    Returns
+    -------
+    itk.Image
+        Independent image copy with a disconnected pipeline.
+    """
     duplicator = itk.ImageDuplicator[type(img)].New()
     duplicator.SetInputImage(img)
     duplicator.Update()
@@ -27,6 +52,18 @@ def clone_itk_image(img):
 
 
 def get_image_center_mm(image):
+    """Compute the physical-space center of an ITK image in millimeters.
+
+    Parameters
+    ----------
+    image : itk.Image
+        Input image.
+
+    Returns
+    -------
+    numpy.ndarray
+        Center point in physical coordinates (mm), shape (3,).
+    """
     origin = np.array(image.GetOrigin(), dtype=float)
     spacing = np.array(image.GetSpacing(), dtype=float)
     direction = np.array(image.GetDirection(), dtype=float)
@@ -41,22 +78,23 @@ def generate_synthetic_3dct(
         radiodensity_hu: int,
         origin_mm: Tuple[float, float, float] = (0.0, 0.0, 0.0)
 ) -> itk.Image:
-    """
+    """Create a 3D CT volume filled with a constant HU value.
+
     Parameters
     ----------
-    size_mm : (float, float, float)
-        Physical size of the box in mm (X, Y, Z)
-    spacing_mm : (float, float, float)
-        Voxel spacing in mm
+    size_mm : tuple of float
+        Physical size of the volume in mm (X, Y, Z).
+    spacing_mm : tuple of float
+        Voxel spacing in mm (X, Y, Z).
     radiodensity_hu : int
-        Radiodensity of material in Hounsfield Units
-    origin_mm : (float, float, float), optional
-        Image origin in physical space
+        Radiodensity to fill the volume with, in Hounsfield Units.
+    origin_mm : tuple of float, optional
+        Image origin in physical space (mm).
 
     Returns
     -------
     itk.Image
-        itk Image containing 3D CT volume
+        ITK image containing the synthetic 3D CT volume.
     """
     pixel_type = itk.SS  # signed short for CT
     image_type = itk.Image[pixel_type, 3]
@@ -83,7 +121,24 @@ def generate_synthetic_3dct(
 
 
 def read_dicom_series(dicom_dir: str):
-    """Read a DICOM series into an ITK image and its associated metadata."""
+    """Read a DICOM series into an ITK image with metadata.
+
+    Parameters
+    ----------
+    dicom_dir : str
+        Path to a directory containing a DICOM series.
+
+    Returns
+    -------
+    tuple
+        (image, metadata_dict), where image is an ITK 3D image and
+        metadata_dict maps DICOM tags to values.
+
+    Raises
+    ------
+    RuntimeError
+        If no DICOM series is found in the directory.
+    """
     pixel_type = itk.SS
     image_type = itk.Image[pixel_type, 3]
 
@@ -113,7 +168,17 @@ def read_dicom_series(dicom_dir: str):
 
 
 def write_dicom_series(image: itk.Image, output_dir: str, metadata: dict = None):
-    """Write an ITK image to a DICOM series."""
+    """Write an ITK image to a DICOM series on disk.
+
+    Parameters
+    ----------
+    image : itk.Image
+        Image to write.
+    output_dir : str
+        Destination directory for the DICOM slices.
+    metadata : dict, optional
+        DICOM metadata dictionary. Defaults are filled in when missing.
+    """
     metadata = metadata or get_default_image_metadata()
 
     os.makedirs(output_dir, exist_ok=True)
@@ -143,7 +208,24 @@ def write_dicom_series(image: itk.Image, output_dir: str, metadata: dict = None)
 
 
 def apply_affine(image, affine: itk.AffineTransform, output_origin=None, output_size=None):
-    """Apply affine transform with fixed geometry."""
+    """Resample an image with an affine transform into a fixed geometry.
+
+    Parameters
+    ----------
+    image : itk.Image
+        Input image to resample.
+    affine : itk.AffineTransform
+        Affine transform mapping output physical points to input points.
+    output_origin : sequence of float, optional
+        Physical origin of the output image. Defaults to the input origin.
+    output_size : sequence of int, optional
+        Size of the output image in voxels. Defaults to the input size.
+
+    Returns
+    -------
+    itk.Image
+        Resampled image in the specified output geometry.
+    """
     image_type = type(image)
 
     # If no specific geometry is provided, default to original (clipping occurs)
@@ -170,7 +252,28 @@ def apply_affine(image, affine: itk.AffineTransform, output_origin=None, output_
 
 def generate_4dct(image, affines: List[itk.AffineTransform], tumors=None, timeline=None,
                   use_center_as_origin: bool = False):
-    """Generate transformed phases using a global common bounding box."""
+    """Generate transformed 4DCT phases in a shared global bounding box.
+
+    Parameters
+    ----------
+    image : itk.Image
+        Source 3D CT image.
+    affines : list of itk.AffineTransform or list of list
+        Per-phase transforms. A flattened 4x4 matrix list is accepted and
+        converted to an ITK affine.
+    tumors : list, optional
+        Tumor objects to embed.
+    timeline : list of float, optional
+        Time points in seconds aligned with ``affines`` for time-dependent
+        tumor transforms.
+    use_center_as_origin : bool, optional
+        If True, set each affine's center to the image center.
+
+    Returns
+    -------
+    list of itk.Image
+        List of phase images aligned to a common bounding box.
+    """
     spacing = np.array(image.GetSpacing(), dtype=float)
     original_size = image.GetLargestPossibleRegion().GetSize()
 
@@ -227,7 +330,21 @@ def stamp_ellipsoid_hu(
     rotation_deg=(0.0, 0.0, 0.0),
     hu=0,
 ):
-    """Stamp an oriented ellipsoid into an ITK image by setting voxels to a HU value."""
+    """Stamp an oriented ellipsoid into an ITK image by writing HU in-place.
+
+    Parameters
+    ----------
+    image : itk.Image
+        Image to modify in-place.
+    center_mm : sequence of float
+        Ellipsoid center in physical coordinates (mm).
+    radii_mm : sequence of float
+        Ellipsoid radii in mm (X, Y, Z).
+    rotation_deg : sequence of float, optional
+        Euler rotations in degrees (X, Y, Z).
+    hu : int, optional
+        Hounsfield Unit value to write inside the ellipsoid.
+    """
     # Convert to numpy view for in-place write
     arr = itk.array_view_from_image(image)
 
@@ -272,7 +389,19 @@ def stamp_ellipsoid_hu(
 
 
 def embed_tumors_in_image(image, tumors, time_s=None):
-    """Embed tumors into the image (in-place) using DICOM HU if configured."""
+    """Embed tumors into an image in-place using DICOM HU rules.
+
+    Parameters
+    ----------
+    image : itk.Image
+        Target image to modify.
+    tumors : list
+        Tumor objects with attributes: ``embed_mode``, ``translation_mm``,
+        ``rotation_deg``, ``radius_mm``, ``radiodensity_hu``, and optionally
+        ``transform_sequence``.
+    time_s : float, optional
+        Time in seconds used for interpolating tumor transforms.
+    """
     for tumor in tumors:
         if tumor.embed_mode != "dicom": continue
 
@@ -300,7 +429,18 @@ def embed_tumors_in_image(image, tumors, time_s=None):
 
 
 def matrix_to_itk_affine(matrix_flat: List[float]) -> itk.AffineTransform:
-    """Convert a flattened 4x4 matrix to an ITK AffineTransform."""
+    """Convert a flattened 4x4 matrix to an ITK AffineTransform.
+
+    Parameters
+    ----------
+    matrix_flat : list of float
+        Flattened 4x4 affine matrix in row-major order.
+
+    Returns
+    -------
+    itk.AffineTransform
+        ITK affine transform containing the 3x3 matrix and offset.
+    """
     matrix_np = np.array(matrix_flat).reshape(4, 4)
 
     # Extract 3x3 rotation/scale part and 3x1 translation part
@@ -319,6 +459,7 @@ def matrix_to_itk_affine(matrix_flat: List[float]) -> itk.AffineTransform:
 
 # ---------------- Example usage ----------------
 def main():
+    """Run a basic synthetic 3DCT/4DCT generation demo."""
     print("Generating synthetic 3DCT...")
     synthetic_3dct = generate_synthetic_3dct(
         size_mm=(300.0, 300.0, 300.0),
