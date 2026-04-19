@@ -6,24 +6,34 @@ import multiprocessing as mp
 
 from hecTool.ConfigHandler import load_config
 from hecTool.SyntheticCT import (generate_synthetic_3dct, write_dicom_series, read_dicom_series, generate_4dct,
-                                 get_default_image_metadata)
+                                 get_default_image_metadata, embed_tumors_in_image, clone_itk_image)
 from hecTool.TransformAffine import interpolate_transforms, params_to_flat_4x4
 
 
-class SimulationRunner:
+class HECManager:
+    """Orchestrate configuration loading and synthetic CT generation."""
     def __init__(self):
+        """Initialize the manager and parse CLI arguments."""
         self.args = self.parse_arguments()
 
     def parse_arguments(self):
+        """Parse command-line arguments for the simulation runner.
+
+        Returns
+        -------
+        argparse.Namespace
+            Parsed CLI arguments.
+        """
         parser = argparse.ArgumentParser(description="Simulation Runner")
         parser.add_argument("filename", help="Path to the YAML configuration file")
-        parser.add_argument("--output_dir", help="Where all generated files and DICOMs are saved")
+        parser.add_argument("--outputdir", help="Where all generated files and DICOMs are saved")
         parser.add_argument("--threadcount", type=int, default=-1, help="Number of threads to use")
         parser.add_argument("--profiling", action="store_true", help="Enable performance monitoring")
         parser.add_argument("--interactive", action="store_true", help="Enable interactive config editor")
         return parser.parse_args()
 
     def run(self):
+        """Execute the end-to-end simulation workflow."""
         try:
             cfg = load_config(self.args.filename)
         except Exception as e:
@@ -31,7 +41,7 @@ class SimulationRunner:
             return
 
         # Determine output directory
-        output_dir = self.args.output_dir
+        output_dir = self.args.outputdir
         if not output_dir:
             config_name = os.path.splitext(os.path.basename(self.args.filename))[0]
             output_dir = os.path.join("TOPAS_simulation_data", config_name)
@@ -75,10 +85,22 @@ class SimulationRunner:
 
         # Write TOPAS configuration
         print("Writing TOPAS configuration...")
-        cfg.write_topas_config(output_dir, self.args.threadcount, timeline=timeline)
-        print(f"TOPAS configuration written to : {output_dir}")
+        cfg.write_topas_config(output_dir, self.args.threadcount, timeline)
+        print(f"TOPAS configuration written to: {output_dir}")
 
     def _get_shared_timeline(self, cfg):
+        """Build a shared time grid from patient and tumor transforms.
+
+        Parameters
+        ----------
+        cfg : ConfigModel
+            Loaded configuration model with patient/tumor sequences.
+
+        Returns
+        -------
+        list of float
+            Time points in seconds for simulation phases.
+        """
         time_points = set()
         if cfg.patient.transform_sequence:
             for t in cfg.patient.transform_sequence:
@@ -90,13 +112,23 @@ class SimulationRunner:
         if not time_points:
             return [0.0]
 
-        min_t, max_t = min(time_points), max(time_points)
-        num_steps = cfg.simulation_steps if cfg.simulation_steps > 0 else len(time_points)
-        if num_steps < 1:
-            return [min_t]
-        return np.linspace(min_t, max_t, num_steps).tolist()
+        if cfg.simulation_steps < len(time_points):
+            return list(time_points)
+
+        return np.linspace(min(time_points), max(time_points), cfg.simulation_steps).tolist()
 
     def _handle_synthetic_ct(self, cfg, timeline, output_dir):
+        """Generate synthetic CT data and write DICOM phases.
+
+        Parameters
+        ----------
+        cfg : ConfigModel
+            Loaded configuration model.
+        timeline : list of float
+            Time points in seconds for phases.
+        output_dir : str
+            Output directory for generated series.
+        """
         source_dirs = cfg.patient.dicom_directories
 
         # Generate synthetic 3DCT
@@ -109,30 +141,45 @@ class SimulationRunner:
             write_dicom_series(synthetic_3dct, source_dirs[0])
             print(f"3DCT written to: {source_dirs[0]}")
 
-        # Apply Transform Sequence for 4DCT
-        if len(source_dirs) == 1 and (cfg.patient.transform_sequence or cfg.patient.type == "4dct"):
-            print(f"Applying transforms to generate 4DCT with {len(timeline)} phases...")
-            source_3dct, metadata = read_dicom_series(source_dirs[0])
+        if len(source_dirs) != 1:
+            return
 
+        source_3dct, metadata = read_dicom_series(source_dirs[0])
+
+        has_patient_motion = bool(cfg.patient.transform_sequence)
+        has_tumor_motion = any(t.embed_mode == "dicom" and t.transform_sequence for t in cfg.tumors)
+
+        if has_patient_motion:
+            print(f"Applying transforms to generate 4DCT with {len(timeline)} phases...")
             patient_transforms_interpolated = interpolate_transforms(cfg.patient.transform_sequence, timeline)
             flat_matrices = [params_to_flat_4x4(p) for p in patient_transforms_interpolated]
+            phases = generate_4dct(source_3dct, flat_matrices, cfg.tumors, timeline,
+                                   cfg.patient.use_center_as_transform_origin)
+        elif has_tumor_motion:
+            print(f"Generating tumor-motion 4DCT with {len(timeline)} phases...")
+            phases = [clone_itk_image(source_3dct) for _ in timeline]
+            for phase, t in zip(phases, timeline):
+                embed_tumors_in_image(phase, cfg.tumors, t)
+        else:
+            phases = [source_3dct]
+            phase_times = [timeline[0]]
+            embed_tumors_in_image(phases[0], cfg.tumors, phase_times[0])
 
-            phases = generate_4dct(source_3dct, flat_matrices, cfg.patient.use_center_as_transform_origin)
-
-            pool = mp.Pool()
-            for i, phase_img in enumerate(phases):
-                phase_dir = os.path.join(output_dir, f"phase_{i}")
-                phase_data = get_default_image_metadata(metadata)
-                phase_data["0008|103e"] = f"4DCT Phase {i}"
-                pool.apply_async(write_dicom_series, args=(phase_img, phase_dir, phase_data))
-            print(f"4DCT phases written to {output_dir}")
-            pool.close()
-            pool.join()
+        pool = mp.Pool()
+        for i, phase_img in enumerate(phases):
+            phase_dir = os.path.join(output_dir, f"phase_{i}")
+            phase_data = get_default_image_metadata(metadata)
+            phase_data["0008|103e"] = f"4DCT Phase {i}"
+            pool.apply_async(write_dicom_series, args=(phase_img, phase_dir, phase_data))
+        print(f"4DCT phases written to: {output_dir}")
+        pool.close()
+        pool.join()
 
 
 def main():
-    runner = SimulationRunner()
-    runner.run()
+    """Entry point for the CLI."""
+    hec_manager = HECManager()
+    hec_manager.run()
 
 
 if __name__ == "__main__":

@@ -11,12 +11,24 @@ from hecTool.ConfigHandler import save_config
 
 
 class TransformStepEditor(QWidget):
+    """Editor widget for a single TransformStep."""
     changed = pyqtSignal()
     delete_requested = pyqtSignal(object)
     move_up_requested = pyqtSignal(object)
     move_down_requested = pyqtSignal(object)
 
     def __init__(self, data: TransformStep = None, show_shear=True, parent=None):
+        """Create a TransformStep editor widget.
+
+        Parameters
+        ----------
+        data : TransformStep, optional
+            Initial values to populate the editor.
+        show_shear : bool, optional
+            Whether to show shear fields.
+        parent : QWidget, optional
+            Parent widget.
+        """
         super().__init__(parent)
         self.show_shear = show_shear
         self.initUI()
@@ -24,6 +36,7 @@ class TransformStepEditor(QWidget):
             self.set_value(data)
 
     def initUI(self):
+        """Build the UI controls for the transform step."""
         layout = QGridLayout(self)
 
         # Time
@@ -93,6 +106,13 @@ class TransformStepEditor(QWidget):
             widget.textChanged.connect(self.changed.emit)
 
     def get_value(self) -> TransformStep:
+        """Return the current editor values as a TransformStep.
+
+        Returns
+        -------
+        TransformStep
+            Snapshot of the current editor fields.
+        """
         return TransformStep(
             time_s=float(self.time_s.text() or 0),
             translation_mm=[float(self.tx.text() or 0), float(self.ty.text() or 0), float(self.tz.text() or 0)],
@@ -102,6 +122,13 @@ class TransformStepEditor(QWidget):
         )
 
     def set_value(self, data: TransformStep):
+        """Populate the editor fields from a TransformStep.
+
+        Parameters
+        ----------
+        data : TransformStep
+            Transform values to load into the editor.
+        """
         self.time_s.setText(str(data.time_s))
         mapping = [
             (data.translation_mm, [self.tx, self.ty, self.tz]),
@@ -115,9 +142,21 @@ class TransformStepEditor(QWidget):
 
 
 class VectorEditor(QWidget):
+    """Simple editor widget for a fixed-length numeric vector."""
     changed = pyqtSignal()
 
     def __init__(self, labels, values, parent=None):
+        """Create a vector editor with labels and initial values.
+
+        Parameters
+        ----------
+        labels : list of str
+            Labels to display next to each component.
+        values : list of float
+            Initial component values.
+        parent : QWidget, optional
+            Parent widget.
+        """
         super().__init__(parent)
         layout = QHBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
@@ -131,20 +170,44 @@ class VectorEditor(QWidget):
             self.edits.append(edit)
 
     def get_value(self):
+        """Return the current vector values as floats.
+
+        Returns
+        -------
+        list of float
+            Current component values.
+        """
         return [float(e.text() or 0) for e in self.edits]
 
     def set_value(self, values):
+        """Set the editor values from a list.
+
+        Parameters
+        ----------
+        values : list of float
+            Component values to assign.
+        """
         for edit, val in zip(self.edits, values):
             edit.setText(str(val))
 
 
 class StringItemEditor(QWidget):
+    """Editor widget for a single string item with ordering controls."""
     changed = pyqtSignal()
     delete_requested = pyqtSignal(object)
     move_up_requested = pyqtSignal(object)
     move_down_requested = pyqtSignal(object)
 
     def __init__(self, value="", parent=None):
+        """Create a string item editor with an initial value.
+
+        Parameters
+        ----------
+        value : str, optional
+            Initial string value.
+        parent : QWidget, optional
+            Parent widget.
+        """
         super().__init__(parent)
         layout = QHBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
@@ -169,16 +232,42 @@ class StringItemEditor(QWidget):
         layout.addWidget(self.del_btn)
 
     def get_value(self):
+        """Return the current string value.
+
+        Returns
+        -------
+        str
+            Current editor value.
+        """
         return self.edit.text().strip()
 
     def set_value(self, value):
+        """Set the editor's string value.
+
+        Parameters
+        ----------
+        value : str
+            Value to assign.
+        """
         self.edit.setText(value)
 
 
 class CollectionEditor(QWidget):
+    """Generic editor for a list of item editor widgets."""
     changed = pyqtSignal()
 
     def __init__(self, item_class, title="Items", parent=None):
+        """Create a collection editor for an item widget class.
+
+        Parameters
+        ----------
+        item_class : type
+            Editor widget class used for each item.
+        title : str, optional
+            Title to display on the add button.
+        parent : QWidget, optional
+            Parent widget.
+        """
         super().__init__(parent)
         self.item_class = item_class
         layout = QVBoxLayout(self)
@@ -198,6 +287,15 @@ class CollectionEditor(QWidget):
         self.editors = []
 
     def add_item(self, data=None, **kwargs):
+        """Add a new item editor to the collection.
+
+        Parameters
+        ----------
+        data : object, optional
+            Data to seed the editor.
+        **kwargs : dict
+            Additional keyword arguments passed to the item editor.
+        """
         editor = self.item_class(data, **kwargs)
         editor.changed.connect(self.changed.emit)
         editor.delete_requested.connect(self.remove_item)
@@ -210,10 +308,26 @@ class CollectionEditor(QWidget):
         self.changed.emit()
 
     def add_items(self, list_of_data, **kwargs):
+        """Add multiple items to the collection.
+
+        Parameters
+        ----------
+        list_of_data : list
+            Collection of items to add.
+        **kwargs : dict
+            Additional keyword arguments passed to each item editor.
+        """
         for data in list_of_data:
             self.add_item(data, **kwargs)
 
     def move_item_up(self, editor):
+        """Move an item editor up by one position.
+
+        Parameters
+        ----------
+        editor : QWidget
+            Editor instance to move.
+        """
         idx = self.editors.index(editor)
         if idx > 0:
             self.editors[idx], self.editors[idx - 1] = self.editors[idx - 1], self.editors[idx]
@@ -223,6 +337,13 @@ class CollectionEditor(QWidget):
             self.changed.emit()
 
     def move_item_down(self, editor):
+        """Move an item editor down by one position.
+
+        Parameters
+        ----------
+        editor : QWidget
+            Editor instance to move.
+        """
         idx = self.editors.index(editor)
         if idx < len(self.editors) - 1:
             self.editors[idx], self.editors[idx + 1] = self.editors[idx + 1], self.editors[idx]
@@ -232,28 +353,53 @@ class CollectionEditor(QWidget):
             self.changed.emit()
 
     def remove_item(self, editor):
+        """Remove an item editor from the collection.
+
+        Parameters
+        ----------
+        editor : QWidget
+            Editor instance to remove.
+        """
         self.editors.remove(editor)
         editor.setParent(None)
         editor.deleteLater()
         self.changed.emit()
 
     def get_values(self):
+        """Return values from all item editors.
+
+        Returns
+        -------
+        list
+            Values returned by each item editor.
+        """
         return [e.get_value() for e in self.editors if e.get_value() is not None]
 
 
 class TumorEditor(QWidget):
+    """Editor widget for a single tumor configuration."""
     changed = pyqtSignal()
     delete_requested = pyqtSignal(object)
     move_up_requested = pyqtSignal(object)
     move_down_requested = pyqtSignal(object)
 
     def __init__(self, data: TumorConfig = None, parent=None):
+        """Create a tumor editor widget.
+
+        Parameters
+        ----------
+        data : TumorConfig, optional
+            Initial values to populate the editor.
+        parent : QWidget, optional
+            Parent widget.
+        """
         super().__init__(parent)
         self.initUI()
         if data:
             self.set_value(data)
 
     def initUI(self):
+        """Build the UI controls for tumor configuration."""
         layout = QVBoxLayout(self)
 
         # Material
@@ -263,6 +409,30 @@ class TumorEditor(QWidget):
         self.material.textChanged.connect(self.changed.emit)
         mat_layout.addWidget(self.material)
         layout.addLayout(mat_layout)
+
+        # Embed mode
+        mode_layout = QHBoxLayout()
+        mode_layout.addWidget(QLabel("Embed Mode:"))
+        self.embed_mode_group = QButtonGroup(self)
+        self.embed_mode_topas = QRadioButton("topas")
+        self.embed_mode_dicom = QRadioButton("dicom")
+        self.embed_mode_group.addButton(self.embed_mode_topas)
+        self.embed_mode_group.addButton(self.embed_mode_dicom)
+        self.embed_mode_dicom.setChecked(True)
+        self.embed_mode_topas.toggled.connect(self.on_embed_mode_changed)
+        self.embed_mode_dicom.toggled.connect(self.on_embed_mode_changed)
+        mode_layout.addWidget(self.embed_mode_topas)
+        mode_layout.addWidget(self.embed_mode_dicom)
+        layout.addLayout(mode_layout)
+
+        # Radiodensity
+        hu_layout = QHBoxLayout()
+        hu_layout.addWidget(QLabel("Radiodensity (HU):"))
+        self.radiodensity_hu = QLineEdit("0")
+        self.radiodensity_hu.setValidator(QIntValidator())
+        self.radiodensity_hu.textChanged.connect(self.changed.emit)
+        hu_layout.addWidget(self.radiodensity_hu)
+        layout.addLayout(hu_layout)
 
         # Base Placement
         self.trans = VectorEditor(["Trans X:", "Y:", "Z:"], [0.0, 0.0, 0.0])
@@ -283,6 +453,8 @@ class TumorEditor(QWidget):
         self.sequence_editor.changed.connect(self.changed.emit)
         layout.addWidget(self.sequence_editor)
 
+        self.on_embed_mode_changed()
+
         btn_layout = QHBoxLayout()
         up_btn = QPushButton("Move Up")
         up_btn.clicked.connect(lambda: self.move_up_requested.emit(self))
@@ -296,8 +468,17 @@ class TumorEditor(QWidget):
         layout.addLayout(btn_layout)
 
     def get_value(self) -> TumorConfig:
+        """Return the current editor values as a TumorConfig.
+
+        Returns
+        -------
+        TumorConfig
+            Snapshot of the current editor fields.
+        """
         return TumorConfig(
             topas_material=self.material.text(),
+            radiodensity_hu=int(self.radiodensity_hu.text() or 0),
+            embed_mode="dicom" if self.embed_mode_dicom.isChecked() else "topas",
             translation_mm=self.trans.get_value(),
             rotation_deg=self.rot.get_value(),
             radius_mm=self.radius.get_value(),
@@ -305,7 +486,19 @@ class TumorEditor(QWidget):
         )
 
     def set_value(self, data: TumorConfig):
+        """Populate the editor fields from a TumorConfig.
+
+        Parameters
+        ----------
+        data : TumorConfig
+            Tumor configuration to load into the editor.
+        """
         self.material.setText(data.topas_material)
+        if data.embed_mode == "dicom":
+            self.embed_mode_dicom.setChecked(True)
+        else:
+            self.embed_mode_topas.setChecked(True)
+        self.radiodensity_hu.setText(str(data.radiodensity_hu))
         self.trans.set_value(data.translation_mm)
         self.rot.set_value(data.rotation_deg)
         self.radius.set_value(data.radius_mm)
@@ -315,9 +508,24 @@ class TumorEditor(QWidget):
         for step in data.transform_sequence:
             self.sequence_editor.add_item(step, show_shear=False)
 
+    def on_embed_mode_changed(self):
+        """Toggle tumor fields based on embed mode selection."""
+        is_dicom = self.embed_mode_dicom.isChecked()
+        self.material.setEnabled(not is_dicom)
+        self.radiodensity_hu.setEnabled(is_dicom)
+        self.changed.emit()
+
 
 class ConfigGUI(QMainWindow):
+    """Main window for interactive TOPAS configuration editing."""
     def __init__(self, cfg: SimulationConfig):
+        """Create the GUI with an initial configuration model.
+
+        Parameters
+        ----------
+        cfg : SimulationConfig
+            Initial configuration model.
+        """
         super().__init__()
         self._loading = True
         self.cfg = cfg
@@ -328,6 +536,7 @@ class ConfigGUI(QMainWindow):
         self.on_changed()
 
     def initUI(self):
+        """Build the main window layout and widgets."""
         self.setWindowTitle('TOPAS Simulation Config Editor')
         self.setGeometry(100, 100, 1000, 900)
 
@@ -358,6 +567,7 @@ class ConfigGUI(QMainWindow):
         self.setup_editors()
 
     def setup_editors(self):
+        """Create and wire all editor widgets."""
         # General Settings
         gen_group = QFrame()
         gen_group.setFrameStyle(QFrame.StyledPanel)
@@ -483,6 +693,7 @@ class ConfigGUI(QMainWindow):
         self.tabs.addTab(self.tumors_widget, "Tumors")
 
     def load_config_to_ui(self):
+        """Populate UI controls from the current configuration model."""
         self.simulation_steps.setText(str(self.cfg.simulation_steps))
         self.seed.setText(str(self.cfg.seed))
 
@@ -509,11 +720,13 @@ class ConfigGUI(QMainWindow):
         for tumor in self.cfg.tumors: self.tumors_collection.add_item(tumor)
 
     def browse_includes(self):
+        """Open a file picker and add selected include files."""
         files, _ = QFileDialog.getOpenFileNames(self, "Select Include Files", "", "TOPAS Files (*.txt);;All Files (*)")
         if files:
             self.includes_editor.add_items(files)
 
     def browse_dicoms(self):
+        """Open a directory picker and add selected DICOM directories."""
         dialog = QFileDialog(self)
         dialog.setFileMode(QFileDialog.Directory)
         dialog.setOption(QFileDialog.ShowDirsOnly, True)
@@ -535,6 +748,7 @@ class ConfigGUI(QMainWindow):
                 self.dicom_editor.add_items(paths)
 
     def on_changed(self):
+        """Update the model from UI changes and refresh the preview tree."""
         if self._loading: return
 
         # Update model from UI
@@ -587,12 +801,24 @@ class ConfigGUI(QMainWindow):
         self.refresh_tree()
 
     def refresh_tree(self):
+        """Rebuild the configuration preview tree."""
         self.tree.clear()
         self.populate_tree(self.tree, self.cfg.to_dict())
         self.tree.expandAll()
         self.tree.resizeColumnToContents(0)
 
     def populate_tree(self, tree, data, parent=None):
+        """Populate a QTreeWidget from nested dict/list data.
+
+        Parameters
+        ----------
+        tree : QTreeWidget
+            Tree widget to populate.
+        data : dict or list or object
+            Nested configuration data.
+        parent : QTreeWidgetItem, optional
+            Parent tree item for recursion.
+        """
         if isinstance(data, dict):
             for key, value in data.items():
                 item = QTreeWidgetItem(parent or tree)
@@ -613,6 +839,7 @@ class ConfigGUI(QMainWindow):
             item.setText(0, str(data))
 
     def save_to_file(self):
+        """Prompt for a filename and save the current configuration."""
         filename, _ = QFileDialog.getSaveFileName(self, "Save Configuration", "", "YAML Files (*.yaml)")
         if filename:
             try:
@@ -624,6 +851,7 @@ class ConfigGUI(QMainWindow):
 
 
 def main():
+    """Launch the standalone configuration editor."""
     import sys
     import argparse
     from hecTool.ConfigHandler import load_config

@@ -13,6 +13,19 @@ if TYPE_CHECKING:
 
 @dataclass(frozen=True)
 class TransformParams:
+    """Container for affine transform parameters.
+
+    Attributes
+    ----------
+    translation : tuple of float
+        Translation in mm (X, Y, Z).
+    rotation_deg : tuple of float
+        Euler rotation angles in degrees (X, Y, Z).
+    scale : tuple of float
+        Scale factors along each axis (X, Y, Z).
+    shear : tuple of float
+        Shear factors (XY, XZ, YZ).
+    """
     translation: Tuple[float, float, float] = (0.0, 0.0, 0.0)
     rotation_deg: Tuple[float, float, float] = (0.0, 0.0, 0.0)
     scale: Tuple[float, float, float] = (1.0, 1.0, 1.0)
@@ -20,12 +33,22 @@ class TransformParams:
 
 
 def params_to_flat_4x4(params: TransformParams) -> List[float]:
+    """Convert transform parameters to a flattened 4x4 affine matrix.
+
+    Parameters
+    ----------
+    params : TransformParams
+        Translation, rotation, scale, and shear parameters.
+
+    Returns
+    -------
+    list of float
+        Flattened 4x4 affine matrix in row-major order.
+    """
     tx, ty, tz = params.translation
     rx, ry, rz = params.rotation_deg
     sx, sy, sz = params.scale
     shxy, shxz, shyz = params.shear
-
-    rx, ry, rz = math.radians(rx), math.radians(ry), math.radians(rz)
 
     trans = np.array(
         [[1, 0, 0, tx],
@@ -35,29 +58,9 @@ def params_to_flat_4x4(params: TransformParams) -> List[float]:
         dtype=float,
     )
 
-    rotx = np.array(
-        [[1, 0, 0, 0],
-         [0, math.cos(rx), -math.sin(rx), 0],
-         [0, math.sin(rx), math.cos(rx), 0],
-         [0, 0, 0, 1]],
-        dtype=float,
-    )
-
-    roty = np.array(
-        [[math.cos(ry), 0, math.sin(ry), 0],
-         [0, 1, 0, 0],
-         [-math.sin(ry), 0, math.cos(ry), 0],
-         [0, 0, 0, 1]],
-        dtype=float,
-    )
-
-    rotz = np.array(
-        [[math.cos(rz), -math.sin(rz), 0, 0],
-         [math.sin(rz), math.cos(rz), 0, 0],
-         [0, 0, 1, 0],
-         [0, 0, 0, 1]],
-        dtype=float,
-    )
+    rot_3x3 = euler_deg_to_matrix((rx, ry, rz))
+    rot = np.eye(4, dtype=float)
+    rot[:3, :3] = rot_3x3
 
     shear = np.array(
         [[1, shxy, shxz, 0],
@@ -75,12 +78,56 @@ def params_to_flat_4x4(params: TransformParams) -> List[float]:
         dtype=float,
     )
 
-    matrix = trans @ rotz @ roty @ rotx @ shear @ scale
+    matrix = trans @ rot @ shear @ scale
     return matrix.flatten().tolist()
 
 
+# Build rotation matrix (XYZ intrinsic, degrees -> radians)
+def euler_deg_to_matrix(rotation_deg: Iterable[float]) -> np.ndarray:
+    """Compute a 3x3 rotation matrix from Euler angles (degrees).
+
+    Parameters
+    ----------
+    rotation_deg : iterable of float
+        Euler angles in degrees (X, Y, Z), applied as intrinsic XYZ.
+
+    Returns
+    -------
+    numpy.ndarray
+        3x3 rotation matrix.
+    """
+    rx, ry, rz = np.deg2rad(rotation_deg)
+    cx, sx = np.cos(rx), np.sin(rx)
+    cy, sy = np.cos(ry), np.sin(ry)
+    cz, sz = np.cos(rz), np.sin(rz)
+    rot_x = np.array([[1, 0, 0],
+                      [0, cx, -sx],
+                      [0, sx, cx]])
+    rot_y = np.array([[cy, 0, sy],
+                      [0, 1, 0],
+                      [-sy, 0, cy]])
+    rot_z = np.array([[cz, -sz, 0],
+                      [sz,  cz, 0],
+                      [0,   0,  1]])
+    return rot_z @ rot_y @ rot_x
+
+
 def interpolate_transforms(sequence: List[TransformStep], target_times: Iterable[float]) -> List[TransformParams]:
-    """Interpolate a transform sequence at target time points."""
+    """Interpolate a transform sequence at target time points.
+
+    Parameters
+    ----------
+    sequence : list of TransformStep
+        Time-ordered or unordered transform steps with ``time_s`` and
+        transform components (translation, rotation, scale, shear).
+    target_times : iterable of float
+        Times in seconds to interpolate at.
+
+    Returns
+    -------
+    list of TransformParams
+        Interpolated transform parameters for each target time.
+    """
     if not sequence:
         return [TransformParams() for _ in target_times]
 

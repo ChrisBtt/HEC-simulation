@@ -30,10 +30,10 @@ The configuration is divided into four main sections: `topas`, `general`, `patie
 | **`physics`**              | List of Geant4 modules (e.g., `[g4em-standard_opt0]`). |
 
 #### 2.2 `general`
-| Parameter              | Description                                                                              |
-|:-----------------------|:-----------------------------------------------------------------------------------------|
-| **`simulation_steps`** | Number of simulation steps including interpolation and keyframes (0 = no interpolation). |
-| **`include_files`**    | Paths to external TOPAS macros (sources, scorers, etc.).                                 |
+| Parameter              | Description                                                                                                           |
+|:-----------------------|:----------------------------------------------------------------------------------------------------------------------|
+| **`simulation_steps`** | Number of simulation steps including interpolation and keyframes (No interpolation if less than number of keyframes). |
+| **`include_files`**    | Paths to external TOPAS macros (sources, scorers, etc.).                                                              |
 
 #### 2.3 `patient`
 | Parameter                            | Description                                                                    |
@@ -50,24 +50,26 @@ The configuration is divided into four main sections: `topas`, `general`, `patie
 #### 2.4 `tumors`
 A list of tumor objects, each with:
 
-| Parameter                | Description                                                |
-|:-------------------------|:-----------------------------------------------------------|
-| **`topas_material`**     | Material name from TOPAS/Geant4 (e.g., `G4_WATER`).        |
-| **`translation_mm`**     | Base translation `[X, Y, Z]` relative to the patient.      |
-| **`rotation_deg`**       | Base rotation `[X, Y, Z]` relative to the patient.         |
-| **`radius_mm`**          | Half-lengths `[X, Y, Z]` of the `TsEllipsoid`.             |
-| **`transform_sequence`** | List of keyframe `TransformStep` objects for tumor motion. |
+| Parameter                | Description                                                   |
+|:-------------------------|:--------------------------------------------------------------|
+| **`embed_mode`**         | `topas` (geometry in TOPAS) or `dicom` (embed HU into DICOM). |
+| **`topas_material`**     | TOPAS material name for TOPAS embedding (e.g., `G4_WATER`).   |
+| **`radiodensity_hu`**    | HU value for DICOM embedding (used when `embed_mode=dicom`).  |
+| **`translation_mm`**     | Base translation `[X, Y, Z]` relative to the patient.         |
+| **`rotation_deg`**       | Base rotation `[X, Y, Z]` relative to the patient.            |
+| **`radius_mm`**          | Half-lengths `[X, Y, Z]` of the `TsEllipsoid`.                |
+| **`transform_sequence`** | List of keyframe `TransformStep` objects for tumor motion.    |
 
 #### 2.5 `TransformStep`
 Used in `transform_sequence` for both patient and tumors:
 
-| Parameter            | Description                                        |
-|:---------------------|:---------------------------------------------------|
-| **`time_s`**         | Time point for this keyframe in seconds.           |
-| **`translation_mm`** | `[X, Y, Z]` translation relative to base position. |
-| **`rotation_deg`**   | `[X, Y, Z]` rotation relative to base position.    |
-| **`scale`**          | `[X, Y, Z]` scaling factors (default `[1, 1, 1]`). |
-| **`shear`**          | `[XY, XZ, YZ]` shear factors (patient only).      |
+| Parameter            | Description                                                      |
+|:---------------------|:-----------------------------------------------------------------|
+| **`time_s`**         | Time point for this keyframe in seconds.                         |
+| **`translation_mm`** | `[X, Y, Z]` translation relative to base position.               |
+| **`rotation_deg`**   | `[X, Y, Z]` rotation relative to base position.                  |
+| **`scale`**          | `[X, Y, Z]` scaling factors (default `[1, 1, 1]`).               |
+| **`shear`**          | `[XY, XZ, YZ]` shear factors (patient only; ignored for tumors). |
 
 ---
 

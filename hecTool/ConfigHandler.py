@@ -9,14 +9,36 @@ class FlowList(list):
 
 
 def flow_list_representer(dumper, data):
+    """Represent FlowList values in YAML using flow style.
+
+    Parameters
+    ----------
+    dumper : yaml.Dumper
+        YAML dumper instance.
+    data : FlowList
+        FlowList to serialize.
+
+    Returns
+    -------
+    yaml.nodes.SequenceNode
+        YAML sequence node with flow style enabled.
+    """
     return dumper.represent_sequence('tag:yaml.org,2002:seq', data, flow_style=True)
 
 
-yaml.add_representer(FlowList, flow_list_representer)
-yaml.add_representer(FlowList, flow_list_representer, Dumper=yaml.SafeDumper)
-
-
 def load_config(filename: str) -> SimulationConfig:
+    """Load, validate, and return a SimulationConfig from a YAML file.
+
+    Parameters
+    ----------
+    filename : str
+        Path to the YAML configuration file.
+
+    Returns
+    -------
+    SimulationConfig
+        Parsed and validated configuration model.
+    """
     with open(filename, "r") as file:
         raw = yaml.safe_load(file) or {}
     cfg = SimulationConfig.from_dict(raw)
@@ -24,7 +46,19 @@ def load_config(filename: str) -> SimulationConfig:
     return cfg
 
 
-def save_config(cfg: SimulationConfig, filename: str) -> None:
+def save_config(cfg: SimulationConfig, filename: str):
+    """Serialize a SimulationConfig to YAML with preferred flow-style lists.
+
+    Parameters
+    ----------
+    cfg : SimulationConfig
+        Configuration model to serialize.
+    filename : str
+        Destination path for the YAML file.
+    """
+    yaml.add_representer(FlowList, flow_list_representer)
+    yaml.add_representer(FlowList, flow_list_representer, Dumper=yaml.SafeDumper)
+
     data = cfg.to_dict()
 
     # Apply flow style to patient components
