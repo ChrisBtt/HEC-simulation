@@ -1,0 +1,51 @@
+includeFile = scoring_dose.txt
+#includeFile = scoring_phasespace.txt
+
+# Current Electron X
+s:Sc/velCurrElX/Quantity                   = "velocityCurrent"
+s:Sc/velCurrElX/Component                  = "Patient"
+i:Sc/velCurrElX/XBins                      = Par/ScoringGridXBins
+i:Sc/velCurrElX/YBins                      = Par/ScoringGridYBins
+i:Sc/velCurrElX/ZBins                      = Par/ScoringGridZBins
+b:Sc/velCurrElX/OutputToConsole            = "False"
+s:Sc/velCurrElX/OutputType                 = "csv"
+b:Sc/velCurrElX/OutputAfterRun             = "True"
+s:Sc/velCurrElX/IfOutputFileAlreadyExists  = "Increment"
+sv:Sc/velCurrElX/OnlyIncludeParticlesNamed = 1 "e-"
+sv:Sc/velCurrElX/Report                    = 3 "Sum" "Standard_Deviation" "Histories" 
+b:Sc/velCurrElX/Active                     = "True"
+s:Sc/velCurrElX/direction                  = "x"
+
+# Current Electron Y
+s:Sc/velCurrElY/Quantity                   = "velocityCurrent"
+s:Sc/velCurrElY/Component                  = "Patient"
+i:Sc/velCurrElY/XBins                      = Par/ScoringGridXBins
+i:Sc/velCurrElY/YBins                      = Par/ScoringGridYBins
+i:Sc/velCurrElY/ZBins                      = Par/ScoringGridZBins
+b:Sc/velCurrElY/OutputToConsole            = "False"
+s:Sc/velCurrElY/OutputType                 = "csv"
+b:Sc/velCurrElY/OutputAfterRun             = "True"
+s:Sc/velCurrElY/IfOutputFileAlreadyExists  = "Increment"
+sv:Sc/velCurrElY/OnlyIncludeParticlesNamed = 1 "e-"
+sv:Sc/velCurrElY/Report                    = 3 "Sum" "Standard_Deviation" "Histories"
+b:Sc/velCurrElY/Active                     = "True"
+s:Sc/velCurrElY/direction                  = "y"
+
+# Current Electron Z
+s:Sc/velCurrElZ/Quantity                   = "velocityCurrent"
+s:Sc/velCurrElZ/Component                  = "Patient"
+i:Sc/velCurrElZ/XBins                      = Par/ScoringGridXBins
+i:Sc/velCurrElZ/YBins                      = Par/ScoringGridYBins
+i:Sc/velCurrElZ/ZBins                      = Par/ScoringGridZBins
+b:Sc/velCurrElZ/OutputToConsole            = "False"
+s:Sc/velCurrElZ/OutputType                 = "csv"
+b:Sc/velCurrElZ/OutputAfterRun             = "True"
+s:Sc/velCurrElZ/IfOutputFileAlreadyExists  = "Increment"
+sv:Sc/velCurrElZ/OnlyIncludeParticlesNamed = 1 "e-"
+sv:Sc/velCurrElZ/Report                    = 3 "Sum" "Standard_Deviation" "Histories"
+b:Sc/velCurrElZ/Active                     = "True"
+s:Sc/velCurrElZ/direction                  = "z"
+
+s:Sc/velCurrElX/OutputFile = Par/ResultsDir + "/velCurrElX"
+s:Sc/velCurrElY/OutputFile = Par/ResultsDir + "/velCurrElY"
+s:Sc/velCurrElZ/OutputFile = Par/ResultsDir + "/velCurrElZ"

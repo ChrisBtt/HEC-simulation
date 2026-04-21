@@ -1,31 +1,5 @@
-# HEC Particle Simulation
-
-A particle simulation project for analyzing the relation between the distribution of charged particle currents and
-deposited dose in High Energy Physics Collisions (HEC). This project includes tools for simulation, data processing and
-visualization.
-Using the open-source simulation framework openTOPAS, the project is divided into to the subfolders: 
-- <code>TOPAS_extension</code>: implementation of current scorers for TOPAS simulations
-- <code>TOPAS_macros</code>: macro files to start TOPAS simulations with `simulation.txt` in each subfolder as the main macro file
-- <code>TOPAS_simulation_data</code>: results from TOPAS simulations with storage path set in <code>TOPAS_macros</code> (**Need to be adjusted**)
-- <code>TOPAS_analysis</code>: Python scripts to analyse simulated current density distributions and Jupyter Notebooks plotting the results
-- <code>hecTool</code>: Script and GUI to start a simulation series with dynamic tumor motion in manual phantom or 3D/4D-DICOM CT
-
-## Getting Started
-
-First, you will need to install the software packages. 
-
-Install Geant4 and Topas from: https://opentopas.github.io/installation.html to install openTOPAS and Geant4. 
-    - Make sure to install the extensions that accompany this project in folder "TOPAS_extensions" folder. To install them, add the following line to your cmake command when building openTOPAS:
-    `` -DTOPAS_EXTENSIONS_DIR=/PATHTO/TOPAS_extensions
-    ``
-
-After testing your first simulation using a macrofile, you are ready to go! 
-
-TOPAS also allows macrofiles in a modular structure for cleaner configuration and easy experiment adjustment. Therefore, `simulation.txt` serves as top-level macrofile and included files can be adjusted using the hierarchical files with chained include-statements. 
-
 To initialize an OpenTOPAS simulation with `hecTool`, you use a YAML configuration to define the geometry and physics. The tool generates the synthetic CT data and the required TOPAS `.txt` files.
 
-## hecTool
 ### 1. How to Run
 Execute the tool from the project root:
 ```shell script
@@ -73,8 +47,6 @@ The configuration is divided into four main sections: `topas`, `general`, `patie
 | **`use_center_as_transform_origin`** | Boolean to change origin of transformations from corner to model center.       |
 | **`transform_sequence`**             | List of keyframe `TransformStep` objects for patient motion.                   |
 
-If **`transform_sequence`** is not given, 3D CT will not be extended to 4D CT.
-
 #### 2.4 `tumors`
 A list of tumor objects, each with:
 
@@ -87,9 +59,6 @@ A list of tumor objects, each with:
 | **`rotation_deg`**       | Base rotation `[X, Y, Z]` relative to the patient.            |
 | **`radius_mm`**          | Half-lengths `[X, Y, Z]` of the `TsEllipsoid`.                |
 | **`transform_sequence`** | List of keyframe `TransformStep` objects for tumor motion.    |
-
-If **`transform_sequence`** is not given, 3D CT will not be extended to 4D CT.
-
 
 #### 2.5 `TransformStep`
 Used in `transform_sequence` for both patient and tumors:
