@@ -4,7 +4,7 @@ includeFile = /Users/pb438/applications/hec-dose-distribution/TOPAS_macros/motor
 # -- Current Scorer
 
 # Current Electron X Fine
-s:Sc/velCurrElX/Quantity = "velocityCurrent"
+s:Sc/velCurrElX/Quantity = "velWeightedCurrent"
 s:Sc/velCurrElX/Component = "ScoringGrid"
 i:Sc/velCurrElX/XBins = Par/GridXBins
 i:Sc/velCurrElX/YBins = Par/GridYBins
@@ -18,7 +18,7 @@ b:Sc/velCurrElX/Active="True"
 s:Sc/velCurrElX/direction = "x"
 
 # Current Electron Y Fine
-s:Sc/velCurrElY/Quantity = "velocityCurrent"
+s:Sc/velCurrElY/Quantity = "velWeightedCurrent"
 s:Sc/velCurrElY/Component = "ScoringGrid"
 i:Sc/velCurrElY/XBins = Par/GridXBins
 i:Sc/velCurrElY/YBins = Par/GridYBins
@@ -32,7 +32,7 @@ b:Sc/velCurrElY/Active="True"
 s:Sc/velCurrElY/direction = "y"
 
 # Current Electron Z Fine
-s:Sc/velCurrElZ/Quantity = "velocityCurrent"
+s:Sc/velCurrElZ/Quantity = "velWeightedCurrent"
 s:Sc/velCurrElZ/Component = "ScoringGrid"
 i:Sc/velCurrElZ/XBins = Par/GridXBins
 i:Sc/velCurrElZ/YBins = Par/GridYBins
@@ -48,3 +48,16 @@ s:Sc/velCurrElZ/direction = "z"
 s:Sc/velCurrElX/OutputFile = "../../TOPAS_simulation_data/motor_servo/velCurrElX" 
 s:Sc/velCurrElY/OutputFile = "../../TOPAS_simulation_data/motor_servo/velCurrElY" 
 s:Sc/velCurrElZ/OutputFile = "../../TOPAS_simulation_data/motor_servo/velCurrElZ"
+
+# Check Surface Scorer
+# s:Sc/MySurfaceCheck/Quantity = "SurfaceCurrent"
+# s:Sc/MySurfaceCheck/Component = "ScoringGrid"
+# s:Sc/MySurfaceCheck/Surface = "ScoringGrid/ZPlusSurface"
+# i:Sc/MySurfaceCheck/XBins = Par/GridXBins
+# i:Sc/MySurfaceCheck/YBins = Par/GridYBins
+# i:Sc/MySurfaceCheck/ZBins = Par/GridZBins
+# sv:Sc/MySurfaceCheck/OnlyIncludeParticlesNamed = 1 "e-"
+# sv:Sc/MySurfaceCheck/Report = 3 "Sum" "Standard_Deviation" "Histories" 
+# s:Sc/MySurfaceCheck/OutputType = "CSV"
+# s:Sc/MySurfaceCheck/IfOutputFileAlreadyExists = "Overwrite"
+# s:Sc/MySurfaceCheck/OutputFile = "../../TOPAS_simulation_data/motor_servo/MySurfaceCheck" 

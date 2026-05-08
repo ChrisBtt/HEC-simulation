@@ -10,9 +10,9 @@ includeFile = /Users/pb438/applications/hec-dose-distribution/TOPAS_macros/motor
 
 # --- World -----------------------
 s:Ge/World/Material  = "Vacuum"
-d:Ge/World/HLX       = 25.0 cm
-d:Ge/World/HLY       = 25.0 cm
-d:Ge/World/HLZ       = 25.0 cm
+d:Ge/World/HLX       = 50.0 cm
+d:Ge/World/HLY       = 50.0 cm
+d:Ge/World/HLZ       = 50.0 cm
 #b:Ge/World/Invisible = "True"
 
 # --- Physics ---------------------

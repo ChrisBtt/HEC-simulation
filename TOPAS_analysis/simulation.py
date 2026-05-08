@@ -11,7 +11,9 @@ class Simulation:
         self.data_filtered = {}
         self.dimensions = self.get_dimensions()
         self.data_filtered[(self.dimensions[0][1] - self.dimensions[0][0]) / 2] = self.data
-        self.current = {}
+        self.currentX = {}
+        self.currentY = {}
+        self.currentZ = {}
 
 
     def get_dimensions(self):
@@ -29,13 +31,15 @@ class Simulation:
         self.data_filtered[halfwidth] = data_filtered
 
 
-    def integrate_current_z(self, z_min: float, z_max: float, pos: float, halfwidth: Optional[float] = None) -> None:
+    def integrate_current(self, z_min: float, z_max: float, pos: float, halfwidth: Optional[float] = None) -> None:
         if halfwidth is None or halfwidth not in self.data_filtered:
+            print(f"Halfwidth {halfwidth} not found in filtered data. Using default halfwidth.")
             halfwidth = (self.dimensions[0][1] - self.dimensions[0][0]) / 2
         data_in_range = self.data_filtered[halfwidth][(self.data_filtered[halfwidth]['z_cm'] >= z_min) & (self.data_filtered[halfwidth]['z_cm'] <= z_max)]
         volume = (z_max - z_min) * (2 * halfwidth) ** 2  # cm^3
-        integrated_current = data_in_range['jz_cm'].sum() / volume
-        self.current[(pos, halfwidth)] = integrated_current
+        self.currentX[(pos, halfwidth)] = data_in_range['jx_cm'].sum() / volume
+        self.currentY[(pos, halfwidth)] = data_in_range['jy_cm'].sum() / volume
+        self.currentZ[(pos, halfwidth)] = data_in_range['jz_cm'].sum() / volume
 
 
 
@@ -44,17 +48,25 @@ class SimulationSeries:
         self.simulations = simulations
         self.measurement = measurement
 
-    def get_simulated_signal(self):
+    def get_simulated_signal(self, halfwidth: Optional[float] = None) -> None:
         self.simulation_signals = {i-1: {} for i in range(1, self.measurement.num_channels+1)}
+        if halfwidth is None:
+            halfwidth = (list(self.simulations.values())[0].dimensions[0][1] - list(self.simulations.values())[0].dimensions[0][0]) / 2
         for name, sim in self.simulations.items():
-            transl = int(name.split('S')[1]) * 10
-            print(f"Processing simulation {name} with currents: {sim.current.keys()}")
+            transl = float(name.split('S')[1]) * 10
+            print(f"Processing simulation {name} with currents: {sim.currentX.keys()}")
             for i in range(1, self.measurement.num_channels+1):
-                curr0 = sim.current[(i-1, (sim.dimensions[0][1] - sim.dimensions[0][0]) / 2)]
-                curr1 = sim.current[(i, (sim.dimensions[0][1] - sim.dimensions[0][0]) / 2)]
-                sig = curr1 - curr0
-                print(f"Simulated signal for {name} at channel {i-1}: {sig:.4e} (curr0={curr0:.4e}, curr1={curr1:.4e})")
+                # currX0 = sim.currentX[(i-1, halfwidth)]
+                # currX1 = sim.currentX[(i, halfwidth)]
+
+                # currY0 = sim.currentY[(i-1, halfwidth)]
+                # currY1 = sim.currentY[(i, halfwidth)]
+
+                currZ0 = sim.currentZ[(i-1, halfwidth)]
+                currZ1 = sim.currentZ[(i, halfwidth)]
                 
+                # sig = (currX1 - currX0) + (currY1 - currY0) + (currZ1 - currZ0)
+                sig = (currZ1 - currZ0)
                 self.simulation_signals[i-1][transl] = sig
                 if transl != 0:
                     self.simulation_signals[i-1][-transl] = sig

@@ -1,0 +1,109 @@
+# --- Material list ------------
+sv:Ma/Wood/Components = 3 "Carbon" "Hydrogen" "Oxygen"
+uv:Ma/Wood/Fractions = 3 0.5 0.06 0.44
+d:Ma/Wood/Density = 0.70 g/cm3
+
+sv:Ma/Foam/Components = 3 "Carbon" "Hydrogen" "Oxygen"
+uv:Ma/Foam/Fractions  = 3 0.63 0.07 0.30
+d:Ma/Foam/Density     = 0.05 g/cm3
+
+
+# --- Scoring grid --
+s:Ge/ScoringGrid/Type       = "TsBox"
+s:Ge/ScoringGrid/Parent     = "World"
+s:Ge/ScoringGrid/Material   = "Vacuum"
+d:Ge/ScoringGrid/HLX        = 18.75 cm
+d:Ge/ScoringGrid/HLY        = 10.25 cm
+d:Ge/ScoringGrid/HLZ        = 18.75 cm
+d:Ge/ScoringGrid/TransZ     = 18.75 cm
+b:Ge/ScoringGrid/Invisible  = "False"
+s:Ge/ScoringGrid/Color      = "white"
+
+# --- Wood slabs -----------
+# Wood top
+s:Ge/WoodenSlab1/Type   = "TsBox"
+s:Ge/WoodenSlab1/Parent = "ScoringGrid"
+s:Ge/WoodenSlab1/Material = "Wood"
+d:Ge/WoodenSlab1/HLX = 18.5 cm
+d:Ge/WoodenSlab1/HLY = 10.0 cm
+d:Ge/WoodenSlab1/HLZ = 1.75 cm
+d:Ge/WoodenSlab1/TransZ = -16.75 cm
+s:Ge/WoodenSlab1/Color = "brown"
+
+# Wood left
+s:Ge/WoodenSlab2/Type   = "TsBox"
+s:Ge/WoodenSlab2/Parent = "ScoringGrid"
+s:Ge/WoodenSlab2/Material = "Wood"
+d:Ge/WoodenSlab2/HLX = 1.75 cm
+d:Ge/WoodenSlab2/HLY = 10.0 cm
+d:Ge/WoodenSlab2/HLZ = 15.0 cm
+d:Ge/WoodenSlab2/TransX = -16.75 cm
+s:Ge/WoodenSlab2/Color = "brown"
+
+# Wood bottom
+s:Ge/WoodenSlab3/Type   = "TsBox"
+s:Ge/WoodenSlab3/Parent = "ScoringGrid"
+s:Ge/WoodenSlab3/Material = "Wood"
+d:Ge/WoodenSlab3/HLX = 18.5 cm
+d:Ge/WoodenSlab3/HLY = 10.0 cm
+d:Ge/WoodenSlab3/HLZ = 1.75 cm
+d:Ge/WoodenSlab3/TransZ = 16.75 cm
+s:Ge/WoodenSlab3/Color = "brown"
+
+# Wood right
+s:Ge/WoodenSlab4/Type   = "TsBox"
+s:Ge/WoodenSlab4/Parent = "ScoringGrid"
+s:Ge/WoodenSlab4/Material = "Wood"
+d:Ge/WoodenSlab4/HLX = 1.75 cm
+d:Ge/WoodenSlab4/HLY = 10.0 cm
+d:Ge/WoodenSlab4/HLZ = 15.0 cm
+d:Ge/WoodenSlab4/TransX = 16.75 cm
+s:Ge/WoodenSlab4/Color = "brown"
+
+# --- Lung Phantom ----------
+s:Ge/LungTissue/Type      = "TsBox"
+s:Ge/LungTissue/Parent    = "ScoringGrid"
+s:Ge/LungTissue/Material  = "Air"
+d:Ge/LungTissue/HLX       = 15.0 cm
+d:Ge/LungTissue/HLY       = 10.0 cm
+d:Ge/LungTissue/HLZ       = 15.0 cm
+d:Ge/LungTissue/TransX    = 0.0 cm
+d:Ge/LungTissue/TransY    = 0.0 cm
+d:Ge/LungTissue/TransZ    = 0.0 cm
+b:Ge/LungTissue/Invisible = "False"
+s:Ge/LungTissue/Color     = "white"
+
+s:Ge/LungTumor/Type     = "TsCylinder"
+s:Ge/LungTumor/Parent   = "LungTissue"
+s:Ge/LungTumor/Material = "Wood"
+d:Ge/LungTumor/RMin     = 0.0 cm
+d:Ge/LungTumor/RMax     = 2.5 cm
+d:Ge/LungTumor/HL       = 5.0 cm
+d:Ge/LungTumor/SPhi     = 0. deg
+d:Ge/LungTumor/DPhi     = 360. deg
+d:Ge/LungTumor/RotX     = 90. deg
+d:Ge/LungTumor/TransX   = 0 cm
+s:Ge/LungTumor/Color = "brown"
+
+
+# --- Beam anchor ---------------
+s:Ge/BeamPos/Type     = "TsBox"
+s:Ge/BeamPos/Parent   = "World"
+s:Ge/BeamPos/Material = "Vacuum"
+d:Ge/BeamPos/HLX      = 1.0 mm
+d:Ge/BeamPos/HLY      = 1.0 mm
+d:Ge/BeamPos/HLZ      = 1.0 mm
+d:Ge/BeamPos/TransZ   = -5.0 cm
+b:Ge/BeamPos/Invisible= "False"
+s:Ge/BeamPos/Color = "yellow"
+
+
+# --- thin plane just upstream of water (records what enters water)
+s:Ge/PSPlane/Type     = "TsBox"
+s:Ge/PSPlane/Parent   = "World"
+s:Ge/PSPlane/Material = "Vacuum"
+d:Ge/PSPlane/HLX      = 6.0 cm
+d:Ge/PSPlane/HLY      = 6.0 cm
+d:Ge/PSPlane/HLZ      = 0.01 mm
+d:Ge/PSPlane/TransZ   = -4.5 cm      # epsilon < 5.0 cm (water upstream face)
+b:Ge/PSPlane/Invisible= "True"

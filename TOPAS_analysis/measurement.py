@@ -21,6 +21,7 @@ class Measurement:
 		mu_rate: float,
 		sampling_rate: float,
 		motor_path: Optional[str] = None,
+		time_offset: float = 0.0,
 		notes: str = "",
 		root_dir: Optional[str] = None,
 	) -> None:
@@ -40,9 +41,10 @@ class Measurement:
 		self.notes = notes
 		self.motor_path = motor_path
 		self.t: np.ndarray = np.array([])
+		self.time_offset = time_offset
 		self.channels: Dict[int, np.ndarray] = {}
 		self.features: Dict[str, Dict[int, Any]] = {}
-		self.channels_components: Dict[str, Dict[int, Any]] = {c: {} for c in ["baseline", "signal_beam", "signal_motion", "signal_noise"]}
+		self.channels_components: Dict[str, Dict[int, Any]] = {c: {} for c in ["baseline", "signal_beam", "signal_motion", "signal_noise", "signal_filter"]}
 
 		self._load_data_file()
 		if self.motor_path:
@@ -87,6 +89,9 @@ class Measurement:
 			
 			timestamps = np.loadtxt(self.motor_path, delimiter=',', skiprows=1, usecols=(0,), dtype=str)
 			self.motor_signal['timestamp'] = pd.to_datetime(timestamps).values
+			if self.time_offset != 0.0:
+				self.timestamp += pd.to_timedelta(self.time_offset, unit='s')
+				self.t += self.time_offset
 
 			self.position = np.interp(self.timestamp.astype(np.int64), self.motor_signal['timestamp'].astype(np.int64), self.motor_signal['position'])
 		except Exception as exc:
@@ -111,7 +116,7 @@ class Measurement:
 	@staticmethod
 	def remove_overshoot(
 		y: np.ndarray,
-		prominence: float = 100.0,
+		prominence: float = 10.0,
 		distance: int = 100,
 	) -> np.ndarray:
 		peaks, _ = signal.find_peaks(np.abs(y), prominence=prominence, distance=distance)
@@ -210,7 +215,7 @@ class Measurement:
 		duration: Optional[float] = None,
 		remove_peaks: bool = False,
 		moving_avg_window: Optional[int] = None,
-		overshoot_prominence: float = 100.0,
+		overshoot_prominence: float = 10.0,
 		overshoot_distance: int = 100,
 	) -> None:
 		
@@ -284,8 +289,8 @@ class Measurement:
 		"""
 		Detect signal window boundaries based on noise level and signal characteristics.
 		
-		Looks for sustained regions where signal is above noise_multiplier * noise_sigma.
-		Falls back to signal extrema if no clear window is found.
+		Finds the first point above threshold from the start and the last point above 
+		threshold from the end, assuming a single continuous signal.
 		"""
 
 		self.features['signal_window'] = {}
@@ -304,27 +309,14 @@ class Measurement:
 				self.features['signal_window'][ch] = (float(t[0]), float(t[-1]))
 				continue
 			
-			diff = np.diff(above_threshold.astype(int))
-			starts = np.where(diff == 1)[0] + 1
-			ends = np.where(diff == -1)[0] + 1
+			# Find first index above threshold from start
+			start_idx = np.where(above_threshold)[0][0]
 			
-			if len(starts) == 0 or len(ends) == 0:
-				if above_threshold[0]:
-					starts = np.insert(starts, 0, 0)
-				if above_threshold[-1]:
-					ends = np.append(ends, len(y))
-			
-			# Find the longest segment
-			if len(starts) == 0 or len(ends) == 0:
-				self.features['signal_window'][ch] = (float(t[0]), float(t[-1]))
-				continue
-			
-			segments = list(zip(starts, ends))
-			longest_idx = np.argmax([end - start for start, end in segments])
-			start_idx, end_idx = segments[longest_idx]
+			# Find last index above threshold from end
+			end_idx = np.where(above_threshold)[0][-1]
 			
 			t_start = float(t[start_idx])
-			t_end = float(t[min(end_idx, len(t) - 1)])
+			t_end = float(t[end_idx])
 			
 			# Ensure minimum duration
 			if t_end - t_start < min_duration:
@@ -474,6 +466,7 @@ class Measurement:
 			self.channels_components["signal_motion"][ch] = motion
 			self.channels_components["signal_noise"][ch] = noise
 			self.channels_components["signal_beam"][ch] = beam
+			self.channels_components["signal_filter"][ch] = self.channels_cleaned[f"ch{ch}"] - noise
 
 
 	@staticmethod
@@ -690,7 +683,7 @@ class Measurement:
 
 		self.clean_signal(duration=1, remove_peaks=True, moving_avg_window=5)
 		self.detect_signal_window()
-		# self.separate_signal_components()
+		self.separate_signal_components()
 
 		for ch in range(self.num_channels):
 			summed = np.sum([self.channels_cleaned[f"ch{i}"] for i in range(ch + 1)], axis=0)
