@@ -1,5 +1,5 @@
-includeFile = /mnt/e/Christoph/applications/hec-dose-distribution/TOPAS_macros/motor_servo/scoring_dose.txt
-includeFile = /mnt/e/Christoph/applications/hec-dose-distribution/TOPAS_macros/motor_servo/scoring_phasespace.txt
+includeFile = /Users/pb438/applications/hec-dose-distribution/TOPAS_macros/motor_servo/scoring_dose.txt
+includeFile = /Users/pb438/applications/hec-dose-distribution/TOPAS_macros/motor_servo/scoring_phasespace.txt
 
 # -- Current Scorer
 
