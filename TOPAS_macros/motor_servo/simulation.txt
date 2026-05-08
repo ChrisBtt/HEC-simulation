@@ -4,24 +4,24 @@ i:Ts/NumberOfThreads = 24
 # --- Random seed ----------------
 i:Ts/Seed = 1 # default is 1
 
-includeFile = /mnt/e/Christoph/applications/hec-dose-distribution/TOPAS_macros/motor_servo/geometry_slabs.txt
+includeFile = /mnt/e/Christoph/applications/hec-dose-distribution/TOPAS_macros/motor_servo/geometry_slabs_dist.txt
 includeFile = /mnt/e/Christoph/applications/hec-dose-distribution/TOPAS_macros/motor_servo/beam_10FFF.txt
 includeFile = /mnt/e/Christoph/applications/hec-dose-distribution/TOPAS_macros/motor_servo/scoring_current.txt
 
 # --- World -----------------------
 s:Ge/World/Material  = "Vacuum"
-d:Ge/World/HLX       = 25.0 cm
-d:Ge/World/HLY       = 25.0 cm
-d:Ge/World/HLZ       = 25.0 cm
+d:Ge/World/HLX       = 50.0 cm
+d:Ge/World/HLY       = 50.0 cm
+d:Ge/World/HLZ       = 50.0 cm
 #b:Ge/World/Invisible = "True"
 
 # --- Physics ---------------------
 sv:Ph/Default/Modules = 1 "g4em-standard_opt0"   # simple EM for photons
 
 # --- simple 3D viewer ------------
-b:Ts/UseQt              = "False"
+b:Ts/UseQt              = "True"
 s:Gr/View/Type          = "OpenGL"
-b:Gr/View/Active        = "False"
+b:Gr/View/Active        = "True"
 b:Gr/View/HiddenLineRemovalForTrajectories = "True"
 b:Gr/View/IncludeAxes   = "True"  # defaults to "False"
 s:Gr/View/AxesComponent = "World"  # Component in which to center the axes. Defaults to World.

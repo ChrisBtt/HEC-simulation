@@ -1,7 +1,7 @@
 # Shared bin parameters
-i:Par/GridXBins = 61 # 5mm
-i:Par/GridYBins = 61
-i:Par/GridZBins = 200 # 1mm
+i:Par/GridXBins = 61 # 5mm 75 61
+i:Par/GridYBins = 61 # 41 61
+i:Par/GridZBins = 280 # 1mm 375 300
 
 # Dose on the mass-world grid
 s:Sc/DoseGrid/Quantity                        = "DoseToMedium"

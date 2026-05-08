@@ -16,16 +16,21 @@ mkdir -p "$OUTDIR"
 [[ -f "$BASE" ]]      || { echo "No base macro at $BASE"; exit 1; }
 
 # ========================= Main settings =========================
-HIST=2000000        # single number of histories
+HIST=1000000        # single number of histories
 T=24                # single number of threads
 REPS=1              # single repetition
 
 # beam energies and diameters
-SHIFTS=(0 1 2 3 4 5 6 7) # cm
-FIELDS=(7 1)      # cm
+SHIFTS=(-4 -3.5 -3 -2.5 -2 -1.5 -1 -0.5 0 0.5 1 1.5 2 2.5 3 3.5 4) # cm
+FIELDS=(0.5)      # cm
 
 CSV="$OUTDIR/results.csv"
 echo "field,shift_cm,hist,threads,wall_s,user_s,sys_s,rss_kb,eps,log" > "$CSV"
+# wall: overall runtime (user+sys + overhead) in seconds 
+# user: CPU time in user mode
+# sys: CPU time in kernel mode
+# rss: max resident set size (memory), in kilobytes
+# eps: events per second = hist / wall
 
 # key=value extractor for the /usr/bin/time file
 get_kv() { awk -v K="$1" '{for(i=1;i<=NF;i++){split($i,a,"="); if(a[1]==K){print a[2]; exit}}}' "$2"; }
@@ -43,6 +48,7 @@ for SHIFT in "${SHIFTS[@]}"; do
     case "$FIELD" in
       7) CUTOFF="3.5" ;;
       1)  CUTOFF="0.5" ;;
+      0.5)  CUTOFF="0.25" ;;
       *)  CUTOFF="2.5" ;; # fallback
     esac
 
@@ -55,7 +61,7 @@ for SHIFT in "${SHIFTS[@]}"; do
     awk -v T="$T" -v SHIFT="$SHIFT" -v CUTOFF="$CUTOFF" -v RUNBASE="$COMBO_DIR" -v HIST="$HIST" '
       BEGIN{
         nt=qt=gv=hq=0;
-        cx=0; tx=0;
+        cx=0; tz=0;
         dg=0; ps=0; vx=0; vy=0; vz=0;
       }
 
@@ -78,8 +84,8 @@ for SHIFT in "${SHIFTS[@]}"; do
       }
 
       # --- Wodden phantom translation (from motor motion) ---
-      /^d:Ge\/LungTumor\/TransX/ {
-        printf "d:Ge/LungTumor/TransX   = %d cm\n", SHIFT; tx=1; next
+      /^d:Ge\/LungTumor\/TransZ/ {
+        printf "d:Ge/LungTumor/TransZ   = %s cm\n", SHIFT; tz=1; next
       }
 
       # --- Scorer output files (override to per-run folder) ---
@@ -107,8 +113,8 @@ for SHIFT in "${SHIFTS[@]}"; do
         if(!gv) print  "b:Gr/View/Active = \"False\"";
         if(!hq) printf "i:So/Beam/NumberOfHistoriesInRun = %d\n", HIST;
 
-        if(!cx) printf "d:So/Beam/BeamPositionCutoffX        = %s cm\n", CUTOFF;
-        if(!tx) printf "d:Ge/LungTumor/TransX                = %d cm\n", SHIFT;
+        if(!cx) printf "d:So/Beam/BeamPositionCutoffX     = %s cm\n", CUTOFF;
+        if(!tz) printf "d:Ge/LungTumor/TransZ             = %s cm\n", SHIFT;
 
         if(!dg) printf "s:Sc/DoseGrid/OutputFile                = \"%s/DoseGrid\"\n", RUNBASE;
         if(!ps) printf "s:Sc/PS/OutputFile                      = \"%s/PS\"\n", RUNBASE;
