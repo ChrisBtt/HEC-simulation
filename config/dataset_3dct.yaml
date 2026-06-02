@@ -13,7 +13,7 @@ general:
 patient:
   type: 3dct
   dicom_directories:
-    - '/mnt/e/Christoph/EIT/CT/p107/MP1_ph0_masked'
+    - '/Users/pb438/applications/hec-dose-distribution/data/p107/MP1_ph0_masked'
   parameters:
     size_mm: [100., 100., 100.]
     spacing_mm: [1., 1., 1.]
@@ -22,19 +22,10 @@ patient:
   translation_mm: [0., 0., 150.]
   rotation_deg: [0., 0., 0.]
   use_center_as_transform_origin: true
-  transform_sequence:
-    - time_s: 0
-      translation_mm: [0., 0., 0.]
-      rotation_deg: [0., 0., 0.]
-      scale: [1., 1., 1.]
-      shear: [0., 0., 0.]
-    - time_s: 9
-      translation_mm: [ 25., 25., 0. ]
-      rotation_deg: [ 0., 0., 0. ]
-      scale: [ 1., 1., 1. ]
-      shear: [ 0., 0., 0. ]
 tumors:
-  - topas_material: G4_WATER
+  - embed_mode: dicom
+    topas_material: G4_WATER
+    radiodensity_hu: 1000
     translation_mm: [0., 0., 0.]
     rotation_deg: [0., 0., 0.]
     radius_mm: [10., 10., 10.]
@@ -44,6 +35,6 @@ tumors:
         rotation_deg: [0., 0., 0.]
         scale: [1., 1., 1.]
       - time_s: 9
-        translation_mm: [0., 0., 0.]
+        translation_mm: [10., 10., 0.]
         rotation_deg: [0., 0., 0.]
-        scale: [1., 0.1, 1.]
+        scale: [1., 1., 1.]

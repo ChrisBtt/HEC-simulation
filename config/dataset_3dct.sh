@@ -47,6 +47,14 @@ while IFS= read -r line; do
   CT_PATHS+=("$line")
 done < "$PATHS_FILE"
 
+if (( ${#CT_PATHS[@]} == 0 )); then
+  echo "ERROR: Keine gültigen CT-Pfade in $PATHS_FILE gefunden."
+  exit 1
+fi
+
+echo "Found ${#CT_PATHS[@]} CT path(s):"
+printf '  %s\n' "${CT_PATHS[@]}"
+
 # -----------------------------------------------------------------------------
 # Backup original YAML and restore it automatically on exit
 # -----------------------------------------------------------------------------
