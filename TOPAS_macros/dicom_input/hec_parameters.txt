@@ -1,0 +1,6 @@
+s:Par/OutputDir = "/mnt/e/Christoph/applications/hec-dose-distribution/TOPAS_simulation_data/dataset_3dct"
+s:Par/ResultsDir = Par/OutputDir + "/results"
+
+i:Par/ScoringGridXBins = 128
+i:Par/ScoringGridYBins = 128
+i:Par/ScoringGridZBins = 128
