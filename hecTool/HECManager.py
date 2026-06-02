@@ -5,9 +5,10 @@ import numpy as np
 import multiprocessing as mp
 
 from hecTool.ConfigHandler import load_config
-from hecTool.SyntheticCT import (generate_synthetic_3dct, write_dicom_series, read_dicom_series, generate_4dct,
+from hecTool.SyntheticCT import (generate_synthetic_3dct, write_dicom_series, generate_4dct,
                                  get_default_image_metadata, embed_tumors_in_image, clone_itk_image)
 from hecTool.TransformAffine import interpolate_transforms, params_to_flat_4x4
+from hecTool.ProcessCT import read_dicom_series
 
 
 class HECManager:
@@ -144,7 +145,8 @@ class HECManager:
         if len(source_dirs) != 1:
             return
 
-        source_3dct, metadata = read_dicom_series(source_dirs[0])
+        source_3dct, metadata, files = read_dicom_series(source_dirs[0], debug=True)
+        print(f"Loaded 3D CT from {source_dirs[0]} with metadata: {metadata}")
 
         has_patient_motion = bool(cfg.patient.transform_sequence)
         has_tumor_motion = any(t.embed_mode == "dicom" and t.transform_sequence for t in cfg.tumors)

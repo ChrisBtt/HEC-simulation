@@ -3,7 +3,18 @@ from typing import List, Tuple, Dict
 import numpy as np
 import itk
 
+from pathlib import Path
+from datetime import datetime
+
+import pydicom
+from pydicom.dataset import FileMetaDataset
+from pydicom.uid import (
+    CTImageStorage,
+    ImplicitVRLittleEndian,
+    generate_uid,
+)
 from hecTool.TransformAffine import interpolate_transforms, euler_deg_to_matrix
+from hecTool.ProcessCT import read_dicom_series, audit_dicom_series
 
 
 def get_default_image_metadata(metadata=None) -> Dict:
@@ -49,6 +60,18 @@ def clone_itk_image(img):
     out = duplicator.GetOutput()
     out.DisconnectPipeline()
     return out
+
+
+def clean_dicom_output_dir(output_dir: str):
+    output_dir = Path(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    for p in output_dir.iterdir():
+        if p.is_file() and (
+            p.suffix.lower() in [".dcm", ".dicom", ""]
+            or p.name.startswith("slice_")
+        ):
+            p.unlink()
 
 
 def get_image_center_mm(image):
@@ -120,93 +143,300 @@ def generate_synthetic_3dct(
     return image
 
 
-def read_dicom_series(dicom_dir: str):
-    """Read a DICOM series into an ITK image with metadata.
-
-    Parameters
-    ----------
-    dicom_dir : str
-        Path to a directory containing a DICOM series.
-
-    Returns
-    -------
-    tuple
-        (image, metadata_dict), where image is an ITK 3D image and
-        metadata_dict maps DICOM tags to values.
-
-    Raises
-    ------
-    RuntimeError
-        If no DICOM series is found in the directory.
-    """
-    pixel_type = itk.SS
-    image_type = itk.Image[pixel_type, 3]
-
-    names = itk.GDCMSeriesFileNames.New()
-    names.SetUseSeriesDetails(True)
-    names.SetDirectory(dicom_dir)
-
-    series_uids = names.GetSeriesUIDs()
-    if len(series_uids) == 0:
-        raise RuntimeError("No DICOM series found")
-
-    reader = itk.ImageSeriesReader[image_type].New()
-    dicom_io = itk.GDCMImageIO.New()
-    reader.SetImageIO(dicom_io)
-    filenames = names.GetFileNames(series_uids[0])
-    reader.SetFileNames(filenames)
-    reader.Update()
-
-    # Store essential metadata from first slice
-    dicom_io.SetFileName(filenames[0])
-    dicom_io.ReadImageInformation()
-    metadata = dicom_io.GetMetaDataDictionary()
-
-    metadata_dict = {k: metadata[k] for k in metadata.GetKeys()}
-
-    return reader.GetOutput(), metadata_dict
+def _format_ds(value: float) -> str:
+    """Format a DICOM DS value safely."""
+    return f"{float(value):.12g}"
 
 
-def write_dicom_series(image: itk.Image, output_dir: str, metadata: dict = None):
-    """Write an ITK image to a DICOM series on disk.
+def _format_multi_ds(values) -> list[str]:
+    """Format a DICOM multi-value DS field."""
+    return [_format_ds(v) for v in values]
+
+
+def _itk_direction_to_numpy(image: itk.Image) -> np.ndarray:
+    """Convert ITK 3D direction matrix to a NumPy 3x3 array."""
+    direction = image.GetDirection()
+
+    try:
+        arr = np.asarray(direction, dtype=float)
+        if arr.shape == (3, 3):
+            return arr
+    except Exception:
+        pass
+
+    try:
+        return itk.array_from_matrix(direction).astype(float)
+    except Exception:
+        pass
+
+    try:
+        return np.array(
+            [[float(direction[i, j]) for j in range(3)] for i in range(3)],
+            dtype=float,
+        )
+    except Exception:
+        pass
+
+    try:
+        vnl = direction.GetVnlMatrix()
+        return np.array(
+            [[float(vnl.get(i, j)) for j in range(3)] for i in range(3)],
+            dtype=float,
+        )
+    except Exception as exc:
+        raise RuntimeError("Could not convert ITK image direction to NumPy.") from exc
+
+
+def _metadata_get(metadata: dict, keyword: str, tag: str, default=None):
+    """Read metadata either by DICOM keyword or ITK/GDCM tag string."""
+    if metadata is None:
+        return default
+
+    candidates = [
+        keyword,
+        tag,
+        tag.lower(),
+        tag.upper(),
+        tag.replace("|", ","),
+        tag.replace("|", ",").upper(),
+    ]
+
+    for key in candidates:
+        if key in metadata and metadata[key] not in [None, ""]:
+            return metadata[key]
+
+    return default
+
+
+def _set_file_meta(ds: pydicom.Dataset):
+    """Ensure file meta information exists and is internally consistent."""
+    if not hasattr(ds, "file_meta") or ds.file_meta is None:
+        ds.file_meta = FileMetaDataset()
+
+    ds.file_meta.MediaStorageSOPClassUID = CTImageStorage
+    ds.file_meta.MediaStorageSOPInstanceUID = ds.SOPInstanceUID
+
+    if "TransferSyntaxUID" not in ds.file_meta:
+        ds.file_meta.TransferSyntaxUID = ImplicitVRLittleEndian
+
+    ds.file_meta.ImplementationClassUID = generate_uid()
+
+
+def write_dicom_series(image: itk.Image, output_dir: str, metadata: dict = None, expected_slices: int | None = None, clean_output: bool = True, debug: bool = True):
+    """Write an ITK image to a DICOM CT series on disk.
+
+    Missing CT geometry and DICOM series metadata are derived from the 3D ITK
+    image and patched into each slice after ITK/GDCM writing.
 
     Parameters
     ----------
     image : itk.Image
-        Image to write.
+        3D ITK image to write.
     output_dir : str
         Destination directory for the DICOM slices.
     metadata : dict, optional
-        DICOM metadata dictionary. Defaults are filled in when missing.
+        DICOM metadata dictionary. May use ITK/GDCM tag keys such as
+        "0008|0060" or DICOM keywords such as "Modality".
     """
     metadata = metadata or get_default_image_metadata()
 
-    os.makedirs(output_dir, exist_ok=True)
+    output_dir = Path(output_dir)
+    if clean_output:
+        clean_dicom_output_dir(output_dir)
+    else:
+        output_dir.mkdir(parents=True, exist_ok=True)
+
+    # -------------------------------------------------------------------------
+    # Basic image geometry extracted from the ITK image
+    # -------------------------------------------------------------------------
+
+    region = image.GetLargestPossibleRegion()
+    size = tuple(int(v) for v in region.GetSize())
+
+    if len(size) != 3:
+        raise ValueError(f"Expected a 3D image, got image size: {size}")
+
+    spacing = np.asarray(image.GetSpacing(), dtype=float)
+    origin = np.asarray(image.GetOrigin(), dtype=float)
+    direction = _itk_direction_to_numpy(image)
+
+    rows = size[1]
+    columns = size[0]
+    number_of_slices = size[2]
+
+    # ITK index axis 0 corresponds to DICOM image row direction,
+    # ITK index axis 1 corresponds to DICOM image column direction.
+    row_direction = direction[:, 0]
+    column_direction = direction[:, 1]
+    slice_direction = direction[:, 2]
+
+    image_orientation_patient = np.concatenate(
+        [row_direction, column_direction]
+    )
+
+    # DICOM PixelSpacing is row spacing first, column spacing second.
+    pixel_spacing = [spacing[1], spacing[0]]
+
+    slice_spacing = abs(float(spacing[2]))
+
+    # -------------------------------------------------------------------------
+    # Fill global metadata before ITK/GDCM writing
+    # -------------------------------------------------------------------------
+
+    now = datetime.now()
+
+    study_instance_uid = _metadata_get(
+        metadata,
+        "StudyInstanceUID",
+        "0020|000d",
+        generate_uid(),
+    )
+    series_instance_uid = _metadata_get(
+        metadata,
+        "SeriesInstanceUID",
+        "0020|000e",
+        generate_uid(),
+    )
+    frame_of_reference_uid = _metadata_get(
+        metadata,
+        "FrameOfReferenceUID",
+        "0020|0052",
+        generate_uid(),
+    )
+
+    metadata.setdefault("0008|0008", "DERIVED\\SECONDARY")
+    metadata.setdefault("0008|0016", str(CTImageStorage))
+    metadata.setdefault("0008|0020", now.strftime("%Y%m%d"))
+    metadata.setdefault("0008|0030", now.strftime("%H%M%S"))
+    metadata.setdefault("0008|0060", "CT")
+    metadata.setdefault("0008|103e", "Synthetic CT")
+
+    metadata.setdefault("0018|0050", _format_ds(slice_spacing))
+    metadata.setdefault("0018|0088", _format_ds(slice_spacing))
+
+    metadata.setdefault("0020|000d", str(study_instance_uid))
+    metadata.setdefault("0020|000e", str(series_instance_uid))
+    metadata.setdefault("0020|0052", str(frame_of_reference_uid))
+    metadata.setdefault("0020|0011", "1")
+
+    metadata.setdefault("0028|0002", "1")
+    metadata.setdefault("0028|0004", "MONOCHROME2")
+    metadata.setdefault("0028|0010", str(rows))
+    metadata.setdefault("0028|0011", str(columns))
+    metadata.setdefault("0028|0030", "\\".join(_format_multi_ds(pixel_spacing)))
+    metadata.setdefault("0028|0100", "16")
+    metadata.setdefault("0028|0101", "16")
+    metadata.setdefault("0028|0102", "15")
+    metadata.setdefault("0028|0103", "1")
+    metadata.setdefault("0028|1052", "0")
+    metadata.setdefault("0028|1053", "1")
+    metadata.setdefault("0028|1054", "HU")
+
+    # -------------------------------------------------------------------------
+    # ITK/GDCM write
+    # -------------------------------------------------------------------------
 
     pixel_type = itk.SS
     image_type = itk.Image[pixel_type, 3]
+    slice_type = itk.Image[pixel_type, 2]
 
-    writer = itk.ImageSeriesWriter[image_type, itk.Image[pixel_type, 2]].New()
+    writer = itk.ImageSeriesWriter[image_type, slice_type].New()
     writer.SetInput(image)
 
     gdcm_io = itk.GDCMImageIO.New()
     metadata_dict = itk.MetaDataDictionary()
+
     for key, value in metadata.items():
-        metadata_dict[key] = value
+        metadata_dict[str(key)] = str(value)
 
     gdcm_io.SetMetaDataDictionary(metadata_dict)
     writer.SetImageIO(gdcm_io)
 
     names = itk.NumericSeriesFileNames.New()
-    names.SetSeriesFormat(os.path.join(output_dir, "slice_%03d.dcm"))
+    names.SetSeriesFormat(str(output_dir / "slice_%03d.dcm"))
     names.SetStartIndex(0)
-    names.SetEndIndex(image.GetLargestPossibleRegion().GetSize()[2] - 1)
+    names.SetEndIndex(number_of_slices - 1)
     names.SetIncrementIndex(1)
 
-    writer.SetFileNames(names.GetFileNames())
+    file_names = list(names.GetFileNames())
+    writer.SetFileNames(file_names)
     writer.Update()
 
+    # -------------------------------------------------------------------------
+    # Robust post-patching with pydicom
+    # -------------------------------------------------------------------------
+    # This is important because InstanceNumber, ImagePositionPatient and
+    # SOPInstanceUID must be slice-specific.
 
+    for k, file_name in enumerate(file_names):
+        ds = pydicom.dcmread(file_name, force=True)
+
+        sop_instance_uid = generate_uid()
+
+        # Identification
+        ds.SOPClassUID = CTImageStorage
+        ds.SOPInstanceUID = sop_instance_uid
+        ds.Modality = "CT"
+        ds.ImageType = ["DERIVED", "SECONDARY"]
+
+        ds.StudyInstanceUID = str(study_instance_uid)
+        ds.SeriesInstanceUID = str(series_instance_uid)
+        ds.FrameOfReferenceUID = str(frame_of_reference_uid)
+
+        ds.SeriesNumber = str(
+            _metadata_get(metadata, "SeriesNumber", "0020|0011", "1")
+        )
+        ds.InstanceNumber = str(k + 1)
+
+        # Geometry
+        image_position_patient = origin + k * spacing[2] * slice_direction
+
+        ds.ImagePositionPatient = _format_multi_ds(image_position_patient)
+        ds.ImageOrientationPatient = _format_multi_ds(image_orientation_patient)
+
+        ds.PixelSpacing = _format_multi_ds(pixel_spacing)
+        ds.SliceThickness = _format_ds(slice_spacing)
+        ds.SpacingBetweenSlices = _format_ds(slice_spacing)
+
+        # Pixel module
+        ds.Rows = int(rows)
+        ds.Columns = int(columns)
+        ds.SamplesPerPixel = 1
+        ds.PhotometricInterpretation = "MONOCHROME2"
+        ds.BitsAllocated = 16
+        ds.BitsStored = 16
+        ds.HighBit = 15
+        ds.PixelRepresentation = 1
+
+        # CT HU semantics
+        ds.RescaleIntercept = "0"
+        ds.RescaleSlope = "1"
+        ds.RescaleType = "HU"
+
+        # Optional but often helpful
+        if not getattr(ds, "StudyDate", None):
+            ds.StudyDate = now.strftime("%Y%m%d")
+        if not getattr(ds, "StudyTime", None):
+            ds.StudyTime = now.strftime("%H%M%S")
+        if not getattr(ds, "SeriesDescription", None):
+            ds.SeriesDescription = "Synthetic CT"
+
+        _set_file_meta(ds)
+
+        ds.is_little_endian = True
+        ds.is_implicit_VR = True
+
+        ds.save_as(file_name, write_like_original=False)
+    
+    if debug:
+        audit_dicom_series(
+            str(output_dir),
+            title="After DICOM writing",
+            expected_slices=expected_slices,
+            strict=True,
+        )
+
+        
 def apply_affine(image, affine: itk.AffineTransform, output_origin=None, output_size=None):
     """Resample an image with an affine transform into a fixed geometry.
 
@@ -249,6 +479,7 @@ def apply_affine(image, affine: itk.AffineTransform, output_origin=None, output_
     resampler.SetDefaultPixelValue(-1024)
     resampler.Update()
     return resampler.GetOutput()
+
 
 def generate_4dct(image, affines: List[itk.AffineTransform], tumors=None, timeline=None,
                   use_center_as_origin: bool = False):
@@ -471,7 +702,7 @@ def main():
     write_dicom_series(synthetic_3dct, "output/synthetic_water_box")
 
     print("Generating synthetic 4DCT...")
-    ct, metadata = read_dicom_series("output/synthetic_water_box")
+    ct, metadata, files = read_dicom_series("output/synthetic_water_box")
 
     # Create example affine transforms (e.g. breathing motion)
     affines = []
