@@ -1,5 +1,5 @@
-includeFile = /Users/pb438/applications/hec-dose-distribution/TOPAS_macros/motor_servo/scoring_dose.txt
-includeFile = /Users/pb438/applications/hec-dose-distribution/TOPAS_macros/motor_servo/scoring_phasespace.txt
+includeFile = /mnt/e/Christoph/applications/hec-dose-distribution/TOPAS_macros/motor_servo/scoring_dose.txt
+# includeFile = /mnt/e/Christoph/applications/hec-dose-distribution/TOPAS_macros/motor_servo/scoring_phasespace.txt
 
 # -- Current Scorer
 
@@ -10,7 +10,7 @@ i:Sc/velCurrElX/XBins = Par/GridXBins
 i:Sc/velCurrElX/YBins = Par/GridYBins
 i:Sc/velCurrElX/ZBins = Par/GridZBins
 b:Sc/velCurrElX/OutputToConsole = "False"
-s:Sc/velCurrElX/OutputType = "csv"
+s:Sc/velCurrElX/OutputType = "DICOM"
 s:Sc/velCurrElX/IfOutputFileAlreadyExists = "Overwrite"
 sv:Sc/velCurrElX/OnlyIncludeParticlesNamed = 1 "e-"
 sv:Sc/velCurrElX/Report = 3 "Sum" "Standard_Deviation" "Histories" 
@@ -24,7 +24,7 @@ i:Sc/velCurrElY/XBins = Par/GridXBins
 i:Sc/velCurrElY/YBins = Par/GridYBins
 i:Sc/velCurrElY/ZBins = Par/GridZBins
 b:Sc/velCurrElY/OutputToConsole = "False"
-s:Sc/velCurrElY/OutputType = "csv"
+s:Sc/velCurrElY/OutputType = "DICOM"
 s:Sc/velCurrElY/IfOutputFileAlreadyExists = "Overwrite"
 sv:Sc/velCurrElY/OnlyIncludeParticlesNamed = 1 "e-"
 sv:Sc/velCurrElY/Report = 3 "Sum" "Standard_Deviation" "Histories" 
@@ -38,7 +38,7 @@ i:Sc/velCurrElZ/XBins = Par/GridXBins
 i:Sc/velCurrElZ/YBins = Par/GridYBins
 i:Sc/velCurrElZ/ZBins = Par/GridZBins
 b:Sc/velCurrElZ/OutputToConsole = "False"
-s:Sc/velCurrElZ/OutputType = "csv"
+s:Sc/velCurrElZ/OutputType = "DICOM"
 s:Sc/velCurrElZ/IfOutputFileAlreadyExists = "Overwrite"
 sv:Sc/velCurrElZ/OnlyIncludeParticlesNamed = 1 "e-"
 sv:Sc/velCurrElZ/Report = 3 "Sum" "Standard_Deviation" "Histories" 

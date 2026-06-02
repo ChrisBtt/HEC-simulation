@@ -1,7 +1,7 @@
 # Shared bin parameters
 i:Par/GridXBins = 61 # 5mm 75 61
 i:Par/GridYBins = 61 # 41 61
-i:Par/GridZBins = 280 # 1mm 375 300
+i:Par/GridZBins = 56 # 1mm 375 300
 
 # Dose on the mass-world grid
 s:Sc/DoseGrid/Quantity                        = "DoseToMedium"
@@ -11,7 +11,7 @@ i:Sc/DoseGrid/YBins                           = Par/GridYBins
 i:Sc/DoseGrid/ZBins                           = Par/GridZBins
 b:Sc/DoseGrid/PreCalculateStoppingPowerRatios = "True"
 b:Sc/DoseGrid/OutputToConsole                 = "False"
-s:Sc/DoseGrid/OutputType                      = "csv"
+s:Sc/DoseGrid/OutputType                      = "DICOM"
 s:Sc/DoseGrid/IfOutputFileAlreadyExists       = "Overwrite"
 sv:Sc/DoseGrid/Report                         = 3 "Sum" "Standard_Deviation" "Histories"
 s:Sc/DoseGrid/OutputFile                      = "../../TOPAS_simulation_data/motor_servo/DoseGrid" 

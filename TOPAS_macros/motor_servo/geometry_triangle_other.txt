@@ -1,0 +1,297 @@
+# --- Material list ------------
+sv:Ma/Wood/Components = 3 "Carbon" "Hydrogen" "Oxygen"
+uv:Ma/Wood/Fractions = 3 0.5 0.06 0.44
+d:Ma/Wood/Density = 0.70 g/cm3
+
+sv:Ma/Foam/Components = 3 "Carbon" "Hydrogen" "Oxygen"
+uv:Ma/Foam/Fractions  = 3 0.63 0.07 0.30
+d:Ma/Foam/Density     = 0.05 g/cm3
+
+
+# --- Scoring grid --
+s:Ge/ScoringGrid/Type       = "TsBox"
+s:Ge/ScoringGrid/Parent     = "World"
+s:Ge/ScoringGrid/Material   = "Vacuum"
+d:Ge/ScoringGrid/HLX        = 15.25 cm
+d:Ge/ScoringGrid/HLY        = 15.25 cm
+d:Ge/ScoringGrid/HLZ        = 10 cm
+d:Ge/ScoringGrid/TransZ     = 10 cm
+b:Ge/ScoringGrid/Invisible  = "False"
+s:Ge/ScoringGrid/Color      = "white"
+
+# --- Water slab ---------------
+s:Ge/Water/Type     = "TsBox"
+s:Ge/Water/Parent   = "ScoringGrid"
+s:Ge/Water/Material = "G4_WATER"
+d:Ge/Water/HLX      = 15.0 cm
+d:Ge/Water/HLY      = 15.0 cm
+d:Ge/Water/HLZ      = 1.5 cm
+d:Ge/Water/TransZ   = -8.5 cm     # move cube downstream so beam enters from +Z
+b:Ge/Water/Invisible= "False"
+s:Ge/Water/Color    = "blue"
+
+# --- Wood slabs -----------
+s:Ge/WoodenSlab1/Type   = "TsBox"
+s:Ge/WoodenSlab1/Parent = "ScoringGrid"
+s:Ge/WoodenSlab1/Material = "Wood"
+d:Ge/WoodenSlab1/HLX = 15.0 cm
+d:Ge/WoodenSlab1/HLY = 15.0 cm
+d:Ge/WoodenSlab1/HLZ = 0.2 cm
+d:Ge/WoodenSlab1/TransZ = -6.8 cm
+s:Ge/WoodenSlab1/Color = "brown"
+
+s:Ge/WoodenSlab2/Type   = "TsBox"
+s:Ge/WoodenSlab2/Parent = "ScoringGrid"
+s:Ge/WoodenSlab2/Material = "Wood"
+d:Ge/WoodenSlab2/HLX = 15.0 cm
+d:Ge/WoodenSlab2/HLY = 15.0 cm
+d:Ge/WoodenSlab2/HLZ = 0.2 cm
+d:Ge/WoodenSlab2/TransZ = -6.4 cm
+s:Ge/WoodenSlab2/Color = "brown"
+
+s:Ge/WoodenSlab3/Type   = "TsBox"
+s:Ge/WoodenSlab3/Parent = "ScoringGrid"
+s:Ge/WoodenSlab3/Material = "Wood"
+d:Ge/WoodenSlab3/HLX = 15.0 cm
+d:Ge/WoodenSlab3/HLY = 15.0 cm
+d:Ge/WoodenSlab3/HLZ = 0.2 cm
+d:Ge/WoodenSlab3/TransZ = -6.0 cm
+s:Ge/WoodenSlab3/Color = "brown"
+
+s:Ge/WoodenSlab4/Type   = "TsBox"
+s:Ge/WoodenSlab4/Parent = "ScoringGrid"
+s:Ge/WoodenSlab4/Material = "Wood"
+d:Ge/WoodenSlab4/HLX = 15.0 cm
+d:Ge/WoodenSlab4/HLY = 15.0 cm
+d:Ge/WoodenSlab4/HLZ = 0.2 cm
+d:Ge/WoodenSlab4/TransZ = -5.6 cm
+s:Ge/WoodenSlab4/Color = "brown"
+
+s:Ge/WoodenSlab5/Type   = "TsBox"
+s:Ge/WoodenSlab5/Parent = "ScoringGrid"
+s:Ge/WoodenSlab5/Material = "Wood"
+d:Ge/WoodenSlab5/HLX = 15.0 cm
+d:Ge/WoodenSlab5/HLY = 15.0 cm
+d:Ge/WoodenSlab5/HLZ = 0.2 cm
+d:Ge/WoodenSlab5/TransZ = -5.2 cm
+s:Ge/WoodenSlab5/Color = "brown"
+
+s:Ge/WoodenSlab6/Type   = "TsBox"
+s:Ge/WoodenSlab6/Parent = "ScoringGrid"
+s:Ge/WoodenSlab6/Material = "Wood"
+d:Ge/WoodenSlab6/HLX = 15.0 cm
+d:Ge/WoodenSlab6/HLY = 15.0 cm
+d:Ge/WoodenSlab6/HLZ = 0.2 cm
+d:Ge/WoodenSlab6/TransZ = -4.8 cm
+s:Ge/WoodenSlab6/Color = "brown"
+
+s:Ge/WoodenSlab7/Type   = "TsBox"
+s:Ge/WoodenSlab7/Parent = "ScoringGrid"
+s:Ge/WoodenSlab7/Material = "Wood"
+d:Ge/WoodenSlab7/HLX = 15.0 cm
+d:Ge/WoodenSlab7/HLY = 15.0 cm
+d:Ge/WoodenSlab7/HLZ = 0.2 cm
+d:Ge/WoodenSlab7/TransZ = -4.4 cm
+s:Ge/WoodenSlab7/Color = "brown"
+
+s:Ge/WoodenSlab8/Type   = "TsBox"
+s:Ge/WoodenSlab8/Parent = "ScoringGrid"
+s:Ge/WoodenSlab8/Material = "Wood"
+d:Ge/WoodenSlab8/HLX = 15.0 cm
+d:Ge/WoodenSlab8/HLY = 15.0 cm
+d:Ge/WoodenSlab8/HLZ = 0.2 cm
+d:Ge/WoodenSlab8/TransZ = -4.0 cm
+s:Ge/WoodenSlab8/Color = "brown"
+
+s:Ge/WoodenSlab9/Type   = "TsBox"
+s:Ge/WoodenSlab9/Parent = "ScoringGrid"
+s:Ge/WoodenSlab9/Material = "Wood"
+d:Ge/WoodenSlab9/HLX = 15.0 cm
+d:Ge/WoodenSlab9/HLY = 15.0 cm
+d:Ge/WoodenSlab9/HLZ = 0.2 cm
+d:Ge/WoodenSlab9/TransZ = -3.6 cm
+s:Ge/WoodenSlab9/Color = "brown"
+
+s:Ge/WoodenSlab10/Type   = "TsBox"
+s:Ge/WoodenSlab10/Parent = "ScoringGrid"
+s:Ge/WoodenSlab10/Material = "Wood"
+d:Ge/WoodenSlab10/HLX = 15.0 cm
+d:Ge/WoodenSlab10/HLY = 15.0 cm
+d:Ge/WoodenSlab10/HLZ = 0.2 cm
+d:Ge/WoodenSlab10/TransZ = -3.2 cm
+s:Ge/WoodenSlab10/Color = "brown"
+
+s:Ge/WoodenSlab11/Type   = "TsBox"
+s:Ge/WoodenSlab11/Parent = "ScoringGrid"
+s:Ge/WoodenSlab11/Material = "Wood"
+d:Ge/WoodenSlab11/HLX = 15.0 cm
+d:Ge/WoodenSlab11/HLY = 15.0 cm
+d:Ge/WoodenSlab11/HLZ = 0.2 cm
+d:Ge/WoodenSlab11/TransZ = -2.8 cm
+s:Ge/WoodenSlab11/Color = "brown"
+
+s:Ge/AirGap1/Type   = "TsBox"
+s:Ge/AirGap1/Parent = "ScoringGrid"
+s:Ge/AirGap1/Material = "Air"
+d:Ge/AirGap1/HLX = 15.0 cm
+d:Ge/AirGap1/HLY = 15.0 cm
+d:Ge/AirGap1/HLZ = 0.5 cm
+d:Ge/AirGap1/TransZ = -2.1 cm
+s:Ge/AirGap1/Color = "white"
+
+s:Ge/WoodenSlab12/Type   = "TsBox"
+s:Ge/WoodenSlab12/Parent = "ScoringGrid"
+s:Ge/WoodenSlab12/Material = "Air"
+d:Ge/WoodenSlab12/HLX = 15.0 cm
+d:Ge/WoodenSlab12/HLY = 15.0 cm
+d:Ge/WoodenSlab12/HLZ = 0.2 cm
+d:Ge/WoodenSlab12/TransZ = -1.4 cm
+s:Ge/WoodenSlab12/Color = "brown"
+
+# ------- Phantom ----------
+
+s:Ge/TriangularPrism/Type      = "G4GenericTrap"
+s:Ge/TriangularPrism/Parent    = "ScoringGrid"
+s:Ge/TriangularPrism/Material  = "Wood"
+d:Ge/TriangularPrism/HLZ       = 7.5 cm
+dv:Ge/TriangularPrism/Vertices = 16 -3.5 0.0 3.5 0.0 0.0 5.0 0.0 5.0 -3.5 0.0 3.5 0.0 0.0 5.0 0.0 5.0 cm
+d:Ge/TriangularPrism/TransX    = 5.0 cm
+d:Ge/TriangularPrism/TransY    = 0.0 cm
+d:Ge/TriangularPrism/TransZ    = -1.2 cm
+d:Ge/TriangularPrism/RotX      = -90.0 deg
+d:Ge/TriangularPrism/RotY      = 0.0 deg
+d:Ge/TriangularPrism/RotZ      = 0.0 deg
+s:Ge/TriangularPrism/Color     = "brown"
+
+
+s:Ge/AirGap2/Type   = "TsBox"
+s:Ge/AirGap2/Parent = "ScoringGrid"
+s:Ge/AirGap2/Material = "Air"
+d:Ge/AirGap2/HLX = 15.0 cm
+d:Ge/AirGap2/HLY = 15.0 cm
+d:Ge/AirGap2/HLZ = 0.5 cm
+d:Ge/AirGap2/TransZ = 4.3 cm
+s:Ge/AirGap2/Color = "white"
+
+# --- Wood slabs -----------
+s:Ge/WoodenSlab14/Type   = "TsBox"
+s:Ge/WoodenSlab14/Parent = "ScoringGrid"
+s:Ge/WoodenSlab14/Material = "Wood"
+d:Ge/WoodenSlab14/HLX = 15.0 cm
+d:Ge/WoodenSlab14/HLY = 15.0 cm
+d:Ge/WoodenSlab14/HLZ = 0.2 cm
+d:Ge/WoodenSlab14/TransZ = 5.0 cm
+s:Ge/WoodenSlab14/Color = "brown"
+
+s:Ge/WoodenSlab15/Type   = "TsBox"
+s:Ge/WoodenSlab15/Parent = "ScoringGrid"
+s:Ge/WoodenSlab15/Material = "Wood"
+d:Ge/WoodenSlab15/HLX = 15.0 cm
+d:Ge/WoodenSlab15/HLY = 15.0 cm
+d:Ge/WoodenSlab15/HLZ = 0.2 cm
+d:Ge/WoodenSlab15/TransZ = 5.4 cm
+s:Ge/WoodenSlab15/Color = "brown"
+
+s:Ge/WoodenSlab16/Type   = "TsBox"
+s:Ge/WoodenSlab16/Parent = "ScoringGrid"
+s:Ge/WoodenSlab16/Material = "Wood"
+d:Ge/WoodenSlab16/HLX = 15.0 cm
+d:Ge/WoodenSlab16/HLY = 15.0 cm
+d:Ge/WoodenSlab16/HLZ = 0.2 cm
+d:Ge/WoodenSlab16/TransZ = 5.8 cm
+s:Ge/WoodenSlab16/Color = "brown"
+
+s:Ge/WoodenSlab17/Type   = "TsBox"
+s:Ge/WoodenSlab17/Parent = "ScoringGrid"
+s:Ge/WoodenSlab17/Material = "Wood"
+d:Ge/WoodenSlab17/HLX = 15.0 cm
+d:Ge/WoodenSlab17/HLY = 15.0 cm
+d:Ge/WoodenSlab17/HLZ = 0.2 cm
+d:Ge/WoodenSlab17/TransZ = 6.2 cm
+s:Ge/WoodenSlab17/Color = "brown"
+
+s:Ge/WoodenSlab18/Type   = "TsBox"
+s:Ge/WoodenSlab18/Parent = "ScoringGrid"
+s:Ge/WoodenSlab18/Material = "Wood"
+d:Ge/WoodenSlab18/HLX = 15.0 cm
+d:Ge/WoodenSlab18/HLY = 15.0 cm
+d:Ge/WoodenSlab18/HLZ = 0.2 cm
+d:Ge/WoodenSlab18/TransZ = 6.6 cm
+s:Ge/WoodenSlab18/Color = "brown"
+
+s:Ge/WoodenSlab19/Type   = "TsBox"
+s:Ge/WoodenSlab19/Parent = "ScoringGrid"
+s:Ge/WoodenSlab19/Material = "Wood"
+d:Ge/WoodenSlab19/HLX = 15.0 cm
+d:Ge/WoodenSlab19/HLY = 15.0 cm
+d:Ge/WoodenSlab19/HLZ = 0.2 cm
+d:Ge/WoodenSlab19/TransZ = 7.0 cm
+s:Ge/WoodenSlab19/Color = "brown"
+
+s:Ge/WoodenSlab20/Type   = "TsBox"
+s:Ge/WoodenSlab20/Parent = "ScoringGrid"
+s:Ge/WoodenSlab20/Material = "Wood"
+d:Ge/WoodenSlab20/HLX = 15.0 cm
+d:Ge/WoodenSlab20/HLY = 15.0 cm
+d:Ge/WoodenSlab20/HLZ = 0.2 cm
+d:Ge/WoodenSlab20/TransZ = 7.4 cm
+s:Ge/WoodenSlab20/Color = "brown"
+
+s:Ge/WoodenSlab21/Type   = "TsBox"
+s:Ge/WoodenSlab21/Parent = "ScoringGrid"
+s:Ge/WoodenSlab21/Material = "Wood"
+d:Ge/WoodenSlab21/HLX = 15.0 cm
+d:Ge/WoodenSlab21/HLY = 15.0 cm
+d:Ge/WoodenSlab21/HLZ = 0.2 cm
+d:Ge/WoodenSlab21/TransZ = 7.8 cm
+s:Ge/WoodenSlab21/Color = "brown"
+
+s:Ge/WoodenSlab22/Type   = "TsBox"
+s:Ge/WoodenSlab22/Parent = "ScoringGrid"
+s:Ge/WoodenSlab22/Material = "Wood"
+d:Ge/WoodenSlab22/HLX = 15.0 cm
+d:Ge/WoodenSlab22/HLY = 15.0 cm
+d:Ge/WoodenSlab22/HLZ = 0.2 cm
+d:Ge/WoodenSlab22/TransZ = 8.2 cm
+s:Ge/WoodenSlab22/Color = "brown"
+
+s:Ge/WoodenSlab23/Type   = "TsBox"
+s:Ge/WoodenSlab23/Parent = "ScoringGrid"
+s:Ge/WoodenSlab23/Material = "Wood"
+d:Ge/WoodenSlab23/HLX = 15.0 cm
+d:Ge/WoodenSlab23/HLY = 15.0 cm
+d:Ge/WoodenSlab23/HLZ = 0.2 cm
+d:Ge/WoodenSlab23/TransZ = 8.6 cm
+s:Ge/WoodenSlab23/Color = "brown"
+
+s:Ge/WoodenSlab24/Type   = "TsBox"
+s:Ge/WoodenSlab24/Parent = "ScoringGrid"
+s:Ge/WoodenSlab24/Material = "Wood"
+d:Ge/WoodenSlab24/HLX = 15.0 cm
+d:Ge/WoodenSlab24/HLY = 15.0 cm
+d:Ge/WoodenSlab24/HLZ = 0.2 cm
+d:Ge/WoodenSlab24/TransZ = 9.0 cm
+s:Ge/WoodenSlab24/Color = "brown"
+
+
+# --- Beam anchor ---------------
+s:Ge/BeamPos/Type     = "TsBox"
+s:Ge/BeamPos/Parent   = "World"
+s:Ge/BeamPos/Material = "Vacuum"
+d:Ge/BeamPos/HLX      = 1.0 mm
+d:Ge/BeamPos/HLY      = 1.0 mm
+d:Ge/BeamPos/HLZ      = 1.0 mm
+d:Ge/BeamPos/TransZ   = -5.0 cm
+b:Ge/BeamPos/Invisible= "False"
+s:Ge/BeamPos/Color = "yellow"
+
+
+# --- thin plane just upstream of water (records what enters water)
+s:Ge/PSPlane/Type     = "TsBox"
+s:Ge/PSPlane/Parent   = "World"
+s:Ge/PSPlane/Material = "Vacuum"
+d:Ge/PSPlane/HLX      = 6.0 cm
+d:Ge/PSPlane/HLY      = 6.0 cm
+d:Ge/PSPlane/HLZ      = 0.01 mm
+d:Ge/PSPlane/TransZ   = -4.5 cm      # epsilon < 5.0 cm (water upstream face)
+b:Ge/PSPlane/Invisible= "True"
