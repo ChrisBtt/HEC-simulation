@@ -5,7 +5,7 @@ topas:
   physics:
   - g4em-standard_opt0
 general:
-  simulation_steps: 1
+  simulation_steps: 10
   include_files:
   - config/particle_sources.txt
   - config/scoring_current.txt
@@ -13,7 +13,7 @@ general:
 patient:
   type: 3dct
   dicom_directories:
-    - /Users/pb438/doiJNLP-Y71kLpdQ/4d_lung/102_HM10395/1.3.6.1.4.1.14519.5.2.1.6834.5010.136142122550447705236756006828/1.3.6.1.4.1.14519.5.2.1.6834.5010.175532348590202604793910878224
+    - '/mnt/e/Christoph/EIT/CT/p107/MP1_ph0_masked'
   parameters:
     size_mm: [100., 100., 100.]
     spacing_mm: [1., 1., 1.]
@@ -22,4 +22,28 @@ patient:
   translation_mm: [0., 0., 150.]
   rotation_deg: [0., 0., 0.]
   use_center_as_transform_origin: true
+  transform_sequence:
+    - time_s: 0
+      translation_mm: [0., 0., 0.]
+      rotation_deg: [0., 0., 0.]
+      scale: [1., 1., 1.]
+      shear: [0., 0., 0.]
+    - time_s: 9
+      translation_mm: [ 25., 25., 0. ]
+      rotation_deg: [ 0., 0., 0. ]
+      scale: [ 1., 1., 1. ]
+      shear: [ 0., 0., 0. ]
 tumors:
+  - topas_material: G4_WATER
+    translation_mm: [0., 0., 0.]
+    rotation_deg: [0., 0., 0.]
+    radius_mm: [10., 10., 10.]
+    transform_sequence:
+      - time_s: 0
+        translation_mm: [0., 0., 0.]
+        rotation_deg: [0., 0., 0.]
+        scale: [1., 1., 1.]
+      - time_s: 9
+        translation_mm: [0., 0., 0.]
+        rotation_deg: [0., 0., 0.]
+        scale: [1., 0.1, 1.]

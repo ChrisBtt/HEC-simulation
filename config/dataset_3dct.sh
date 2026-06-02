@@ -1,9 +1,29 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-# -----------------------------------------------------------------------------
-# Configuration
-# -----------------------------------------------------------------------------
+# Find Python executable
+PYTHON_CMD=$(which python3 2>/dev/null || which python 2>/dev/null || command -v python3 2>/dev/null || echo "")
+if [[ -z "$PYTHON_CMD" ]]; then
+  # Try common Python installation locations on Windows
+  for python_path in \
+    "C:/Python313/python" \
+    "C:/Python312/python" \
+    "E:/Christoph/Programs/Python/Python313/python" \
+    "/c/Python313/python" \
+    "/c/Python312/python"; do
+    if [[ -f "$python_path" ]] || [[ -f "${python_path}.exe" ]]; then
+      PYTHON_CMD="$python_path"
+      break
+    fi
+  done
+fi
+
+if [[ -z "$PYTHON_CMD" ]]; then
+  echo "ERROR: Python not found. Please ensure Python is installed and in PATH."
+  exit 1
+fi
+
+echo "Using Python: $PYTHON_CMD"
 
 # Project root: adjust this if needed, or leave as the current directory.
 PROJECT_ROOT="$(pwd)"
@@ -20,6 +40,9 @@ fi
 
 CT_PATHS=()
 while IFS= read -r line; do
+  # Remove carriage returns and trim whitespace
+  line="${line//$'\r'/}"
+  line="$(echo "$line" | xargs)"
   [[ -z "$line" || "$line" =~ ^[[:space:]]*# ]] && continue
   CT_PATHS+=("$line")
 done < "$PATHS_FILE"
@@ -44,7 +67,7 @@ trap cleanup EXIT
 update_yaml_ct_path() {
   local ct_path="$1"
 
-  python3 - "$YAML_FILE" "$ct_path" <<'PY'
+  "$PYTHON_CMD" - "$YAML_FILE" "$ct_path" <<'PY'
 import re
 import sys
 from pathlib import Path
@@ -78,7 +101,7 @@ for ct_path in "${CT_PATHS[@]}"; do
   echo "  $ct_path"
   echo "============================================================"
 
-  if [[ ! -d "$ct_path" ]]; then
+  if [[ ! -d $ct_path ]]; then
     echo "WARNING: CT directory does not exist, skipping:"
     echo "  $ct_path"
     continue
@@ -90,7 +113,7 @@ for ct_path in "${CT_PATHS[@]}"; do
   echo "[2/5] Running hecTool ..."
   (
     cd "$PROJECT_ROOT"
-    printf 'y\n' | python3 -m hecTool config/dataset_3dct.yaml --threadcount 24
+    printf 'y\n' | "$PYTHON_CMD" -m hecTool config/dataset_3dct.yaml --threadcount 24
   )
 
   echo "[3/5] Running TOPAS ..."
