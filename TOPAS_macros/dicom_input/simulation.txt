@@ -9,7 +9,7 @@ d:Ge/World/HLX = 1.0 m
 d:Ge/World/HLY = 1.0 m
 d:Ge/World/HLZ = 1.0 m
 
-d:Tf/TimelineStart = 0. s
+d:Tf/TimelineStart = 0.0 s
 d:Tf/TimelineEnd = 1.0 s
 i:Tf/NumberOfSequentialTimes = 1
 
@@ -23,27 +23,32 @@ d:Ge/Patient/TransZ = 150.0 mm
 d:Ge/Patient/RotX   = 0.0 deg
 d:Ge/Patient/RotY   = 0.0 deg
 d:Ge/Patient/RotZ   = 0.0 deg
-s:Ge/Patient/DicomDirectory = "/mnt/e/Christoph/EIT/CT/p107/MP1_ph0_masked"
+s:Ge/Patient/DicomDirectory = "/Users/pb438/applications/hec-dose-distribution/TOPAS_simulation_data/dataset_3dct/phase_0"
 b:Ge/Patient/Invisible  = "False"
-iv:Ge/Patient/ShowSpecificSlicesX = 1 -1 # means only show center slice
-iv:Ge/Patient/ShowSpecificSlicesY = 1 -1 # means only show center slice
-iv:Ge/Patient/ShowSpecificSlicesZ = 1 -1 # means only show center slice
+# iv:Gr/Patient/ShowSpecificSlicesX = 1 -2 # means only show center slice
+# iv:Gr/Patient/ShowSpecificSlicesY = 1 -2 # means only show center slice
+# iv:Gr/Patient/ShowSpecificSlicesZ = 1 -2 # means only show center slice
+i:Gr/ShowOnlyOutlineIfVoxelCountExceeds = 100000
 
-s:Ge/Patient/DicomRTStructFile = "/mnt/e/Christoph/EIT/CT/p107/MP1_ph0_masked/patched_for_weasis/RS_patched_to_converted_CT.dcm"
-b:Ge/Patient/IgnoreInconsistentFrameOfReferenceUID = "True"
-sv:Ge/Patient/ColorByRTStructNames = 1 "PTV_0"
-sv:Ge/Patient/ColorByRTStructColors = 1 "red"
+# s:Ge/Patient/DicomRTStructFile = "/Users/pb438/applications/hec-dose-distribution/data/p107/patched_rt/RS_patched_to_converted_CT.dcm"
+# b:Ge/Patient/IgnoreInconsistentFrameOfReferenceUID = "True"
+# sv:Ge/Patient/ColorByRTStructNames = 1 "PTV_0"
+# sv:Ge/Patient/ColorByRTStructColors = 1 "red"
+# s:Ge/Patient/CloneRTDoseGridFrom = "/Users/pb438/applications/hec-dose-distribution/data/p107/patched_rt/RD_patched_to_converted_CT.dcm"
 
 includeFile = particle_sources.txt
 includeFile = scoring_current.txt
 includeFile = HUtoMaterialSchneider.txt
 
 # --- simple 3D viewer ------------
-b:Ts/UseQt              = "True"
+b:Ts/UseQt              = "False"
+b:Gr/Enable             = "False"
 s:Gr/View/Type          = "OpenGL"
-b:Gr/View/Active        = "True"
-i:Gr/ShowOnlyOutlineIfVoxelCountExceeds = 100000000
-b:Gr/View/HiddenLineRemovalForTrajectories = "True"
+b:Gr/View/Active        = "False"
+# b:Gr/View/HiddenLineRemovalForTrajectories = "True"
+b:Gr/View/IncludeGeometry = "True"
+b:Gr/View/IncludeTrajectories = "False"
 b:Gr/View/IncludeAxes   = "True"  # defaults to "False"
-s:Gr/View/AxesComponent = "World"  # Component in which to center the axes. Defaults to World.
+# s:Gr/View/AxesComponent = "World"  # Component in which to center the axes. Defaults to World.
 d:Gr/View/AxesSize      = 0.2 m  # size of axes
+s:Gr/RefreshEvery = "Run"

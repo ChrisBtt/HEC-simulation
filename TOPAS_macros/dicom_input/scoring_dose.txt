@@ -1,14 +1,16 @@
 includeFile = hec_parameters.txt
 
 # Dose on the mass-world grid
-s:Sc/DoseGrid/Quantity                  = "DoseToMedium"
-s:Sc/DoseGrid/Component                 = "Patient"
-i:Sc/DoseGrid/XBins                     = Par/ScoringGridXBins
-i:Sc/DoseGrid/YBins                     = Par/ScoringGridYBins
-i:Sc/DoseGrid/ZBins                     = Par/ScoringGridZBins
-b:Sc/DoseGrid/OutputToConsole           = "False"
-s:Sc/DoseGrid/OutputType                = "DICOM"
-b:Sc/DoseGrid/OutputAfterRun            = "True"
-s:Sc/DoseGrid/IfOutputFileAlreadyExists = "Increment"
+s:Sc/DoseGrid/Quantity                   = "DoseToMedium"
+s:Sc/DoseGrid/Component                  = "Patient"
+# s:Sc/DoseGrid/ReferencedDicomPatient     = "Patient"
+i:Sc/DoseGrid/XBins                      = Par/ScoringGridXBins
+i:Sc/DoseGrid/YBins                      = Par/ScoringGridYBins
+i:Sc/DoseGrid/ZBins                      = Par/ScoringGridZBins
+# sv:Sc/DoseGrid/OnlyIncludeIfInRTStructure = 1 "PTV_0"
+b:Sc/DoseGrid/OutputToConsole            = "False"
+s:Sc/DoseGrid/OutputType                 = "DICOM"
+b:Sc/DoseGrid/OutputAfterRun             = "True"
+s:Sc/DoseGrid/IfOutputFileAlreadyExists  = "Increment"
 sv:Sc/DoseGrid/Report = 3 "Sum" "Standard_Deviation" "Histories"
-s:Sc/DoseGrid/OutputFile = Par/ResultsDir + "/DoseGrid"
+s:Sc/DoseGrid/OutputFile = Par/OutputDir + "/DoseGrid"
