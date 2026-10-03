@@ -284,7 +284,8 @@ def quantize_dose(dose_gy, headroom_factor=1.05, max_int=SAFE_MAX_INT):
 
 
 def build_new_rtdose(eclipse_ds, topas_ds, normalized_dose_gy, new_sop_uid=None,
-                     keep_geometry_from_topas=False, headroom=1.05):
+                     keep_geometry_from_topas=False, headroom=1.05,
+                     dose_units="GY"):
     new_ds = eclipse_ds.copy()
     print("[INFO] Building new RTDose dataset...")
 
@@ -317,7 +318,7 @@ def build_new_rtdose(eclipse_ds, topas_ds, normalized_dose_gy, new_sop_uid=None,
     new_ds.PixelData = pixel_array.tobytes()
     new_ds.file_meta.TransferSyntaxUID = pydicom.uid.ExplicitVRLittleEndian
 
-    new_ds.DoseUnits = "GY"
+    new_ds.DoseUnits = dose_units
     new_ds.DoseType = "PHYSICAL"
     if not getattr(new_ds, "DoseSummationType", None):
         new_ds.DoseSummationType = "PLAN"
@@ -331,7 +332,7 @@ def build_new_rtdose(eclipse_ds, topas_ds, normalized_dose_gy, new_sop_uid=None,
     return new_ds
 
 
-def verify_written_file(path, expected_dose):
+def verify_written_file(path, expected_dose, value_label="Gy"):
     """Read back and confirm no wrap-around (also under signed interpretation)."""
     ds = pydicom.dcmread(str(path))
     arr = ds.pixel_array
@@ -339,7 +340,8 @@ def verify_written_file(path, expected_dose):
     as_signed = arr.view(np.int32)
     max_err = np.abs(dose - expected_dose).max()
     print(f"[VERIFY] Read back: dtype={arr.dtype}, max pixel={arr.max()}, "
-          f"max dose={dose.max():.6g} Gy, max abs error={max_err:.3e} Gy")
+          f"max value={dose.max():.6g} {value_label}, "
+          f"max abs error={max_err:.3e} {value_label}")
     if as_signed.min() < 0:
         print("[VERIFY][WARNING] Pixels would be negative if read as signed int32!")
     else:
@@ -366,7 +368,8 @@ def _voxel_points(dose, ds, percentile, max_points):
     return xs, ys, zs, vals
 
 
-def plot_dose_3d(dose, ds, output_path, percentile=95.0, max_points=200000):
+def plot_dose_3d(dose, ds, output_path, percentile=95.0, max_points=200000,
+                value_label="Dose (Gy)"):
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
@@ -381,8 +384,8 @@ def plot_dose_3d(dose, ds, output_path, percentile=95.0, max_points=200000):
     ax = fig.add_subplot(111, projection="3d")
     p = ax.scatter(xs, ys, zs, c=vals, cmap="inferno", s=1, alpha=0.7)
     ax.set_xlabel("X (mm)"); ax.set_ylabel("Y (mm)"); ax.set_zlabel("Z (mm)")
-    fig.colorbar(p, ax=ax, label="Dose (Gy)")
-    plt.title(f"3D dose scatter (>= P{percentile})")
+    fig.colorbar(p, ax=ax, label=value_label)
+    plt.title(f"3D distribution (>= P{percentile})")
     plt.tight_layout()
     plt.savefig(output_path, dpi=150)
     plt.close(fig)
@@ -390,7 +393,7 @@ def plot_dose_3d(dose, ds, output_path, percentile=95.0, max_points=200000):
 
 
 def plot_dose_3d_interactive(dose, ds, output_html, percentile=95.0,
-                             max_points=200000, auto_open=False):
+                             max_points=200000, auto_open=False, value_label="Dose (Gy)"):
     try:
         import plotly.graph_objects as go
     except ImportError:
@@ -404,11 +407,11 @@ def plot_dose_3d_interactive(dose, ds, output_html, percentile=95.0,
     fig = go.Figure(
         data=[go.Scatter3d(x=xs, y=ys, z=zs, mode="markers",
                            marker=dict(size=2, color=vals, colorscale="Inferno",
-                                       showscale=True, colorbar=dict(title="Dose (Gy)"),
+                                        showscale=True, colorbar=dict(title=value_label),
                                        opacity=0.8))],
         layout=go.Layout(scene=dict(xaxis_title="X (mm)", yaxis_title="Y (mm)",
                                     zaxis_title="Z (mm)"),
-                         title=f"Interactive 3D dose scatter (>= P{percentile})"))
+                          title=f"Interactive 3D distribution (>= P{percentile})"))
     fig.write_html(output_html, auto_open=auto_open)
     print(f"[INFO] Interactive 3D plot saved to {output_html}")
 
@@ -444,7 +447,7 @@ def check_rtdose_rtplan_reference(rtdose, rtplan):
 # Main
 # --------------------------------------------------------------------------
 def main():
-    p = argparse.ArgumentParser(description="Replace Eclipse RTDose pixel data with normalized TOPAS dose.")
+    p = argparse.ArgumentParser(description="Write a TOPAS dose or current-density grid into an RTDOSE container.")
     p.add_argument("--eclipse-dose", required=True, type=Path)
     p.add_argument("--topas-dose", required=True, type=Path)
     p.add_argument("--rtplan", required=True, type=Path)
@@ -482,31 +485,46 @@ def main():
     rtplan_ds = pydicom.dcmread(str(args.rtplan))
     rtstruct_ds = pydicom.dcmread(str(args.rtstruct))
 
+    is_current_density = "velcurr" in args.topas_dose.name.casefold()
+    if is_current_density:
+        print("[INFO] Current-density input detected from filename; Eclipse-dose normalization will be skipped.")
+
     check_frame_of_reference(eclipse_ds, rtplan_ds, rtstruct_ds)
     check_rtdose_rtplan_reference(eclipse_ds, rtplan_ds)
 
     # --- Load doses in Gy (float) ---
     eclipse_dose, _ = load_dose_gy(eclipse_ds)
     topas_dose, topas_raw = load_dose_gy(topas_ds)
+    if is_current_density:
+        topas_dose *= -1.0
+        print("[INFO] Current-density values multiplied by -1 to make the beam-direction current positive.")
     topas_dose = check_saturation(topas_raw, args.mask_saturated, topas_dose)
-    topas_dose = clean_dose(topas_dose)
+    if is_current_density:
+        topas_dose = np.nan_to_num(topas_dose, nan=0.0, posinf=0.0, neginf=0.0)
+    else:
+        topas_dose = clean_dose(topas_dose)
 
     print(f"[INFO] Eclipse grid shape: {eclipse_dose.shape}")
     print(f"[INFO] TOPAS grid shape  : {topas_dose.shape}")
 
-    print("\n[INFO] Eclipse dose centroid:")
-    centroid_mm(eclipse_dose, eclipse_ds)
-    print("[INFO] TOPAS dose centroid:")
+    if not is_current_density:
+        print("\n[INFO] Eclipse dose centroid:")
+        centroid_mm(eclipse_dose, eclipse_ds)
+    print("\n[INFO] TOPAS grid centroid:")
     centroid_mm(topas_dose, topas_ds)
 
     # --- Histogram ---
-    if args.plot_histogram or args.histogram_only:
+    if (args.plot_histogram or args.histogram_only) and not is_current_density:
         hist_out = args.histogram_output or args.output.with_name(
             args.output.stem + "_dose_histogram.png")
         args.output.parent.mkdir(parents=True, exist_ok=True)
         plot_dose_histograms(topas_dose, eclipse_dose, output_path=hist_out)
         if args.histogram_only:
             print("[INFO] --histogram-only set, exiting.")
+            sys.exit(0)
+    elif (args.plot_histogram or args.histogram_only) and is_current_density:
+        print("[INFO] Dose histogram skipped for current density; it would compare unlike quantities.")
+        if args.histogram_only:
             sys.exit(0)
 
     # --- Put TOPAS dose on the output grid ---
@@ -522,32 +540,45 @@ def main():
         centroid_mm(out_dose, eclipse_ds)
 
     # --- Normalize ---
-    normalized_dose, _ = normalize_topas_dose(
-        out_dose, eclipse_dose, method=args.norm_method,
-        percentile=args.norm_percentile, same_grid=same_grid)
+    if is_current_density:
+        current_peak = float(np.max(out_dose))
+        if not np.isfinite(current_peak) or current_peak <= 0:
+            raise ValueError("Current-density grid has no positive values after sign correction; cannot normalize to 100%.")
+        normalized_dose = out_dose * (100.0 / current_peak)
+        print(f"[NORMALIZE] Current density scaled independently to a positive peak of 100% (factor={100.0 / current_peak:.6e}).")
+    else:
+        normalized_dose, _ = normalize_topas_dose(
+            out_dose, eclipse_dose, method=args.norm_method,
+            percentile=args.norm_percentile, same_grid=same_grid)
 
     # --- Build & save ---
     new_ds = build_new_rtdose(eclipse_ds, topas_ds, normalized_dose,
                               new_sop_uid=args.new_sop_uid,
                               keep_geometry_from_topas=args.keep_geometry_from_topas,
-                              headroom=args.norm_headroom)
+                              headroom=args.norm_headroom,
+                              dose_units="RELATIVE" if is_current_density else "GY")
 
     args.output.parent.mkdir(parents=True, exist_ok=True)
     print(f"[INFO] Saving new RTDose to {args.output} ...")
     new_ds.save_as(str(args.output), write_like_original=False)
     print("[DONE] New RTDose file written successfully.")
-    verify_written_file(args.output, normalized_dose)
+    verify_written_file(args.output, normalized_dose,
+                        "relative current-density value" if is_current_density else "Gy")
 
     # --- Plots (use the geometry the dose actually lives on) ---
     if args.plot_3d:
         out = args.plot_3d_output or args.output.with_name(args.output.stem + "_3d.png")
         plot_dose_3d(normalized_dose, geom_ds, str(out),
-                     args.plot_3d_percentile, args.plot_3d_max_points)
+                     args.plot_3d_percentile, args.plot_3d_max_points,
+                     value_label=("Relative current-density value"
+                                  if is_current_density else "Dose (Gy)"))
     if args.plot_3d_interactive:
         out = args.plot_3d_html_output or args.output.with_name(args.output.stem + "_3d.html")
         plot_dose_3d_interactive(normalized_dose, geom_ds, str(out),
-                                 args.plot_3d_percentile, args.plot_3d_max_points,
-                                 auto_open=args.plot_3d_open)
+                                  args.plot_3d_percentile, args.plot_3d_max_points,
+                                  auto_open=args.plot_3d_open,
+                                  value_label=("Relative current-density value"
+                                               if is_current_density else "Dose (Gy)"))
 
 
 if __name__ == "__main__":

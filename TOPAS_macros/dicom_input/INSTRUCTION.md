@@ -90,6 +90,18 @@ Important options in this command:
 
 The script requires Python packages `numpy`, `pydicom`, and `scipy`. Histogram plotting also requires `matplotlib`; interactive plotting requires `plotly`. Install missing packages in the Python environment used to run the script.
 
+### Using a TOPAS current-density grid instead of dose
+
+To put the Z-component current-density grid from a run into the same spatial RTDOSE container, pass its DICOM path as `--topas-dose`, for example:
+
+```text
+TOPAS_simulation_data/dicom_input/velCurrElZ_Run_0000_43.dcm
+```
+
+The converter detects current input when the TOPAS filename contains `velCurr` (case-insensitive). In this mode it skips normalization against Eclipse dose, flips the current sign, and independently scales the positive peak to 100 relative units (100%). This avoids carrying the TOPAS scorer's large raw values into the RTDOSE pixel values. It skips the Eclipse-vs-TOPAS dose histogram and writes `DoseUnits=RELATIVE` rather than labeling the values as Gy. The interactive 3D plot can still be used to inspect the spatial pattern. No `--norm-method` setting is needed for current-density input; the CLI option is ignored in this mode.
+
+This is only a way to visualize current-density values in an RTDOSE-compatible container. RTDOSE is fundamentally a dose object, so the output does not encode current-density units or semantics and may not be interpreted meaningfully by every DICOM viewer. The current scorer's `direction = "z"` is the scorer's Z direction; ensure its component coordinate system is aligned with the beam direction if you specifically need current along the beam. The sign flip followed by peak normalization changes only the sign and scale, not the distribution's spatial pattern; the resulting 100% is relative to this current grid's own positive peak, not 100 cGy or Eclipse dose.
+
 ## 6. Review the result
 
 Before using the output, confirm that the script completed without errors and inspect its warnings and diagnostic values. Open the generated RTDOSE and plots in a DICOM viewer, checking dose location, grid orientation/spacing, target coverage, and agreement with the intended geometry. Pay particular attention to Frame of Reference UID warnings, RT Plan reference warnings, all-zero/resampled dose warnings, dose saturation warnings, and the normalization factor.
