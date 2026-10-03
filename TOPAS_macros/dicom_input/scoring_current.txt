@@ -46,6 +46,6 @@ sv:Sc/velCurrElZ/Report                    = 3 "Sum" "Standard_Deviation" "Histo
 b:Sc/velCurrElZ/Active                     = "True"
 s:Sc/velCurrElZ/direction                  = "z"
 
-s:Sc/velCurrElX/OutputFile = Par/ResultsDir + "/velCurrElX"
-s:Sc/velCurrElY/OutputFile = Par/ResultsDir + "/velCurrElY"
-s:Sc/velCurrElZ/OutputFile = Par/ResultsDir + "/velCurrElZ"
+s:Sc/velCurrElX/OutputFile = Par/OutputDir + "/velCurrElX"
+s:Sc/velCurrElY/OutputFile = Par/OutputDir + "/velCurrElY"
+s:Sc/velCurrElZ/OutputFile = Par/OutputDir + "/velCurrElZ"

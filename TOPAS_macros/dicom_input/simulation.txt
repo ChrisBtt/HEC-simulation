@@ -10,45 +10,57 @@ d:Ge/World/HLY = 1.0 m
 d:Ge/World/HLZ = 1.0 m
 
 d:Tf/TimelineStart = 0.0 s
-d:Tf/TimelineEnd = 1.0 s
+d:Tf/TimelineEnd   = 1.0 s
 i:Tf/NumberOfSequentialTimes = 1
 
 # Geometry Setup
-s:Ge/Patient/Type = "TsDicomPatient"
+
+s:Ge/Patient/Type   = "TsDicomPatient"
 s:Ge/Patient/Parent = "World"
 b:Ge/Patient/PreLoadAllMaterials = "True"
-d:Ge/Patient/TransX = 0.0 mm
-d:Ge/Patient/TransY = 0.0 mm
-d:Ge/Patient/TransZ = 150.0 mm
-d:Ge/Patient/RotX   = 0.0 deg
-d:Ge/Patient/RotY   = 0.0 deg
-d:Ge/Patient/RotZ   = 0.0 deg
-s:Ge/Patient/DicomDirectory = "/Users/pb438/applications/hec-dose-distribution/TOPAS_simulation_data/dataset_3dct/phase_0"
-b:Ge/Patient/Invisible  = "False"
-# iv:Gr/Patient/ShowSpecificSlicesX = 1 -2 # means only show center slice
-# iv:Gr/Patient/ShowSpecificSlicesY = 1 -2 # means only show center slice
-# iv:Gr/Patient/ShowSpecificSlicesZ = 1 -2 # means only show center slice
-i:Gr/ShowOnlyOutlineIfVoxelCountExceeds = 100000
 
-# s:Ge/Patient/DicomRTStructFile = "/Users/pb438/applications/hec-dose-distribution/data/p107/patched_rt/RS_patched_to_converted_CT.dcm"
+d:Ge/Patient/TransX = 0 mm
+d:Ge/Patient/TransY = 0 mm
+d:Ge/Patient/TransZ = 0 mm
+
+s:Ge/Patient/DicomDirectory = "/Users/pb438/applications/hec-dose-distribution/TOPAS_simulation_data/dataset_3dct/phase_0"
+b:Ge/Patient/Invisible      = "False"
+s:Ge/Patient/DrawingStyle   = "WireFrame"  # Previous options were "WireFrame", "FullWireFrame" and "Solid", new is "Cloud" 
+
+# iv:Gr/Patient/ShowSpecificSlicesX = 1 -2  # means only show center slice
+# iv:Gr/Patient/ShowSpecificSlicesY = 1 -2  # means only show center slice
+# iv:Gr/Patient/ShowSpecificSlicesZ = 1 -2  # means only show center slice
+# i:Gr/ShowOnlyOutlineIfVoxelCountExceeds = 10000
+
+# s:Ge/Patient/DicomRTStructFile = "/Users/pb438/applications/hec-dose-distribution/data/p107_20260910/new_DICOM/RS.1.2.246.352.205.5224313503680033237.5100524843594716820.dcm"
 # b:Ge/Patient/IgnoreInconsistentFrameOfReferenceUID = "True"
-# sv:Ge/Patient/ColorByRTStructNames = 1 "PTV_0"
+# sv:Ge/Patient/ColorByRTStructNames  = 1 "PTV_0"
 # sv:Ge/Patient/ColorByRTStructColors = 1 "red"
-# s:Ge/Patient/CloneRTDoseGridFrom = "/Users/pb438/applications/hec-dose-distribution/data/p107/patched_rt/RD_patched_to_converted_CT.dcm"
+s:Ge/Patient/CloneRTDoseGridFrom = "/Users/pb438/applications/hec-dose-distribution/data/p107_20260910/new_DICOM/RD.1.2.246.352.71.7.859390668362.14023170.20260910084532.dcm"
 
 includeFile = particle_sources.txt
 includeFile = scoring_current.txt
 includeFile = HUtoMaterialSchneider.txt
 
 # --- simple 3D viewer ------------
-b:Ts/UseQt              = "False"
-b:Gr/Enable             = "False"
-s:Gr/View/Type          = "OpenGL"
-b:Gr/View/Active        = "False"
-# b:Gr/View/HiddenLineRemovalForTrajectories = "True"
-b:Gr/View/IncludeGeometry = "True"
-b:Gr/View/IncludeTrajectories = "False"
-b:Gr/View/IncludeAxes   = "True"  # defaults to "False"
-# s:Gr/View/AxesComponent = "World"  # Component in which to center the axes. Defaults to World.
-d:Gr/View/AxesSize      = 0.2 m  # size of axes
-s:Gr/RefreshEvery = "Run"
+b:Ts/UseQt                    = "False"
+b:Gr/Enable                   = "False"
+s:Gr/View/Type                = "OpenGL"
+b:Gr/View/Active              = "False"
+
+b:Gr/View/IncludeGeometry     = "True"
+b:Gr/View/IncludeTrajectories = "True"
+b:Gr/View/IncludeAxes         = "True"  # defaults to "False"
+b:Gr/View/IncludeLabels       = "False" # labels usually clutter VRML
+s:Gr/View/AxesComponent       = "World" # Component in which to center the axes. Defaults to World.
+d:Gr/View/AxesSize            = 0.2 m   # size of axes
+s:Gr/RefreshEvery             = "Run"
+
+# Geometry quality (smoother solids; larger file)
+# i:Gr/View/MaxTessellation = 300
+
+# Show geometry + axes if you want orientation
+
+# Make tracks/points visible
+i:Gr/View/VisibleTrackWidth     = 6
+i:Gr/View/TrajectoriesPrecision = 1000
